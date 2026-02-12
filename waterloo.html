@@ -4,30 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Waterloo Ballet Studio</title>
+
   <style>
     :root{
-      --cardBg1: rgba(25, 10, 40, 0.72);
-      --cardBg2: rgba(12, 6, 24, 0.70);
+      --cardBg1: rgba(34, 10, 56, 0.70);
+      --cardBg2: rgba(16, 6, 26, 0.70);
       --border: rgba(255,255,255,0.12);
-      --text: #f4efff;
-      --muted: rgba(244,239,255,0.78);
+      --text: #f6f2ff;
+      --muted: rgba(246,242,255,0.76);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background:
-        radial-gradient(900px 520px at 50% 18%, rgba(255,180,230,0.10), transparent 60%),
-        radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 60%),
-        linear-gradient(160deg,#1b0b2e,#060514);
       color: var(--text);
-    }
-    .wrap{
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(255,160,220,0.18), transparent 60%),
+        radial-gradient(900px 520px at 50% 120%, rgba(130,220,255,0.14), transparent 60%),
+        linear-gradient(160deg,#12051d,#060616);
       min-height:100svh;
       display:flex;
       justify-content:center;
       padding: 10px 12px 14px;
     }
+
     .card{
       width:min(560px, 100%);
       border-radius: 24px;
@@ -36,8 +36,9 @@
       box-shadow: 0 30px 80px rgba(0,0,0,0.55);
       overflow:hidden;
     }
+
     .header{
-      padding: 16px 16px 10px;
+      padding: 16px 16px 8px;
       text-align:center;
     }
     h1{
@@ -64,7 +65,6 @@
     }
     .pill{
       flex:1;
-      min-width: 170px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -75,120 +75,119 @@
       border: 1px solid rgba(255,255,255,0.12);
       font-weight: 900;
       letter-spacing: 0.2px;
+      min-width: 0;
     }
     .pill small{
       color: var(--muted);
       font-weight: 800;
     }
 
-    .stage{ padding: 8px 12px 12px; }
+    .stage{
+      padding: 8px 12px 10px;
+    }
     .frame{
       border-radius: 20px;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.10);
       padding: 10px;
       position: relative;
+      overflow: hidden;
     }
     canvas{
       width:100%;
       height:auto;
       display:block;
       border-radius: 16px;
-      background: #f3eaff; /* fallback */
+      background: #f2eaff;
       touch-action: manipulation;
     }
 
     .controls{
       position:absolute;
-      inset: 0;
-      pointer-events:none; /* buttons will re-enable */
-    }
-    .btnPad{
-      position:absolute;
-      top: 52%;
-      transform: translateY(-50%);
-      width: 82px;
-      height: 82px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.16);
-      border: 1px solid rgba(255,255,255,0.20);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      inset: 10px;
       display:flex;
       align-items:center;
-      justify-content:center;
-      font-size: 34px;
-      user-select:none;
-      pointer-events:auto;
-      backdrop-filter: blur(6px);
+      justify-content:space-between;
+      pointer-events:none;
     }
-    .btnPad:active{ transform: translateY(-50%) scale(0.98); }
-    .btnLeft{ left: 18px; }
-    .btnRight{ right: 18px; }
+    .btnArrow{
+      pointer-events:auto;
+      width: 78px;
+      height: 78px;
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.45);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+      display:grid;
+      place-items:center;
+      user-select:none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform 90ms ease;
+    }
+    .btnArrow:active{ transform: scale(0.96); }
 
-    .meterWrap{
+    .btnArrow svg{
+      width: 38px;
+      height: 38px;
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+    }
+
+    .hint{
       padding: 0 16px 14px;
+      text-align:center;
       color: var(--muted);
       font-size: 12px;
-      text-align:center;
-      line-height:1.35;
+      line-height: 1.35;
     }
 
-    /* Popup */
+    /* popup */
     .overlay{
-      position:fixed;
-      inset:0;
+      position: fixed;
+      inset: 0;
       display:none;
       align-items:center;
       justify-content:center;
       padding: 18px;
-      background: rgba(0,0,0,0.35);
-      z-index: 50;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
     }
     .overlay.show{ display:flex; }
     .modal{
-      width:min(520px, 100%);
-      border-radius: 20px;
-      background: rgba(18,10,30,0.86);
-      border: 1px solid rgba(255,255,255,0.16);
-      box-shadow: 0 26px 80px rgba(0,0,0,0.55);
-      padding: 16px;
+      width: min(420px, 96vw);
+      background: rgba(18, 8, 28, 0.82);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 18px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+      padding: 16px 14px 14px;
       text-align:center;
     }
-    .modal h2{
-      margin: 6px 0 8px;
+    .modalTitle{
       font-size: 18px;
-      font-weight: 1000;
+      font-weight: 900;
+      margin: 0 0 10px;
       letter-spacing: -0.01em;
     }
-    .modal p{
-      margin: 0 0 12px;
-      color: rgba(244,239,255,0.82);
-      font-size: 13px;
-    }
-    .modal button{
-      appearance:none;
-      border:0;
+    .modalBtn{
+      width: 100%;
+      border: 0;
       border-radius: 999px;
       padding: 14px 16px;
-      width: min(360px, 100%);
-      font-weight: 1000;
+      font-weight: 900;
       letter-spacing: 0.2px;
-      background: linear-gradient(180deg, rgba(255,170,210,0.28), rgba(255,170,210,0.14));
+      background: linear-gradient(180deg, rgba(159,240,200,0.22), rgba(159,240,200,0.12));
+      border: 1px solid rgba(159,240,200,0.28);
       color: var(--text);
-      border: 1px solid rgba(255,170,210,0.30);
       cursor:pointer;
     }
-
-    /* keep no scrolling on typical phones */
-    @media (max-height: 740px){
-      h1{ font-size: 28px; }
-      .btnPad{ width: 74px; height: 74px; border-radius: 16px; }
-    }
+    .modalBtn:active{ transform: translateY(1px); }
   </style>
 </head>
 
 <body>
-<div class="wrap">
   <div class="card">
     <div class="header">
       <h1>Welcome to the Waterloo ballet studio! 🩰</h1>
@@ -196,531 +195,609 @@
     </div>
 
     <div class="hud">
-      <div class="pill"><span>⏱️</span><span><strong id="timeLeft">10.0</strong><small>&nbsp;s left</small></span></div>
-      <div class="pill"><span>⚖️</span><span>Balance:&nbsp;<strong id="balanceText">steady</strong></span></div>
+      <div class="pill"><span>⏱️</span><span><strong id="timeLeft">10.0</strong>&nbsp;<small>s left</small></span></div>
+      <div class="pill"><span>⚖️</span><span>Balance:&nbsp;<strong id="balanceState">steady</strong></span></div>
     </div>
 
     <div class="stage">
       <div class="frame">
-        <canvas id="c" width="390" height="520"></canvas>
+        <canvas id="game" width="390" height="520" aria-label="Waterloo balance game"></canvas>
 
-        <div class="controls" aria-hidden="true">
-          <div id="leftBtn" class="btnPad btnLeft" role="button" aria-label="Left">⬅️</div>
-          <div id="rightBtn" class="btnPad btnRight" role="button" aria-label="Right">➡️</div>
+        <!-- on-screen arrow buttons -->
+        <div class="controls">
+          <div id="leftBtn" class="btnArrow" role="button" aria-label="Left">
+            <!-- not emoji: clean icon -->
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M14.5 5.5L8 12l6.5 6.5" stroke="rgba(30,35,55,0.95)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div id="rightBtn" class="btnArrow" role="button" aria-label="Right">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9.5 5.5L16 12l-6.5 6.5" stroke="rgba(30,35,55,0.95)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="meterWrap">Hold it for 10 seconds. Small wobble → tilt → drop → auto restart.</div>
+    <div class="hint">Hold it for 10 seconds. Small wobble → tilt → drop → auto restart.</div>
   </div>
-</div>
 
-<!-- BGM -->
-<audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
-
-<!-- Win popup -->
-<div id="overlay" class="overlay" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h2>Congratulations! You balanced with grace under pressure.</h2>
-    <p>Chaotic confetti courtesy of your inner ballerina 💥</p>
-    <button id="nextMissionBtn">On to my next mission!</button>
+  <!-- Win popup -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTitle">Congratulations! You balanced with grace under pressure. 🙆‍♀️</div>
+      <button id="nextBtn" class="modalBtn">On to my next mission!</button>
+    </div>
   </div>
-</div>
+
+  <!-- BGM -->
+  <audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
 
 <script>
 (() => {
-  const canvas = document.getElementById("c");
+  const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = true;
-
-  const timeLeftEl = document.getElementById("timeLeft");
-  const balanceTextEl = document.getElementById("balanceText");
 
   const leftBtn = document.getElementById("leftBtn");
   const rightBtn = document.getElementById("rightBtn");
 
+  const timeLeftEl = document.getElementById("timeLeft");
+  const balanceStateEl = document.getElementById("balanceState");
+
   const overlay = document.getElementById("overlay");
-  const nextMissionBtn = document.getElementById("nextMissionBtn");
+  const nextBtn = document.getElementById("nextBtn");
 
   const bgm = document.getElementById("bgm");
+  bgm.volume = 0.6;
+
+  // BGM: start on first user interaction; keep it continuous via localStorage flag
   let bgmStarted = false;
   async function ensureBgm(){
     if (bgmStarted) return;
     bgmStarted = true;
     try{
-      bgm.volume = 0.7;
       await bgm.play();
       localStorage.setItem("bgmPlaying","true");
     }catch(e){
       bgmStarted = false;
     }
   }
-  // If already playing in other scenes, try autoplay; iOS may still block until tap.
-  if (localStorage.getItem("bgmPlaying")==="true") ensureBgm();
-
-  const rand = (a,b)=>a + Math.random()*(b-a);
-
-  // ===== Game State =====
-  const HOLD_MS = 10000;
-
-  const state = {
-    running: true,
-    won: false,
-    tStart: performance.now(),
-    holdLeft: HOLD_MS,
-
-    // balance in [-1.2, 1.2] where |balance|>1 => drop
-    balance: 0,
-    balVel: 0,
-
-    // drift that changes direction randomly
-    driftTarget: 0,
-    driftT: 0,
-
-    // tap impulse (stronger than drift)
-    tapImpulse: 0.22,
-
-    // visuals
-    confetti: [],
-    confettiOn: false
-  };
-
-  function resetRun(){
-    state.running = true;
-    state.won = false;
-    state.tStart = performance.now();
-    state.holdLeft = HOLD_MS;
-
-    state.balance = 0;
-    state.balVel = 0;
-    state.driftTarget = rand(-0.30, 0.30);
-    state.driftT = 0;
-
-    state.confetti = [];
-    state.confettiOn = false;
-
-    overlay.classList.remove("show");
-    updateHUD();
+  if (localStorage.getItem("bgmPlaying")==="true"){
+    // may still require a gesture on iOS; we'll try, and try again on first tap
+    bgm.play().catch(()=>{});
   }
 
-  function updateHUD(){
-    timeLeftEl.textContent = (state.holdLeft/1000).toFixed(1);
+  // ===== Gameplay model =====
+  // We use “cue windows” (missed cue == fail). This is what makes it playable + fair.
+  const GAME = {
+    totalMs: 10000,
+    elapsedMs: 0,
+    running: true,
+    state: "playing", // playing | dropping | win
+    // lean is what you *see*: -1..1
+    lean: 0,
+    leanVel: 0,
+    // cue
+    cueDir: 0,          // -1 left, +1 right
+    cueDeadline: 0,     // ms timestamp in game time
+    cueWindowMs: 900,   // ramps down
+    // cosmetics
+    shake: 0,
+    confetti: []
+  };
 
-    const a = Math.abs(state.balance);
-    let txt = "steady";
-    if (a > 0.25) txt = "wobble";
-    if (a > 0.55) txt = "tilting";
-    if (a > 0.82) txt = "danger";
-    balanceTextEl.textContent = txt;
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function setBalanceLabel(){
+    const a = Math.abs(GAME.lean);
+    let label = "steady";
+    if (a > 0.55) label = "danger";
+    else if (a > 0.28) label = "wobble";
+    balanceStateEl.textContent = label;
+  }
+
+  // Keep it fair: no more than 2 same directions in a row
+  let sameStreak = 0;
+  let lastDir = 0;
+
+  function nextCue(nowMs){
+    let dir = Math.random() < 0.5 ? -1 : 1;
+    if (dir === lastDir) sameStreak++; else sameStreak = 1;
+    if (sameStreak >= 3){
+      dir *= -1;
+      sameStreak = 1;
+    }
+    lastDir = dir;
+    GAME.cueDir = dir;
+
+    // difficulty ramp: 900ms -> 520ms across the 10s
+    const t = clamp(GAME.elapsedMs / GAME.totalMs, 0, 1);
+    GAME.cueWindowMs = Math.round(900 + (520 - 900) * t);
+
+    // “feel” of rhythm: cue interval slightly shorter as time passes
+    const minI = 480 + (360 - 480) * t;
+    const maxI = 760 + (520 - 760) * t;
+    const interval = rand(minI, maxI);
+
+    GAME.cueDeadline = nowMs + Math.min(GAME.cueWindowMs, interval);
+  }
+
+  function resetGame(){
+    GAME.elapsedMs = 0;
+    GAME.running = true;
+    GAME.state = "playing";
+    GAME.lean = 0;
+    GAME.leanVel = 0;
+    GAME.shake = 0;
+    GAME.confetti = [];
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden","true");
+
+    // new cue
+    sameStreak = 0;
+    lastDir = 0;
+    nextCue(0);
+
+    timeLeftEl.textContent = "10.0";
+    setBalanceLabel();
   }
 
   // ===== Input =====
-  function nudge(dir){
+  // “Failure rules: tapped wrong side”
+  // We’ll also fail if a cue is missed (no tap before deadline) because otherwise you can just do nothing and win.
+  function handleTap(dir){
     ensureBgm();
-    if (!state.running || state.won) return;
-    state.balVel += dir * state.tapImpulse; // impulse to velocity (feels responsive)
-  }
+    if (!GAME.running || GAME.state !== "playing") return;
 
-  const bindHold = (el, dir) => {
-    let held = false;
-    let holdRAF = 0;
+    if (dir === GAME.cueDir){
+      // Correct: recover toward center + tiny overshoot for satisfaction
+      GAME.leanVel += (-GAME.lean) * 0.06;
+      GAME.leanVel += dir * 0.09; // gives a little “snap”
+      GAME.shake = 5;
 
-    const start = (e) => {
-      e.preventDefault();
-      ensureBgm();
-      held = true;
-      // immediate nudge
-      nudge(dir);
-
-      const tick = () => {
-        if (!held) return;
-        // gentle repeat while held (not too OP)
-        state.balVel += dir * (state.tapImpulse * 0.25);
-        holdRAF = requestAnimationFrame(tick);
-      };
-      holdRAF = requestAnimationFrame(tick);
-    };
-
-    const end = () => {
-      held = false;
-      if (holdRAF) cancelAnimationFrame(holdRAF);
-      holdRAF = 0;
-    };
-
-    el.addEventListener("pointerdown", start, {passive:false});
-    window.addEventListener("pointerup", end);
-    window.addEventListener("pointercancel", end);
-    window.addEventListener("blur", end);
-  };
-
-  bindHold(leftBtn, -1);
-  bindHold(rightBtn, +1);
-
-  // Also allow tapping anywhere left/right of center on canvas
-  canvas.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) * (canvas.width / r.width);
-    nudge(x < canvas.width/2 ? -1 : +1);
-  }, {passive:false});
-
-  // ===== Avatar (pixel-ish, clean proportions) =====
-  function drawGlassesLocal(x, y){
-    // y is top of lens row
-    ctx.fillStyle = "#000";
-    const thick = 2;
-    const lensW = 12, lensH = 9, gap = 5;
-
-    const leftX = x - (lensW*2 + gap)/2;
-    // left lens
-    ctx.fillRect(leftX, y, lensW, thick);
-    ctx.fillRect(leftX, y + lensH - thick, lensW, thick);
-    ctx.fillRect(leftX, y, thick, lensH);
-    ctx.fillRect(leftX + lensW - thick, y, thick, lensH);
-
-    const rightX = leftX + lensW + gap;
-    ctx.fillRect(rightX, y, lensW, thick);
-    ctx.fillRect(rightX, y + lensH - thick, lensW, thick);
-    ctx.fillRect(rightX, y, thick, lensH);
-    ctx.fillRect(rightX + lensW - thick, y, thick, lensH);
-
-    // bridge
-    ctx.fillRect(leftX + lensW, y + Math.floor(lensH/2) - 1, gap, 2);
-    // small arms
-    ctx.fillRect(leftX - 4, y + 2, 4, 2);
-    ctx.fillRect(rightX + lensW, y + 2, 4, 2);
-  }
-
-  function drawBalletAgy(cx, cy, tiltRad){
-    // cx,cy is "feet baseline-ish" for the standing leg area
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(tiltRad);
-    ctx.translate(-cx, -cy);
-
-    // proportions tuned to look like Chinatown but in tutu + pose
-    const x = cx;
-    const y = cy; // baseline reference (near feet)
-
-    // Hair (rectangle blob like Chinatown)
-    ctx.fillStyle = "#000";
-    ctx.fillRect(x-18, y-150, 36, 62);
-
-    // Face
-    ctx.fillStyle = "#f1c7a6";
-    ctx.fillRect(x-12, y-136, 24, 30);
-
-    // Glasses
-    drawGlassesLocal(x, y-125);
-
-    // Neck (tiny)
-    ctx.fillStyle = "#f1c7a6";
-    ctx.fillRect(x-4, y-106, 8, 6);
-
-    // Top (sleeveless light blue)
-    ctx.fillStyle = "#86c8ff";
-    ctx.fillRect(x-15, y-100, 30, 26);
-
-    // Bare arms (rounded-ish)
-    ctx.fillStyle = "#f1c7a6";
-    // arms rounded (front view) -> two curved-ish segments
-    ctx.fillRect(x-28, y-98, 8, 16);
-    ctx.fillRect(x+20, y-98, 8, 16);
-
-    // Arms "rounded" (ballet-ish) using arcs + small rects
-    ctx.strokeStyle = "rgba(241,199,166,0.95)";
-    ctx.lineWidth = 6;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.arc(x, y-92, 26, Math.PI*0.15, Math.PI*0.85, false); // soft rounded arms
-    ctx.stroke();
-
-    // Tutu (pink skirt)
-    ctx.fillStyle = "#ff8fc2";
-    ctx.fillRect(x-22, y-76, 44, 16);
-    ctx.fillStyle = "rgba(255,255,255,0.18)";
-    ctx.fillRect(x-18, y-72, 36, 2);
-
-    // Legs (piqué-ish):
-    // Standing leg straight down on pointe
-    ctx.fillStyle = "#f1c7a6";
-    ctx.fillRect(x-6, y-60, 10, 54);
-
-    // Pointe shoe (standing)
-    ctx.fillStyle = "#ffe7ef";
-    ctx.fillRect(x-8, y-6, 14, 6);
-    ctx.fillStyle = "rgba(0,0,0,0.08)";
-    ctx.fillRect(x-8, y-2, 14, 2);
-
-    // Back leg slightly behind, angled
-    ctx.save();
-    ctx.translate(x+6, y-40);
-    ctx.rotate(-0.55);
-    ctx.translate(-(x+6), -(y-40));
-    ctx.fillStyle = "#f1c7a6";
-    ctx.fillRect(x+6, y-40, 8, 44);
-
-    // Back shoe
-    ctx.fillStyle = "#ffe7ef";
-    ctx.fillRect(x+4, y+2, 14, 6);
-    ctx.restore();
-
-    ctx.restore();
-  }
-
-  // ===== Studio Background (cleaner, mirror wall + barre + lights + spotlight) =====
-  function drawStudio(){
-    const W = canvas.width, H = canvas.height;
-
-    // wall gradient
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "#f7f0ff");
-    g.addColorStop(0.55, "#f3eaff");
-    g.addColorStop(1, "#efe0ff");
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    // subtle vignette
-    ctx.fillStyle = "rgba(0,0,0,0.06)";
-    ctx.fillRect(0,0,W,6);
-
-    // mirror band
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.fillRect(0, 170, W, 130);
-    ctx.fillStyle = "rgba(170,140,210,0.18)";
-    ctx.fillRect(0, 170, W, 2);
-    ctx.fillRect(0, 300, W, 2);
-
-    // mirror vertical seams
-    ctx.fillStyle = "rgba(120,90,160,0.10)";
-    for (let x=18; x<W; x+=74){
-      ctx.fillRect(x, 176, 2, 118);
+      // Immediately switch to next cue
+      nextCue(GAME.elapsedMs);
+    } else {
+      // Wrong: drop
+      triggerDrop();
     }
-
-    // ballet barre + brackets
-    ctx.fillStyle = "rgba(140, 90, 70, 0.55)";
-    ctx.fillRect(0, 310, W, 10);
-    ctx.fillStyle = "rgba(90, 60, 50, 0.35)";
-    for (let x=26; x<W; x+=90){
-      ctx.fillRect(x, 320, 8, 28);
-    }
-
-    // floor
-    ctx.fillStyle = "#e7be8e";
-    ctx.fillRect(0, 340, W, H-340);
-
-    // floor planks
-    ctx.fillStyle = "rgba(120,80,55,0.12)";
-    for (let x=16; x<W; x+=34){
-      ctx.fillRect(x, 340, 2, H-340);
-    }
-
-    // base shadow line
-    ctx.fillStyle = "rgba(0,0,0,0.10)";
-    ctx.fillRect(0, 340, W, 4);
-
-    // lights above (simple)
-    for (let i=0;i<4;i++){
-      const lx = 60 + i*90;
-      ctx.fillStyle = "rgba(255,255,255,0.70)";
-      ctx.fillRect(lx, 40, 46, 10);
-      ctx.fillStyle = "rgba(255,255,255,0.38)";
-      ctx.fillRect(lx+6, 52, 34, 6);
-    }
-
-    // spotlight cone (center)
-    const spot = ctx.createRadialGradient(W/2, 210, 10, W/2, 260, 250);
-    spot.addColorStop(0, "rgba(255,255,255,0.70)");
-    spot.addColorStop(1, "rgba(255,255,255,0.00)");
-    ctx.fillStyle = spot;
-    ctx.fillRect(0,0,W,H);
   }
 
-  // ===== Balance Meter =====
-  function drawBalanceMeter(){
-    const W = canvas.width, H = canvas.height;
+  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap(-1); }, {passive:false});
+  rightBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap( 1); }, {passive:false});
 
-    const barX = 34;
-    const barY = H - 44;
-    const barW = W - 68;
-    const barH = 10;
-
-    // track
-    ctx.fillStyle = "rgba(0,0,0,0.14)";
-    ctx.fillRect(barX, barY, barW, barH);
-
-    // safe zone
-    ctx.fillStyle = "rgba(120,255,190,0.25)";
-    ctx.fillRect(barX + barW*0.30, barY, barW*0.40, barH);
-
-    // danger tint ends
-    ctx.fillStyle = "rgba(255,120,150,0.18)";
-    ctx.fillRect(barX, barY, barW*0.22, barH);
-    ctx.fillRect(barX + barW*0.78, barY, barW*0.22, barH);
-
-    // knob from balance [-1..1]
-    const clamped = Math.max(-1, Math.min(1, state.balance));
-    const t = (clamped + 1) / 2; // 0..1
-    const knobX = barX + t * barW;
-
-    ctx.fillStyle = "#ff77b7";
-    ctx.beginPath();
-    ctx.arc(knobX, barY + barH/2, 9, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = "rgba(255,255,255,0.22)";
-    ctx.beginPath();
-    ctx.arc(knobX-2, barY + barH/2 - 2, 3, 0, Math.PI*2);
-    ctx.fill();
+  // ===== Drop / win =====
+  function triggerDrop(){
+    if (GAME.state !== "playing") return;
+    GAME.state = "dropping";
+    GAME.running = false;
+    GAME.shake = 10;
+    // quick restart after the drop animation
+    setTimeout(resetGame, 650);
   }
 
-  // ===== Confetti =====
-  function startConfettiExplosion(){
-    state.confettiOn = true;
-    state.confetti = [];
-    const W = canvas.width;
-
-    // overload 💥
-    const N = 220;
-    for (let i=0;i<N;i++){
-      const angle = rand(-Math.PI, 0);     // mostly downward burst
-      const speed = rand(3.0, 9.0);
-      state.confetti.push({
-        x: W/2 + rand(-10,10),
-        y: 140 + rand(-10,10),
-        vx: Math.cos(angle)*speed + rand(-1.5,1.5),
-        vy: Math.sin(angle)*speed + rand(-1.0,2.0),
-        g: rand(0.08, 0.16),
-        s: rand(3,7),
-        a: rand(0.55, 1.0),
-        rot: rand(0, Math.PI*2),
-        vr: rand(-0.18, 0.18)
+  function spawnConfetti(){
+    const n = 240; // chaotic overload
+    for (let i=0;i<n;i++){
+      GAME.confetti.push({
+        x: canvas.width/2 + rand(-30, 30),
+        y: canvas.height*0.42 + rand(-20, 20),
+        vx: rand(-2.6, 2.6),
+        vy: rand(-4.4, -1.2),
+        g: rand(0.06, 0.12),
+        r: rand(2.2, 5.0),
+        a: rand(0.65, 1.0),
+        spin: rand(-0.25, 0.25),
+        ang: rand(0, Math.PI*2)
       });
     }
   }
 
-  function drawConfetti(dt){
-    if (!state.confettiOn) return;
-    const H = canvas.height, W = canvas.width;
+  function win(){
+    GAME.state = "win";
+    GAME.running = false;
+    spawnConfetti();
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }
 
-    for (const p of state.confetti){
+  // ===== Drawing helpers =====
+  function roundedRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  // Background: clean ballet studio + mirror wall + barre + top lights + spotlight
+  function drawStudio(){
+    // soft wall gradient
+    const g = ctx.createLinearGradient(0,0,0,canvas.height);
+    g.addColorStop(0, "#f7f0ff");
+    g.addColorStop(0.55, "#f2e9ff");
+    g.addColorStop(1, "#f6d8f0");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // ceiling lights (simple, clean)
+    ctx.globalAlpha = 0.8;
+    for (let i=0;i<4;i++){
+      const x = 60 + i*85;
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      roundedRect(x, 44, 56, 14, 7);
+      ctx.fill();
+      ctx.fillStyle = "rgba(0,0,0,0.06)";
+      roundedRect(x, 58, 56, 3, 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // mirror wall panel
+    ctx.fillStyle = "rgba(255,255,255,0.60)";
+    roundedRect(22, 90, canvas.width-44, 210, 18);
+    ctx.fill();
+    // mirror seams
+    ctx.strokeStyle = "rgba(150,120,170,0.18)";
+    ctx.lineWidth = 2;
+    for (let i=1;i<4;i++){
+      const x = 22 + (canvas.width-44) * (i/4);
+      ctx.beginPath();
+      ctx.moveTo(x, 96);
+      ctx.lineTo(x, 290);
+      ctx.stroke();
+    }
+
+    // barre
+    ctx.fillStyle = "rgba(180,140,120,0.85)";
+    roundedRect(18, 320, canvas.width-36, 14, 7);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.07)";
+    roundedRect(18, 331, canvas.width-36, 4, 2);
+    ctx.fill();
+    // barre supports
+    ctx.fillStyle = "rgba(110,100,125,0.35)";
+    for (let i=0;i<4;i++){
+      const x = 70 + i*85;
+      ctx.fillRect(x, 332, 6, 54);
+    }
+
+    // floor (wood)
+    const f = ctx.createLinearGradient(0, 360, 0, canvas.height);
+    f.addColorStop(0, "#e7b881");
+    f.addColorStop(1, "#d8a76b");
+    ctx.fillStyle = f;
+    ctx.fillRect(0, 360, canvas.width, canvas.height-360);
+
+    // floor boards
+    ctx.strokeStyle = "rgba(120,80,50,0.10)";
+    ctx.lineWidth = 2;
+    for (let x=20; x<canvas.width; x+=28){
+      ctx.beginPath();
+      ctx.moveTo(x, 360);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    // spotlight cone on dancer
+    ctx.globalAlpha = 0.55;
+    const cone = ctx.createRadialGradient(canvas.width/2, 250, 10, canvas.width/2, 360, 240);
+    cone.addColorStop(0, "rgba(255,255,255,0.95)");
+    cone.addColorStop(1, "rgba(255,255,255,0.00)");
+    ctx.fillStyle = cone;
+    ctx.beginPath();
+    ctx.ellipse(canvas.width/2, 350, 160, 220, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Cue arrow above head (NOT emoji; pixel-ish arrow)
+  function drawCue(){
+    const cx = canvas.width/2;
+    const cy = 190;
+
+    // faint bubble behind
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    roundedRect(cx-44, cy-34, 88, 64, 18);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // arrow drawing
+    ctx.fillStyle = "rgba(55, 40, 90, 0.95)";
+    const dir = GAME.cueDir; // -1 or +1
+
+    // simple arrow made of rects (pixel vibe)
+    // base position
+    const x0 = cx + (dir < 0 ? -10 : 10);
+    const y0 = cy - 2;
+
+    function px(x,y,w,h){ ctx.fillRect(x,y,w,h); }
+
+    // shaft
+    px(x0-10, y0-4, 20, 8);
+
+    // head
+    if (dir < 0){
+      px(x0-20, y0-10, 10, 20);
+      px(x0-28, y0-6, 8, 12);
+    } else {
+      px(x0+10, y0-10, 10, 20);
+      px(x0+20, y0-6, 8, 12);
+    }
+
+    // tiny “pulse” outline (so it pops vs the buttons)
+    ctx.strokeStyle = "rgba(255, 160, 220, 0.65)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(cx-34, cy-24, 68, 44);
+  }
+
+  // ===== Avatar: keep your Chinatown face/glasses/hair proportions; change outfit + pose =====
+  function drawGlasses(localCtx, leftX, gy, lensW, lensH, thick, gap, armLen){
+    localCtx.fillStyle = "#000";
+    localCtx.fillRect(leftX, gy, lensW, thick);
+    localCtx.fillRect(leftX, gy + lensH - thick, lensW, thick);
+    localCtx.fillRect(leftX, gy, thick, lensH);
+    localCtx.fillRect(leftX + lensW - thick, gy, thick, lensH);
+
+    const rightX = leftX + lensW + gap;
+    localCtx.fillRect(rightX, gy, lensW, thick);
+    localCtx.fillRect(rightX, gy + lensH - thick, lensW, thick);
+    localCtx.fillRect(rightX, gy, thick, lensH);
+    localCtx.fillRect(rightX + lensW - thick, gy, thick, lensH);
+
+    localCtx.fillRect(leftX + lensW, gy + Math.floor(lensH/2) - 1, gap, 2);
+    localCtx.fillRect(leftX - armLen, gy + 2, armLen, 2);
+    localCtx.fillRect(rightX + lensW, gy + 2, armLen, 2);
+  }
+
+  function drawAgyBallet(x, y, lean){
+    // y is feet baseline
+    // Apply lean by rotating around hips area (looks like tipping)
+    const pivotX = x;
+    const pivotY = y - 26;
+
+    ctx.save();
+    ctx.translate(pivotX, pivotY);
+    ctx.rotate(lean * 0.42); // visual tilt (tuned so it won't look insane)
+    ctx.translate(-pivotX, -pivotY);
+
+    // hair (same style)
+    ctx.fillStyle="#000";
+    ctx.fillRect(x-18, y-92, 36, 60);
+
+    // face
+    ctx.fillStyle="#f1c7a6";
+    ctx.fillRect(x-12, y-76, 24, 28);
+
+    // glasses (same)
+    const gy = y - 70;
+    const lensW = 11, lensH = 9;
+    const thick = 2, gap = 5, armLen = 4;
+    const leftX = x - 14;
+    drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
+
+    // sleeveless light blue top
+    ctx.fillStyle="#8fd1ff";
+    ctx.fillRect(x-16, y-48, 32, 22);
+    // tiny straps / arm cut (subtle)
+    ctx.fillStyle="rgba(0,0,0,0.05)";
+    ctx.fillRect(x-16, y-48, 6, 4);
+    ctx.fillRect(x+10, y-48, 6, 4);
+
+    // arms: rounded-ish (two curved strokes feel)
+    // (still “pixel” but less weird)
+    ctx.strokeStyle = "#f1c7a6";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+
+    // left rounded arm
+    ctx.beginPath();
+    ctx.moveTo(x-18, y-44);
+    ctx.quadraticCurveTo(x-36, y-58, x-22, y-66);
+    ctx.stroke();
+
+    // right rounded arm
+    ctx.beginPath();
+    ctx.moveTo(x+18, y-44);
+    ctx.quadraticCurveTo(x+36, y-58, x+22, y-66);
+    ctx.stroke();
+
+    // pink tutu (simple band + skirt flare)
+    ctx.fillStyle="#ff9cc7";
+    ctx.fillRect(x-22, y-28, 44, 10);
+    ctx.fillStyle="#ff84bd";
+    ctx.fillRect(x-26, y-18, 52, 16);
+
+    // legs: piqué-ish: one straight down on pointe, other slightly behind
+    ctx.fillStyle="#f1c7a6";
+    // main leg
+    ctx.fillRect(x-4, y-2, 8, 34);
+    // back leg (diagonal)
+    ctx.save();
+    ctx.translate(x+8, y+12);
+    ctx.rotate(0.42);
+    ctx.fillRect(-3, 0, 7, 26);
+    ctx.restore();
+
+    // pointe shoes
+    ctx.fillStyle="#ffe6f1";
+    ctx.fillRect(x-10, y+30, 20, 6); // front shoe
+    // back shoe
+    ctx.save();
+    ctx.translate(x+18, y+30);
+    ctx.rotate(0.25);
+    ctx.fillRect(-10, 0, 18, 6);
+    ctx.restore();
+
+    ctx.restore();
+
+    // soft shadow on floor (doesn't rotate)
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(x, y+34, 34, 10, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ===== Confetti draw/update =====
+  function updateConfetti(dt){
+    for (const p of GAME.confetti){
+      p.x += p.vx * dt * 0.9;
+      p.y += p.vy * dt * 0.9;
       p.vy += p.g * dt;
-      p.x += p.vx * dt * 0.35;
-      p.y += p.vy * dt * 0.35;
-      p.rot += p.vr * dt * 0.18;
+      p.ang += p.spin * dt;
+      p.a = Math.max(0, p.a - 0.0009 * dt);
+    }
+    // prune
+    GAME.confetti = GAME.confetti.filter(p => p.a > 0.02 && p.y < canvas.height + 80);
+  }
 
+  function drawConfetti(){
+    for (const p of GAME.confetti){
       ctx.save();
       ctx.globalAlpha = p.a;
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-
-      // random bright colors
-      const colors = ["#ff5aa7","#7df0ff","#ffe36a","#9cff7b","#b28dff","#ff9c6a"];
-      ctx.fillStyle = colors[(p.s * 13 + (p.x|0)) % colors.length];
-      ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s*0.7);
-
+      ctx.rotate(p.ang);
+      // vibrant-ish without hardcoding too many colors:
+      const hue = (p.x * 2 + p.y) % 360;
+      ctx.fillStyle = `hsla(${hue}, 92%, 68%, ${p.a})`;
+      ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
       ctx.restore();
     }
-
-    // stop once all below bottom (but keep some)
-    if (state.confetti.every(p => p.y > H + 60)){
-      state.confettiOn = false;
-    }
+    ctx.globalAlpha = 1;
   }
 
-  // ===== Game Loop =====
-  function step(dt){
-    if (!state.running || state.won) return;
+  // ===== Main update loop =====
+  function update(dt){
+    if (GAME.state !== "playing") return;
+
+    GAME.elapsedMs += dt;
 
     // countdown
-    state.holdLeft = Math.max(0, HOLD_MS - (performance.now() - state.tStart));
+    const left = Math.max(0, (GAME.totalMs - GAME.elapsedMs) / 1000);
+    timeLeftEl.textContent = left.toFixed(1);
 
-    // drift target changes every ~0.7s
-    state.driftT += dt;
-    if (state.driftT > 700){
-      state.driftT = 0;
-      state.driftTarget = rand(-0.45, 0.45); // faster drift, but not insane
+    // win?
+    if (GAME.elapsedMs >= GAME.totalMs){
+      win();
+      return;
     }
 
-    // physics: balance accelerates toward driftTarget
-    // Make failing possible: if you do nothing, it will walk to the edge.
-    const driftForce = state.driftTarget * 0.0021;
-    state.balVel += driftForce * dt;
+    // drift (faster drift, but controllable)
+    // cueDir sets where she’s leaning; we nudge toward cueDir over time
+    const t = clamp(GAME.elapsedMs / GAME.totalMs, 0, 1);
+    const driftStrength = 0.0022 + 0.0012 * t; // ramps up
+    GAME.leanVel += GAME.cueDir * driftStrength * dt;
 
-    // damping (keeps it controllable)
-    state.balVel *= 0.985;
+    // damping
+    GAME.leanVel *= 0.985;
+    GAME.lean += GAME.leanVel;
 
-    // integrate
-    state.balance += state.balVel * dt * 0.18;
+    // clamp lean
+    GAME.lean = clamp(GAME.lean, -1.2, 1.2);
 
-    // clamps beyond drop threshold
-    const absB = Math.abs(state.balance);
-
-    // WIN
-    if (state.holdLeft <= 0){
-      state.won = true;
-      state.running = false;
-      startConfettiExplosion();
-      setTimeout(() => overlay.classList.add("show"), 380);
+    // missed cue (no tap before deadline) == fail (otherwise you can AFK win)
+    if (GAME.elapsedMs > GAME.cueDeadline){
+      triggerDrop();
+      return;
     }
 
-    // FAIL: drop
-    if (absB > 1.02){
-      // small wobble -> tilt -> drop -> auto restart
-      state.running = false;
-      setTimeout(() => {
-        resetRun();
-      }, 520);
-    }
-
-    updateHUD();
+    setBalanceLabel();
   }
 
-  function draw(dt){
+  function draw(){
+    const shakeX = GAME.shake > 0 ? (Math.random()*4 - 2) : 0;
+    const shakeY = GAME.shake > 0 ? (Math.random()*4 - 2) : 0;
+    if (GAME.shake > 0) GAME.shake -= 1;
+
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+
     drawStudio();
 
+    // cue arrow bubble (above)
+    if (GAME.state === "playing") drawCue();
+
     // dancer position
-    const cx = canvas.width/2;
-    const cy = 340; // near floor top
+    const x = canvas.width/2;
+    const y = 390; // baseline on floor
+    const visibleLean = GAME.state === "playing" ? GAME.lean : GAME.lean;
 
-    // tilt based on balance (soft)
-    const tilt = Math.max(-0.18, Math.min(0.18, state.balance * 0.18)); // rad clamp
+    // balance-to-visual mapping (more readable)
+    const leanVisual = clamp(visibleLean, -1, 1);
 
-    // shadow
-    ctx.fillStyle = "rgba(0,0,0,0.12)";
+    drawAgyBallet(x, y, leanVisual);
+
+    // balance meter at bottom (visual feedback)
+    const barY = canvas.height - 58;
+    const barX = 28;
+    const barW = canvas.width - 56;
+    const barH = 10;
+
+    // base bar
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    roundedRect(barX, barY, barW, barH, 999);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // safe zone highlight
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = "rgba(120,255,190,0.55)";
+    roundedRect(barX + barW*0.35, barY, barW*0.30, barH, 999);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // indicator dot
+    const p = (leanVisual + 1) / 2; // 0..1
+    const dotX = barX + p * barW;
+    ctx.fillStyle = "rgba(255,120,190,0.95)";
     ctx.beginPath();
-    ctx.ellipse(cx, 404, 44, 10, 0, 0, Math.PI*2);
+    ctx.arc(dotX, barY + barH/2, 7.5, 0, Math.PI*2);
     ctx.fill();
 
-    drawBalletAgy(cx, 402, tilt);
-    drawBalanceMeter();
+    // confetti (on win)
+    if (GAME.confetti.length) drawConfetti();
 
-    // confetti on top
-    drawConfetti(dt);
+    ctx.restore();
   }
 
+  // ===== RAF loop =====
   let last = 0;
   function loop(ts){
     if (!last) last = ts;
     const dt = Math.min(33, ts - last);
     last = ts;
 
-    step(dt);
-    draw(dt);
+    if (GAME.running) update(dt);
+    if (GAME.confetti.length) updateConfetti(dt);
+    draw();
 
     requestAnimationFrame(loop);
   }
 
-  // ===== Button: go back to map with Stadium prompt =====
-  const MAP_URL = "./map.html"; // <-- change if your map file has a different name
-  nextMissionBtn.addEventListener("click", () => {
-    // Stadium is prompt index 3 in your prompt order.
+  // ===== Win button: go back to map with stadium prompt =====
+  nextBtn.addEventListener("click", () => {
+    // Stadium prompt is index 3 in your map.html prompts array
     localStorage.setItem("mapPromptIndex", "3");
-    location.href = MAP_URL;
+    // optional breadcrumb if you ever want it:
+    localStorage.setItem("returnFrom", "waterloo");
+    location.href = "./map.html";
   });
 
-  // Start
-  resetRun();
+  // Also allow tap anywhere on canvas to start bgm (iOS-friendly)
+  canvas.addEventListener("pointerdown", ()=>ensureBgm(), {passive:true});
+
+  // ===== init =====
+  resetGame();
   requestAnimationFrame(loop);
 
 })();
