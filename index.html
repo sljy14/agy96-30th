@@ -1,34 +1,194 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>Birthday Adventure</title>
-  <link rel="stylesheet" href="./css/style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>agy96 Amazing Race</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:linear-gradient(160deg,#141428,#0b0b12);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  color:white;
+}
+
+#wrap{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:8px;
+  font-weight:900;
+}
+
+.sub{
+  opacity:0.85;
+  font-size:14px;
+  margin-bottom:30px;
+}
+
+.nameTag{
+  margin-bottom:10px;
+  padding:6px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  font-weight:800;
+  font-size:13px;
+}
+
+/* ===== PIXEL CHARACTER ===== */
+
+.pixel{
+  width:120px;
+  height:200px;
+  position:relative;
+  margin-bottom:30px;
+  image-rendering:pixelated;
+}
+
+/* hair (long black) */
+.hair{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:80px;
+  height:80px;
+  background:#000;
+  border-radius:10px;
+}
+
+/* face */
+.face{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:60px;
+  height:60px;
+  background:#f1c7a6;
+}
+
+/* glasses */
+.glasses{
+  position:absolute;
+  top:48px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70px;
+  height:20px;
+  display:flex;
+  justify-content:space-between;
+}
+.glasses div{
+  width:26px;
+  height:20px;
+  border:3px solid black;
+  box-sizing:border-box;
+}
+
+/* body */
+.body{
+  position:absolute;
+  top:85px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70px;
+  height:50px;
+  background:#c1272d; /* red off shoulder */
+}
+
+/* arms */
+.arm{
+  position:absolute;
+  top:85px;
+  width:18px;
+  height:60px;
+  background:#f1c7a6;
+}
+.arm.left{ left:18px; }
+.arm.right{ right:18px; }
+
+/* legs */
+.leg{
+  position:absolute;
+  top:135px;
+  width:24px;
+  height:60px;
+  background:#0e0e18;
+}
+.leg.left{ left:40px; }
+.leg.right{ right:40px; }
+
+/* shoes */
+.shoe{
+  position:absolute;
+  top:185px;
+  width:24px;
+  height:12px;
+  background:white;
+}
+.shoe.left{ left:40px; }
+.shoe.right{ right:40px; }
+
+/* button */
+button{
+  padding:14px 28px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.1);
+  color:white;
+  font-weight:900;
+  font-size:16px;
+}
+
+button:active{
+  transform:scale(0.97);
+}
+</style>
 </head>
+
 <body>
 <div id="wrap">
-  <div class="bg"></div>
 
-  <div class="centerOverlay">
-    <div class="card">
-      <div class="big">Birthday Adventure 🎮✨</div>
-      <div class="small">
-        A tiny pixel-ish journey across Singapore.<br/>
-        Tap-friendly for your phone.
-      </div>
-      <div class="btnRow">
-        <button onclick="location.href='./tampines.html'">Start ➜</button>
-        <button id="resetBtn">Reset Progress</button>
-      </div>
-      <div class="hint">Tip: turn your phone brightness up 😗</div>
-    </div>
+<h1>Welcome to agy96 amazing race! 🏁</h1>
+<div class="sub">do you have what it takes to complete this mission?</div>
+
+<div class="nameTag">agy96</div>
+
+<div class="pixel">
+  <div class="hair"></div>
+  <div class="face"></div>
+
+  <div class="glasses">
+    <div></div>
+    <div></div>
   </div>
+
+  <div class="body"></div>
+
+  <div class="arm left"></div>
+  <div class="arm right"></div>
+
+  <div class="leg left"></div>
+  <div class="leg right"></div>
+
+  <div class="shoe left"></div>
+  <div class="shoe right"></div>
 </div>
 
-<script type="module">
-  import { resetAll } from "./js/app.js";
-  document.getElementById("resetBtn").onclick = () => { resetAll(); alert("Progress reset!"); };
-</script>
+<button onclick="location.href='./tampines.html'">LFG!!!</button>
+
+</div>
 </body>
 </html>
