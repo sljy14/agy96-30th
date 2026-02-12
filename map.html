@@ -1,486 +1,456 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>Map view</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Map view</title>
 
-  <style>
-    html,body{
-      margin:0;height:100%;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:#fff;
-      background:
-        radial-gradient(900px 520px at 50% 15%, rgba(120,255,235,0.10), transparent 60%),
-        radial-gradient(900px 520px at 50% 85%, rgba(160,120,255,0.10), transparent 60%),
-        linear-gradient(160deg,#0b1b24,#0b0b14);
-    }
+<style>
+  :root{
+    --maxw: 420px;
 
-    #wrap{
-      min-height:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      padding:18px 14px 20px;
-      box-sizing:border-box;
-      text-align:center;
-    }
+    /* Option 1: soft pixel town */
+    --town-base1: #c7efd1;
+    --town-base2: #b6e4c3;
+    --town-path1: rgba(255,255,255,0.18);
+    --town-path2: rgba(0,0,0,0.06);
 
-    h1{
-      margin:10px 0 4px;
-      font-size:28px;
-      font-weight:1000;
-      letter-spacing:-0.5px;
-    }
+    --card: rgba(255,255,255,0.10);
+    --stroke: rgba(255,255,255,0.16);
+    --shadow: rgba(0,0,0,0.18);
+  }
 
-    .sub{
-      margin:0 0 10px;
-      opacity:0.9;
-      font-size:14px;
-    }
+  html,body{
+    margin:0;height:100%;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:#fff;
 
-    #question{
-      margin:8px 0 8px;
-      font-size:18px;
-      font-weight:900;
-      line-height:1.25;
-      text-shadow:0 2px 18px rgba(0,0,0,.35);
-      max-width:520px;
-    }
+    background:
+      radial-gradient(900px 520px at 50% 22%, rgba(120,255,235,0.12), transparent 62%),
+      radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 62%),
+      linear-gradient(160deg,#06202a,#070714);
+  }
 
-    #tryagain{
-      height:20px;
-      margin-top:6px;
-      font-weight:900;
-      color:#ffd6d6;
-      opacity:0;
-      transform:translateY(-4px);
-      transition:opacity .18s ease, transform .18s ease;
-    }
-    #tryagain.show{
-      opacity:1;
-      transform:translateY(0);
-    }
+  .wrap{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:16px 14px 14px;
+    box-sizing:border-box;
+  }
 
-    /* ===== Map Panel ===== */
-    .panel{
-      width:min(92vw, 420px);
-      border-radius:18px;
-      background:rgba(255,255,255,0.10);
-      border:1px solid rgba(255,255,255,0.14);
-      box-shadow:0 18px 40px rgba(0,0,0,0.35);
-      padding:14px;
-      box-sizing:border-box;
-      margin-top:8px;
-    }
+  h1{
+    margin:6px 0 6px;
+    font-weight:1000;
+    letter-spacing:-0.5px;
+    font-size:26px;
+    text-align:center;
+  }
 
-    /* “Town map” canvas */
-    .mapCanvas{
-      position:relative;
-      border-radius:16px;
-      overflow:hidden;
-      /* more top padding so Stadium/Waterloo not too close */
-      padding:22px 14px 16px;
-      box-sizing:border-box;
-      background:
-        /* subtle light grid */
-        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
-        /* grass variation */
-        radial-gradient(14px 10px at 30% 40%, rgba(255,255,255,0.06), transparent 60%),
-        radial-gradient(18px 12px at 70% 25%, rgba(0,0,0,0.10), transparent 60%),
-        radial-gradient(18px 12px at 18% 75%, rgba(0,0,0,0.10), transparent 60%),
-        linear-gradient(180deg, #cfeedd, #c4e8d2);
-      background-size:
-        34px 34px,
-        34px 34px,
-        160px 120px,
-        180px 140px,
-        180px 140px,
-        cover;
-    }
+  .sub{
+    margin:0 0 10px;
+    opacity:0.86;
+    text-align:center;
+    font-size:13px;
+  }
 
-    /* stones border */
-    .mapCanvas::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        radial-gradient(circle at 8px 8px, rgba(240,240,240,.9) 0 6px, rgba(0,0,0,0) 7px) 0 0 / 28px 28px,
-        radial-gradient(circle at 8px 8px, rgba(215,215,215,.9) 0 5px, rgba(0,0,0,0) 6px) 14px 14px / 28px 28px;
-      opacity:.35;
-      mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-      -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-      padding:12px; /* keeps stones as a border */
-      box-sizing:border-box;
-    }
+  .qLine{
+    width:min(var(--maxw), 94vw);
+    text-align:center;
+    font-size:15px;
+    font-weight:900;
+    letter-spacing:0.2px;
+    margin:6px 0 8px;
+    line-height:1.25;
+  }
 
-    /* bushes */
-    .bush{
-      position:absolute;
-      width:56px;height:26px;
-      border-radius:999px;
-      background:linear-gradient(180deg,#3fb56a,#2e8f53);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,.20), 0 10px 18px rgba(0,0,0,.12);
-      opacity:.9;
-    }
-    .bush::after{
-      content:"";
-      position:absolute;
-      left:12px;top:-8px;
-      width:30px;height:18px;
-      border-radius:999px;
-      background:linear-gradient(180deg,#4fd07a,#2f9858);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,.18);
-    }
+  .tryAgain{
+    width:min(var(--maxw), 94vw);
+    text-align:center;
+    margin:2px 0 10px;
+    font-weight:1000;
+    color:#ffd0d0;
+    display:none;
+  }
+  .tryAgain.show{ display:block; }
 
-    /* tiny flowers (decor only) */
-    .flower{
-      position:absolute;
-      width:10px;height:10px;
-      border-radius:3px;
-      background:rgba(255,255,255,.55);
-      opacity:.25;
-      transform:rotate(15deg);
-    }
+  .mapCard{
+    width:min(var(--maxw), 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:12px;
+    box-sizing:border-box;
+  }
 
-    /* ===== Map Layout (4 corners + center) ===== */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: auto auto auto;
-      gap:18px 16px; /* more breathing room */
-      align-items:center;
-      justify-items:center;
-    }
+  .stage{
+    position:relative;
+    width:100%;
+    aspect-ratio: 1 / 1;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
 
-    .tile{
-      width:120px;
-      max-width:30vw;
-      border-radius:16px;
-      background:rgba(255,255,255,0.18);
-      border:1px solid rgba(0,0,0,0.08);
-      box-shadow:0 14px 26px rgba(0,0,0,0.10);
-      padding:10px 10px 12px;
-      box-sizing:border-box;
-      cursor:pointer;
-      transition:transform .12s ease, filter .12s ease;
-      position:relative;
-    }
-    .tile:active{ transform:scale(0.98); }
-    .tile:hover{ filter:brightness(1.03); }
+    background:
+      radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,0.00) 55%, rgba(0,0,0,0.12) 100%),
+      linear-gradient(90deg, transparent 0 42%, var(--town-path1) 42% 58%, transparent 58% 100%),
+      linear-gradient(180deg, transparent 0 42%, var(--town-path1) 42% 58%, transparent 58% 100%),
+      radial-gradient(2px 2px at 12% 18%, rgba(0,0,0,0.08) 45%, transparent 46%),
+      radial-gradient(2px 2px at 38% 62%, rgba(0,0,0,0.08) 45%, transparent 46%),
+      radial-gradient(2px 2px at 74% 34%, rgba(0,0,0,0.08) 45%, transparent 46%),
+      radial-gradient(2px 2px at 86% 78%, rgba(0,0,0,0.08) 45%, transparent 46%),
+      radial-gradient(2px 2px at 24% 82%, rgba(0,0,0,0.06) 45%, transparent 46%),
+      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06)),
+      linear-gradient(180deg, var(--town-base1), var(--town-base2));
+  }
 
-    /* floating label pill */
-    .pill{
-      position:absolute;
-      left:50%;
-      top:-12px;
-      transform:translateX(-50%);
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(0,0,0,0.55);
-      border:1px solid rgba(255,255,255,0.14);
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.2px;
-      box-shadow:0 10px 18px rgba(0,0,0,.20);
-      animation:floaty 2.6s ease-in-out infinite;
-    }
+  .spot{
+    position:absolute;
+    width:104px;
+    height:104px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(0,0,0,0.10);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
 
-    @keyframes floaty{
-      0%,100%{ transform:translateX(-50%) translateY(0); }
-      50%{ transform:translateX(-50%) translateY(-3px); }
-    }
+    transform: translateY(0);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    animation: floaty 2.8s ease-in-out infinite;
+  }
+  .spot:nth-child(1){ animation-delay: 0.00s; }
+  .spot:nth-child(2){ animation-delay: 0.18s; }
+  .spot:nth-child(3){ animation-delay: 0.35s; }
+  .spot:nth-child(4){ animation-delay: 0.52s; }
 
-    .art{
-      width:82px;height:62px;
-      margin:8px auto 0;
-      display:block;
-    }
+  @keyframes floaty{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-3px); }
+  }
 
-    /* Center character block */
-    .centerWrap{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      user-select:none;
-    }
-    .nameTag{
-      font-weight:900;
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(0,0,0,0.50);
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:0 10px 18px rgba(0,0,0,.18);
-      animation:floaty 2.6s ease-in-out infinite;
-    }
+  .spot:active{
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  }
 
-    /* ===== Pixel Sprite (agy96) ===== */
-    .pixelGrid{
-      --p: 10px; /* default pixel size */
-      width: calc(var(--p) * 12);
-      height: calc(var(--p) * 20);
-      display:grid;
-      grid-template-columns: repeat(12, var(--p));
-      grid-template-rows: repeat(20, var(--p));
-      gap:0;
-      image-rendering:pixelated;
-      filter: drop-shadow(0 10px 0 rgba(0,0,0,0.18));
-    }
-    .cell{ width:var(--p); height:var(--p); }
-    .hair{ background:#000; }
-    .skin{ background:#f1c7a6; }
-    .top{ background:#c1272d; }
-    .pants{ background:#0c0c18; }
-    .shoe{ background:#fff; }
-    .glass{ background:#000; }
+  .label{
+    position:absolute;
+    top:-24px;
+    left:50%;
+    transform:translateX(-50%);
+    font-weight:1000;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(0,0,0,0.22);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+    white-space:nowrap;
+    pointer-events:none;
+  }
 
-    /* Jump animation on wrong */
-    .jump2x{
-      animation:jumpTwice .55s ease-in-out 1;
-    }
-    @keyframes jumpTwice{
-      0%{ transform:translateY(0); }
-      18%{ transform:translateY(-10px); }
-      32%{ transform:translateY(0); }
-      55%{ transform:translateY(-10px); }
-      70%{ transform:translateY(0); }
-      100%{ transform:translateY(0); }
-    }
+  canvas.icon{
+    width:78px;
+    height:78px;
+    image-rendering:pixelated;
+  }
 
-    /* responsive tweaks */
-    @media (max-width:420px){
-      h1{ font-size:26px; }
-      #question{ font-size:16px; }
-      .tile{ width:110px; }
-      .pixelGrid{ --p: 9px; }
-    }
-    @media (max-width:360px){
-      .tile{ width:102px; }
-      .pixelGrid{ --p: 8px; }
-      .grid{ gap:16px 12px; }
-    }
-  </style>
+  /* ✅ NEW: pull spots away from the borders (looks less cramped)
+     Feel free to tweak these 4 numbers. */
+  #stadiumSpot   { left:32px; top:26px; }
+  #waterlooSpot  { right:32px; top:26px; }
+  #chinatownSpot { left:32px; bottom:26px; }
+  #macritchieSpot{ right:32px; bottom:26px; }
+
+  .center{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:110px;
+    height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
+
+  .agyTag{
+    position:absolute;
+    top:-22px;
+    left:50%;
+    transform:translateX(-50%);
+    font-weight:1000;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(0,0,0,0.22);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+  }
+
+  .pixel{ width:92px; height:132px; position:relative; }
+  .hair{
+    position:absolute; width:66px; height:92px; background:#000;
+    top:0; left:50%; transform:translateX(-50%); border-radius:10px;
+  }
+  .face{
+    position:absolute; width:44px; height:50px; background:#f1c7a6;
+    top:24px; left:50%; transform:translateX(-50%); border-radius:2px;
+  }
+  .glasses{
+    position:absolute; top:43px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center;
+  }
+  .glasses .side{ width:10px; height:4px; background:#000; }
+  .glasses .lens{ width:16px; height:13px; border:3px solid #000; box-sizing:border-box; }
+  .glasses .bridge{ width:8px; height:4px; background:#000; }
+
+  .body{
+    position:absolute; top:82px; left:50%; transform:translateX(-50%);
+    width:58px; height:36px; background:#c1272d;
+  }
+  .pants{
+    position:absolute; top:118px; left:50%; transform:translateX(-50%);
+    width:60px; height:22px; background:#0e0e18;
+  }
+  .shoes{
+    position:absolute; top:140px; left:50%; transform:translateX(-50%);
+    width:54px; height:9px; background:#fff;
+  }
+
+  @keyframes hop {
+    0%{ transform:translate(-50%,-50%) translateY(0); }
+    25%{ transform:translate(-50%,-50%) translateY(-10px); }
+    50%{ transform:translate(-50%,-50%) translateY(0); }
+    75%{ transform:translate(-50%,-50%) translateY(-10px); }
+    100%{ transform:translate(-50%,-50%) translateY(0); }
+  }
+  .jumpTwice{ animation: hop 420ms ease-in-out 1; }
+
+  @media (max-width: 360px){
+    h1{ font-size:24px; }
+    .qLine{ font-size:14px; }
+    .spot{ width:98px; height:98px; }
+    canvas.icon{ width:74px; height:74px; }
+
+    /* on tiny screens, reduce inset a bit */
+    #stadiumSpot   { left:24px; top:22px; }
+    #waterlooSpot  { right:24px; top:22px; }
+    #chinatownSpot { left:24px; bottom:22px; }
+    #macritchieSpot{ right:24px; bottom:22px; }
+  }
+</style>
 </head>
 
 <body>
-  <div id="wrap">
-    <h1>Map view 🗺️</h1>
-    <div class="sub">Tap on the right place!</div>
+<div class="wrap">
+  <h1>Map view 🗺️</h1>
+  <div class="sub">Tap on the right place!</div>
 
-    <div id="question">...</div>
-    <div id="tryagain">Try again!</div>
+  <div class="qLine" id="questionText">...</div>
+  <div class="tryAgain" id="tryAgain">Try again!</div>
 
-    <div class="panel">
-      <div class="mapCanvas">
-        <!-- decor -->
-        <div class="bush" style="left:16px; top:18px;"></div>
-        <div class="bush" style="right:18px; top:34px; width:46px;"></div>
-        <div class="bush" style="left:22px; bottom:22px; width:62px;"></div>
-        <div class="bush" style="right:24px; bottom:18px; width:52px;"></div>
+  <div class="mapCard">
+    <div class="stage" id="stage">
 
-        <div class="flower" style="left:92px; top:68px;"></div>
-        <div class="flower" style="left:210px; top:110px;"></div>
-        <div class="flower" style="right:96px; top:86px;"></div>
-        <div class="flower" style="left:140px; bottom:70px;"></div>
-        <div class="flower" style="right:120px; bottom:56px;"></div>
+      <div class="spot" id="stadiumSpot" data-place="stadium" role="button" aria-label="Stadium">
+        <div class="label">Stadium</div>
+        <canvas class="icon" id="stadiumIcon" width="96" height="96"></canvas>
+      </div>
 
-        <div class="grid">
-          <!-- top-left -->
-          <div class="tile" data-loc="stadium" style="grid-column:1;grid-row:1;">
-            <div class="pill">Stadium</div>
-            <!-- simple pixel-ish stadium/field -->
-            <svg class="art" viewBox="0 0 90 70">
-              <rect x="8" y="10" width="74" height="50" rx="6" fill="#e9e0ff"/>
-              <rect x="14" y="16" width="62" height="38" rx="4" fill="#57b26a"/>
-              <rect x="14" y="16" width="62" height="6" fill="#3aa0d8" opacity=".9"/>
-              <rect x="44" y="16" width="2" height="38" fill="#ffffff" opacity=".9"/>
-              <circle cx="45" cy="35" r="7" fill="none" stroke="#fff" stroke-width="2" opacity=".9"/>
-              <rect x="18" y="30" width="10" height="10" fill="none" stroke="#fff" stroke-width="2" opacity=".9"/>
-              <rect x="62" y="30" width="10" height="10" fill="none" stroke="#fff" stroke-width="2" opacity=".9"/>
-            </svg>
+      <div class="spot" id="waterlooSpot" data-place="waterloo" role="button" aria-label="Waterloo">
+        <div class="label">Waterloo</div>
+        <canvas class="icon" id="waterlooIcon" width="96" height="96"></canvas>
+      </div>
+
+      <div class="spot" id="chinatownSpot" data-place="chinatown" role="button" aria-label="Chinatown">
+        <div class="label">Chinatown</div>
+        <canvas class="icon" id="chinatownIcon" width="96" height="96"></canvas>
+      </div>
+
+      <div class="spot" id="macritchieSpot" data-place="macritchie" role="button" aria-label="MacRitchie">
+        <div class="label">MacRitchie</div>
+        <canvas class="icon" id="macritchieIcon" width="96" height="96"></canvas>
+      </div>
+
+      <div class="center" id="agyCenter" aria-label="agy96">
+        <div class="agyTag">agy96</div>
+        <div class="pixel">
+          <div class="hair"></div>
+          <div class="face"></div>
+          <div class="glasses">
+            <div class="side"></div>
+            <div class="lens"></div>
+            <div class="bridge"></div>
+            <div class="lens"></div>
+            <div class="side"></div>
           </div>
-
-          <!-- top-right -->
-          <div class="tile" data-loc="waterloo" style="grid-column:3;grid-row:1;">
-            <div class="pill">Waterloo</div>
-            <!-- simple pagoda-ish icon -->
-            <svg class="art" viewBox="0 0 90 70">
-              <rect x="18" y="52" width="54" height="8" rx="3" fill="#5e5e70"/>
-              <rect x="24" y="44" width="42" height="10" rx="3" fill="#b24a4a"/>
-              <polygon points="45,16 20,30 70,30" fill="#e06a6a"/>
-              <rect x="24" y="30" width="42" height="8" rx="3" fill="#cc5c5c"/>
-              <polygon points="45,30 16,42 74,42" fill="#f07a7a"/>
-              <rect x="30" y="38" width="30" height="6" rx="3" fill="#d86b6b"/>
-              <rect x="43" y="12" width="4" height="6" fill="#2d2d38"/>
-            </svg>
-          </div>
-
-          <!-- center -->
-          <div class="centerWrap" style="grid-column:2;grid-row:2;">
-            <div class="nameTag">agy96</div>
-            <div id="agySprite" class="pixelGrid" aria-label="agy96 sprite"></div>
-          </div>
-
-          <!-- bottom-left -->
-          <div class="tile" data-loc="chinatown" style="grid-column:1;grid-row:3;">
-            <div class="pill">Chinatown</div>
-            <!-- lanterns -->
-            <svg class="art" viewBox="0 0 90 70">
-              <rect x="12" y="16" width="66" height="6" rx="3" fill="#d6a86a"/>
-              <g>
-                <rect x="18" y="24" width="14" height="18" rx="5" fill="#e23a3a"/>
-                <rect x="22" y="24" width="6" height="18" fill="#ffcf7a" opacity=".35"/>
-                <rect x="38" y="24" width="14" height="18" rx="5" fill="#e23a3a"/>
-                <rect x="42" y="24" width="6" height="18" fill="#ffcf7a" opacity=".35"/>
-                <rect x="58" y="24" width="14" height="18" rx="5" fill="#e23a3a"/>
-                <rect x="62" y="24" width="6" height="18" fill="#ffcf7a" opacity=".35"/>
-              </g>
-              <g fill="#c53030">
-                <rect x="23" y="42" width="3" height="10" rx="2"/>
-                <rect x="43" y="42" width="3" height="10" rx="2"/>
-                <rect x="63" y="42" width="3" height="10" rx="2"/>
-              </g>
-            </svg>
-          </div>
-
-          <!-- bottom-right -->
-          <div class="tile" data-loc="macritchie" style="grid-column:3;grid-row:3;">
-            <div class="pill">MacRitchie</div>
-            <!-- trees -->
-            <svg class="art" viewBox="0 0 90 70">
-              <rect x="14" y="54" width="62" height="8" rx="3" fill="#2f8f53"/>
-              <g>
-                <rect x="28" y="30" width="8" height="24" rx="2" fill="#6b4a2d"/>
-                <rect x="56" y="34" width="8" height="20" rx="2" fill="#6b4a2d"/>
-                <rect x="20" y="20" width="26" height="18" rx="6" fill="#3fb56a"/>
-                <rect x="48" y="22" width="30" height="20" rx="6" fill="#3aa860"/>
-                <rect x="54" y="18" width="18" height="14" rx="6" fill="#4fd07a" opacity=".75"/>
-              </g>
-            </svg>
-          </div>
+          <div class="body"></div>
+          <div class="pants"></div>
+          <div class="shoes"></div>
         </div>
       </div>
+
     </div>
-
   </div>
+</div>
 
-  <script>
-    // ====== PROMPTS (4 questions) ======
-    const prompts = [
-      { q: "Where will you get some shiok and numbing food?", correct: "chinatown", next: "./chinatown.html" },
-      { q: "Where will you get your food stolen from you?", correct: "macritchie", next: "./macritchie.html" },
-      { q: "Where would your toes hurt the most?", correct: "waterloo", next: "./waterloo.html" },
-      { q: "Where would you be more than happy for your ear drums to hurt?", correct: "stadium", next: "./stadium.html" }
-    ];
+<audio id="bgm" src="./arcade.mp3" loop></audio>
 
-    // which prompt to show
-    let promptIndex = Number(localStorage.getItem("mapPromptIndex") || 0);
-    if (promptIndex < 0) promptIndex = 0;
-    if (promptIndex >= prompts.length) promptIndex = 0; // loop if needed
+<script>
+/* ===== BGM (plays after first tap) ===== */
+const bgm = document.getElementById("bgm");
+bgm.volume = 0.5;
+function tryPlayBgm(){
+  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
+}
+if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
-    const questionEl = document.getElementById("question");
-    const tryEl = document.getElementById("tryagain");
-    const current = prompts[promptIndex];
-    questionEl.textContent = current.q;
+/* ===== Prompt system (ALL 4 questions) =====
+   Uses localStorage.mapPromptIndex to control which question is active. */
+const prompts = [
+  { q: "Where will you get some shiok and numbing food?", correct: "chinatown", next: "./chinatown.html" },
+  { q: "Where will you get your food stolen from you?", correct: "macritchie", next: "./macritchie.html" },
+  { q: "Where would your toes hurt the most?", correct: "waterloo", next: "./waterloo.html" },
+  { q: "Where would you be more than happy for your ear drums to hurt?", correct: "stadium", next: "./stadium.html" }
+];
 
-    // ====== Render agy96 sprite WITH ARMS ======
-    const W = 12, H = 20;
-    const sprite = document.getElementById("agySprite");
-    const map = new Array(W*H).fill("");
+let promptIndex = Number(localStorage.getItem("mapPromptIndex") || 0);
+if (!Number.isFinite(promptIndex) || promptIndex < 0) promptIndex = 0;
+if (promptIndex >= prompts.length) promptIndex = 0;
 
-    function put(x,y,cls){
-      const idx = (y-1)*W + (x-1);
-      map[idx] = cls;
+let current = prompts[promptIndex];
+
+const questionText = document.getElementById("questionText");
+const tryAgain = document.getElementById("tryAgain");
+const agyCenter = document.getElementById("agyCenter");
+
+function setPrompt(i){
+  promptIndex = i;
+  current = prompts[promptIndex];
+  questionText.textContent = current.q;
+  tryAgain.classList.remove("show");
+}
+setPrompt(promptIndex);
+
+function jumpTwice(){
+  agyCenter.classList.remove("jumpTwice");
+  void agyCenter.offsetWidth;
+  agyCenter.classList.add("jumpTwice");
+  tryAgain.classList.add("show");
+}
+
+/* ===== Click handling ===== */
+document.querySelectorAll(".spot").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    tryPlayBgm();
+
+    const pick = el.dataset.place;
+    if (pick === current.correct){
+      // advance prompt for next time you return to map
+      localStorage.setItem("mapPromptIndex", String(Math.min(promptIndex + 1, prompts.length - 1)));
+      location.href = current.next;
+    } else {
+      jumpTwice();
     }
+  });
+});
 
-    // Hair (long)
-    for(let y=1;y<=6;y++){
-      for(let x=3;x<=10;x++) put(x,y,"hair");
-    }
-    for(let y=7;y<=12;y++){
-      put(3,y,"hair"); put(4,y,"hair");
-      put(9,y,"hair"); put(10,y,"hair");
-    }
+/* ===== Pixel art drawing ===== */
+function px(ctx, x,y,w,h,color){
+  ctx.fillStyle = color; ctx.fillRect(x,y,w,h);
+}
+function clear(ctx){ ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height); }
 
-    // Face
-    for(let y=4;y<=9;y++){
-      for(let x=5;x<=8;x++) put(x,y,"skin");
-    }
+function drawLanterns(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+  px(ctx, 10, 16, 76, 6, "#d1b15a");
+  const lantern = (cx)=>{
+    px(ctx, cx-10, 24, 20, 24, "#d22b2b");
+    px(ctx, cx-12, 28, 4, 16, "#b01f1f");
+    px(ctx, cx+8, 28, 4, 16, "#b01f1f");
+    px(ctx, cx-8, 28, 16, 2, "#f2c94c");
+    px(ctx, cx-8, 34, 16, 2, "#f2c94c");
+    px(ctx, cx-2, 48, 4, 18, "#d1b15a");
+    px(ctx, cx-6, 66, 12, 4, "#d22b2b");
+  };
+  lantern(26); lantern(48); lantern(70);
+  px(ctx, 24, 32, 4, 6, "#ffe08a");
+  px(ctx, 46, 30, 4, 8, "#ffe08a");
+  px(ctx, 68, 34, 4, 6, "#ffe08a");
+}
 
-    // Glasses
-    // left frame
-    for(let x=4;x<=6;x++){ put(x,6,"glass"); put(x,8,"glass"); }
-    put(4,7,"glass"); put(6,7,"glass");
-    // right frame
-    for(let x=7;x<=9;x++){ put(x,6,"glass"); put(x,8,"glass"); }
-    put(7,7,"glass"); put(9,7,"glass");
-    // bridge
-    put(6,7,"glass"); put(7,7,"glass");
+function drawTrees(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+  px(ctx, 10, 70, 76, 14, "#2b8c3a");
 
-    // Neck
-    put(6,10,"skin"); put(7,10,"skin");
+  const tree = (x, y, s)=>{
+    px(ctx, x+s*2, y+s*4, s, s*4, "#6b3f2a");
+    px(ctx, x, y, s*5, s*4, "#3a8f44");
+    px(ctx, x+s, y-s, s*3, s, "#58b15f");
+    px(ctx, x+s, y+s, s*3, s, "#58b15f");
+  };
+  tree(16, 26, 4);
+  tree(46, 20, 5);
+  tree(62, 34, 3);
+}
 
-    // T-shirt body (red)
-    for(let y=11;y<=15;y++){
-      for(let x=5;x<=8;x++) put(x,y,"top");
-    }
-    // short sleeves (red) on both sides (this is the “tee sleeve” look)
-    put(4,11,"top"); put(4,12,"top");
-    put(9,11,"top"); put(9,12,"top");
+function drawPagoda(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
 
-    // Arms (skin) — FIXED
-    for(let y=13;y<=15;y++){
-      put(4,y,"skin");
-      put(9,y,"skin");
-    }
+  px(ctx, 18, 72, 60, 10, "rgba(0,0,0,0.18)");
+  px(ctx, 18, 56, 60, 12, "#d9b27c");
+  px(ctx, 10, 52, 76, 6, "#e06a2c");
+  px(ctx, 18, 48, 60, 6, "#c75422");
 
-    // Pants
-    for(let y=16;y<=19;y++){
-      put(6,y,"pants"); put(7,y,"pants");
-      put(5,y,"pants"); put(8,y,"pants");
-    }
+  px(ctx, 26, 36, 44, 10, "#d9b27c");
+  px(ctx, 20, 32, 56, 6, "#e06a2c");
+  px(ctx, 26, 28, 44, 6, "#c75422");
 
-    // Shoes
-    put(5,20,"shoe"); put(6,20,"shoe");
-    put(7,20,"shoe"); put(8,20,"shoe");
+  px(ctx, 34, 18, 28, 8, "#d9b27c");
+  px(ctx, 30, 14, 36, 6, "#e06a2c");
+  px(ctx, 34, 10, 28, 6, "#c75422");
 
-    // Render cells
-    for(let i=0;i<W*H;i++){
-      const d = document.createElement("div");
-      d.className = "cell " + (map[i] || "");
-      sprite.appendChild(d);
-    }
+  px(ctx, 46, 6, 4, 8, "#2b2b3a");
+  px(ctx, 44, 4, 8, 3, "#7a7a8a");
+}
 
-    // ====== Click handling + wrong animation ======
-    function showTryAgain(){
-      tryEl.classList.add("show");
-      sprite.classList.remove("jump2x");
-      // reflow to restart animation
-      void sprite.offsetWidth;
-      sprite.classList.add("jump2x");
-      setTimeout(()=>tryEl.classList.remove("show"), 900);
-    }
+function drawStadium(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
 
-    document.querySelectorAll(".tile").forEach(tile=>{
-      tile.addEventListener("click", ()=>{
-        const pick = tile.dataset.loc;
-        if(pick === current.correct){
-          location.href = current.next;
-        }else{
-          showTryAgain();
-        }
-      });
-    });
-  </script>
+  px(ctx, 10, 12, 76, 72, "#d7dbe5");
+  px(ctx, 14, 16, 68, 64, "#eef1f6");
+  px(ctx, 22, 30, 52, 38, "#57b15f");
+  px(ctx, 24, 32, 48, 2, "#ffffff");
+  px(ctx, 24, 64, 48, 2, "#ffffff");
+  px(ctx, 46, 32, 2, 34, "#ffffff");
+  px(ctx, 44, 46, 6, 6, "#ffffff");
+  px(ctx, 46, 48, 2, 2, "#57b15f");
+  px(ctx, 22, 22, 52, 6, "#4aa3d6");
+}
+
+drawLanterns("chinatownIcon");
+drawTrees("macritchieIcon");
+drawPagoda("waterlooIcon");
+drawStadium("stadiumIcon");
+</script>
 </body>
 </html>
