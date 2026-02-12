@@ -1,645 +1,721 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Welcome to MacRitchie!</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MacRitchie Hike</title>
+  <style>
+    :root{
+      --bg1:#071c1f;
+      --bg2:#0b2a2f;
+      --panel: rgba(10, 22, 28, 0.55);
+      --panel2: rgba(255,255,255,0.08);
+      --text:#eaf6ff;
+      --muted: rgba(234,246,255,0.75);
+      --accent:#9ff0c8;
+      --warn:#ffb870;
+    }
 
-<style>
-  :root{
-    --maxw: 420px;
-    --stroke: rgba(255,255,255,0.14);
-  }
+    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 50% -10%, #123d45, #06161a);
+      color: var(--text);
+    }
 
-  html,body{
-    margin:0;height:100%;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    color:#fff;
-    background:
-      radial-gradient(900px 520px at 50% 22%, rgba(120,255,235,0.12), transparent 62%),
-      radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 62%),
-      linear-gradient(160deg,#06202a,#070714);
-  }
+    .wrap{
+      min-height:100svh;
+      display:flex;
+      justify-content:center;
+      padding: 18px 14px 24px;
+    }
 
-  .wrap{
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    padding:16px 14px 14px;
-    box-sizing:border-box;
-  }
+    .card{
+      width:min(520px, 100%);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(7, 24, 28, 0.7), rgba(5, 18, 22, 0.65));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+      overflow:hidden;
+    }
 
-  h1{
-    margin:6px 0 6px;
-    font-weight:1000;
-    letter-spacing:-0.5px;
-    font-size:26px;
-    text-align:center;
-  }
+    .header{
+      padding: 22px 18px 14px;
+      text-align:center;
+    }
 
-  .sub{
-    margin:0 0 8px;
-    opacity:0.86;
-    text-align:center;
-    font-size:13px;
-    line-height:1.25;
-  }
+    h1{
+      margin: 0 0 6px;
+      font-size: 34px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+    .sub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
 
-  .hint{
-    margin:0 0 10px;
-    opacity:0.75;
-    text-align:center;
-    font-size:12px;
-  }
+    .hud{
+      display:flex;
+      gap: 10px;
+      justify-content: space-between;
+      padding: 0 16px 12px;
+    }
 
-  .titleBlock.hide{ display:none; }
+    .pill{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border-radius: 999px;
+      padding: 12px 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      min-width: 0;
+    }
+    .pill small{
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
 
-  .hud{
-    width:min(var(--maxw), 94vw);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin:6px 0 10px;
-  }
+    .stage{
+      padding: 10px 14px 16px;
+    }
 
-  .pill{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 12px;
-    border-radius:999px;
-    border:1px solid var(--stroke);
-    background:rgba(0,0,0,0.20);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-    font-weight:1000;
-    font-size:12px;
-  }
+    .frame{
+      border-radius: 22px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.10);
+      padding: 10px;
+    }
 
-  .stageCard{
-    width:min(var(--maxw), 94vw);
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:12px;
-    box-sizing:border-box;
-  }
+    canvas{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 18px;
+      image-rendering: pixelated;
+      background: #061319;
+      touch-action: manipulation;
+    }
 
-  .stage{
-    position:relative;
-    width:100%;
-    aspect-ratio: 3 / 4;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-    background:
-      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.10) 65%, rgba(0,0,0,0.18) 100%),
-      linear-gradient(180deg, rgba(70,255,120,0.06), rgba(0,0,0,0.00)),
-      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06));
-  }
+    .footer{
+      padding: 14px 16px 20px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap: wrap;
+    }
 
-  canvas{
-    width:100%;
-    height:100%;
-    display:block;
-    image-rendering:pixelated;
-  }
+    .btn{
+      appearance:none;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 16px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      background: rgba(255,255,255,0.10);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.16);
+      cursor:pointer;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(159,240,200,0.22), rgba(159,240,200,0.12));
+      border: 1px solid rgba(159,240,200,0.28);
+    }
+    .hint{
+      width: 100%;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
 
-  .gameWrap.hide{ display:none; }
-  .hud.hide{ display:none; }
+    /* Pages */
+    .page{ display:none; }
+    .page.active{ display:block; }
 
-  /* VIEW SCENE */
-  .winWrap{
-    width:min(var(--maxw), 94vw);
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    gap:14px;
-    margin-top:10px;
-  }
-  .winWrap.show{ display:flex; }
-
-  .winText{
-    width:min(var(--maxw), 94vw);
-    text-align:center;
-    font-weight:1000;
-    font-size:16px;
-    line-height:1.25;
-  }
-
-  .viewStage{
-    width:min(var(--maxw), 94vw);
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:12px;
-    box-sizing:border-box;
-  }
-  .viewBox{
-    position:relative;
-    width:100%;
-    aspect-ratio: 3 / 2;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-    background:
-      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.10) 65%, rgba(0,0,0,0.18) 100%),
-      linear-gradient(180deg, rgba(255,140,80,0.12), rgba(0,0,0,0.00));
-  }
-
-  .btn{
-    width:min(var(--maxw), 94vw);
-    padding:16px 18px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,0.22);
-    background:rgba(255,255,255,0.10);
-    color:#fff;
-    font-weight:1000;
-    font-size:16px;
-    letter-spacing:0.2px;
-  }
-  .btn:active{ transform:scale(0.98); }
-
-  @media (max-width: 360px){
-    h1{ font-size:24px; }
-    .sub{ font-size:12px; }
-    .pill{ font-size:11px; }
-  }
-</style>
+    /* View page */
+    .viewWrap{
+      padding: 14px;
+    }
+    .viewTitle{
+      text-align:center;
+      font-weight: 900;
+      font-size: 22px;
+      margin: 6px 0 10px;
+      letter-spacing: -0.01em;
+    }
+    .viewSubtitle{
+      text-align:center;
+      color: var(--muted);
+      margin: 0 0 12px;
+      font-size: 13px;
+    }
+    .viewFrame{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      overflow:hidden;
+      background: rgba(0,0,0,0.18);
+    }
+    .viewCanvas{
+      width:100%;
+      display:block;
+      image-rendering: pixelated;
+      background:#061319;
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <div class="card">
 
-  <div class="titleBlock" id="titleBlock">
-    <h1>Welcome to the MacRitchie hike! ⛰️</h1>
-    <div class="sub">Tap to jump onto the logs!</div>
-    <div class="hint">Land on 10 logs to reach the top.</div>
-  </div>
+      <!-- GAME PAGE -->
+      <section id="gamePage" class="page active">
+        <div class="header">
+          <h1>Welcome to the MacRitchie hike! 🥾</h1>
+          <p class="sub">Tap to jump onto the logs.<br/>Land on 10 logs to reach the top.</p>
+        </div>
 
-  <div class="hud" id="gameHud">
-    <div class="pill">🪵 Logs: <span id="score">0</span> / 10</div>
-    <div class="pill">🙈 Slips: <span id="miss">0</span></div>
-  </div>
+        <div class="hud">
+          <div class="pill"><span>🪵</span><span>Logs:&nbsp;<strong id="logsCount">0</strong>&nbsp;<small>/ 10</small></span></div>
+          <div class="pill"><span>🙈</span><span>Slips:&nbsp;<strong id="slipsCount">0</strong></span></div>
+        </div>
 
-  <div class="stageCard" id="gameWrap">
-    <div class="stage">
-      <canvas id="game" width="360" height="480" aria-label="MacRitchie log hopping game"></canvas>
+        <div class="stage">
+          <div class="frame">
+            <canvas id="game" width="360" height="520" aria-label="MacRitchie hike game"></canvas>
+          </div>
+        </div>
+
+        <div class="footer">
+          <button id="startBtn" class="btn primary">Start</button>
+          <button id="resetBtn" class="btn">Reset</button>
+          <div class="hint">
+            Tip: logs move left-right. Tap at the right moment to land cleanly.
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PAGE -->
+      <section id="viewPage" class="page">
+        <div class="viewWrap">
+          <div class="viewTitle">Enjoy the view, you deserve it! 🌅</div>
+          <div class="viewSubtitle">MacRitchie complete — you made it to the top.</div>
+
+          <div class="viewFrame">
+            <canvas id="view" class="viewCanvas" width="360" height="420" aria-label="View scene"></canvas>
+          </div>
+
+          <div class="footer" style="padding-top:14px;">
+            <button id="nextBtn" class="btn primary">I’m ready for my next adventure!</button>
+            <button id="replayBtn" class="btn">Replay MacRitchie</button>
+          </div>
+        </div>
+      </section>
+
     </div>
   </div>
-
-  <!-- VIEW SCENE -->
-  <div class="winWrap" id="winWrap">
-    <div class="winText">Enjoy the view, you deserve it! 🌅</div>
-    <div class="viewStage">
-      <div class="viewBox">
-        <canvas id="view" width="360" height="240" aria-label="MacRitchie sunrise view scene"></canvas>
-      </div>
-    </div>
-    <button class="btn" id="nextBtn">I’m ready for my next adventure!</button>
-  </div>
-
-</div>
-
-<audio id="bgm" src="./arcade.mp3" loop></audio>
 
 <script>
 /* =========================
-   SETTINGS YOU CAN EDIT
-========================= */
-const MAP_FILE = "./map.html";
-const NEXT_PROMPT_INDEX = 2; // 2 = Waterloo
-const WIN_TARGET = 10;
+   MACRITCHIE — PIXEL ARCADE
+   =========================
+   Mechanics:
+   - Logs move side-to-side
+   - Tap to jump to the next log
+   - Success if your x overlaps the target log at tap moment
+   - After 10 successful landings -> view page
+*/
 
-/* =========================
-   BGM
-========================= */
-const bgm = document.getElementById("bgm");
-bgm.volume = 0.5;
-function tryPlayBgm(){
-  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
-}
-if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
 
-/* =========================
-   GAME CANVAS
-========================= */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+  const logsCountEl = document.getElementById("logsCount");
+  const slipsCountEl = document.getElementById("slipsCount");
 
-const scoreEl = document.getElementById("score");
-const missEl  = document.getElementById("miss");
+  const startBtn = document.getElementById("startBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
-const titleBlock = document.getElementById("titleBlock");
-const gameWrap = document.getElementById("gameWrap");
-const gameHud  = document.getElementById("gameHud");
+  const gamePage = document.getElementById("gamePage");
+  const viewPage = document.getElementById("viewPage");
 
-const winWrap = document.getElementById("winWrap");
-const nextBtn = document.getElementById("nextBtn");
+  const viewCanvas = document.getElementById("view");
+  const vctx = viewCanvas.getContext("2d");
+  vctx.imageSmoothingEnabled = false;
 
-const W = canvas.width, H = canvas.height;
+  const nextBtn = document.getElementById("nextBtn");
+  const replayBtn = document.getElementById("replayBtn");
 
-let running = true;
-let score = 0;
-let slips = 0;
+  // ------- GAME CONFIG -------
+  const GOAL = 10;
+  const SLIP_LIMIT = 999; // no forced game over unless you want it
+  const LOG_W = 110;
+  const LOG_H = 16;
 
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+  const world = {
+    running: false,
+    time: 0,
+    landed: 0,
+    slips: 0,
+    currentIndex: 0,      // which target log we are jumping to next
+    flash: 0,             // small feedback flash
+    shake: 0,             // small shake on slip
+  };
 
-/* =========================
-   GLASSES (single source of truth)
-   draws: --[]-[]-- with bridge + temple arms
-========================= */
-function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
-  g.fillStyle = "#000";
+  const player = {
+    // fixed-ish position: this is a TIMING game (logs move)
+    x: canvas.width * 0.5,
+    y: canvas.height - 88,
+    w: 20,
+    h: 26,
+    colorTop: "#f3d6c3",
+    colorBody: "#d74a4a",
+    colorHair: "#161616",
+    glasses: true,
+  };
 
-  // left lens
-  g.fillRect(x, y, lensW, thick);
-  g.fillRect(x, y, thick, lensH);
-  g.fillRect(x, y + lensH - thick, lensW, thick);
-  g.fillRect(x + lensW - thick, y, thick, lensH);
+  let logs = [];
+  let birds = [];
 
-  // right lens
-  const rx = x + lensW + gap;
-  g.fillRect(rx, y, lensW, thick);
-  g.fillRect(rx, y, thick, lensH);
-  g.fillRect(rx, y + lensH - thick, lensW, thick);
-  g.fillRect(rx + lensW - thick, y, thick, lensH);
+  // ------- HELPERS -------
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randi = (a, b) => Math.floor(rand(a, b));
 
-  // bridge
-  const bridgeW = Math.max(3, Math.floor(gap * 0.7));
-  const bridgeX = x + lensW;
-  const bridgeY = y + Math.floor(lensH/2) - 1;
-  g.fillRect(bridgeX, bridgeY, bridgeW, 2);
+  function resetGame() {
+    world.running = false;
+    world.time = 0;
+    world.landed = 0;
+    world.slips = 0;
+    world.currentIndex = 0;
+    world.flash = 0;
+    world.shake = 0;
 
-  // temple arms
-  g.fillRect(x - armLen, y + 2, armLen, 2);
-  g.fillRect(rx + lensW, y + 2, armLen, 2);
-}
+    // Create 10 logs stacked upward
+    logs = [];
+    const startY = canvas.height - 120;
+    const gapY = 38;
 
-/* =========================
-   AVATAR (same small gameplay vibe)
-   - fixed x (no left/right movement)
-========================= */
-function drawAgyGameplay(px, py){
-  const x = px, y = py;
-
-  // hair (simple rectangular blob)
-  ctx.fillStyle="#000";
-  ctx.fillRect(x-18, y-60, 36, 60);
-
-  // face
-  ctx.fillStyle="#f1c7a6";
-  ctx.fillRect(x-12, y-44, 24, 28);
-
-  // glasses (temple arms + bridge)
-  const gy = y - 38;
-  const lensW = 11, lensH = 9;
-  const thick = 2, gap = 5, armLen = 4;
-  const leftX = x - 14;
-  drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
-
-  // shirt
-  ctx.fillStyle="#c1272d";
-  ctx.fillRect(x-16, y-16, 32, 22);
-
-  // sleeves
-  ctx.fillRect(x-22, y-16, 6, 8);
-  ctx.fillRect(x+16, y-16, 6, 8);
-
-  // arms
-  ctx.fillStyle="#f1c7a6";
-  ctx.fillRect(x-22, y-8, 6, 10);
-  ctx.fillRect(x+16, y-8, 6, 10);
-
-  // pants + shoes
-  ctx.fillStyle="#0e0e18";
-  ctx.fillRect(x-16, y+6, 32, 16);
-
-  ctx.fillStyle="#fff";
-  ctx.fillRect(x-14, y+22, 28, 5);
-}
-
-/* =========================
-   GAME: LOG HOPPING
-========================= */
-// Player stays centered; you only tap to jump.
-const player = {
-  x: W/2,
-  y: H - 90,
-  w: 26,
-  h: 44,
-  vy: 0,
-  grounded: false,
-  lastLogId: null
-};
-
-const GRAV = 0.55;
-const JUMP = -9.5;
-
-// Logs move DOWN to simulate climbing up.
-const logs = [];
-let logIdSeq = 1;
-let scrollSpeed = 1.4; // increases slightly with score
-
-function spawnLog(y){
-  logs.push({
-    id: logIdSeq++,
-    x: W/2 + rand(-20, 20), // tiny wobble
-    y,
-    w: 92,
-    h: 14
-  });
-}
-
-// initial logs
-spawnLog(H - 40);
-spawnLog(H - 140);
-spawnLog(H - 240);
-spawnLog(H - 340);
-spawnLog(H - 440);
-
-// Tap = jump (only if grounded)
-function jump(){
-  tryPlayBgm();
-  if(player.grounded){
-    player.vy = JUMP;
-    player.grounded = false;
-  }
-}
-
-canvas.addEventListener("mousedown", ()=> jump());
-canvas.addEventListener("touchstart", (e)=>{ jump(); }, {passive:true});
-
-/* =========================
-   BACKGROUND (dense forest + monkeys)
-========================= */
-function drawForest(bgStep){
-  ctx.clearRect(0,0,W,H);
-
-  // deep fog gradient
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, "rgba(10,30,22,0.75)");
-  g.addColorStop(1, "rgba(2,8,10,0.85)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
-
-  // far trees (static silhouettes, slight parallax)
-  ctx.globalAlpha = 0.65;
-  ctx.fillStyle = "rgba(0,0,0,0.55)";
-  for(let i=0;i<10;i++){
-    const tx = i*40 + ((bgStep*0.3)%40);
-    ctx.fillRect(tx-8, 40, 16, H);
-    ctx.fillRect(tx-16, 60, 32, 10);
-  }
-
-  // mid foliage blobs
-  ctx.globalAlpha = 0.85;
-  ctx.fillStyle = "rgba(0,0,0,0.45)";
-  for(let i=0;i<7;i++){
-    const bx = i*55 + ((bgStep*0.6)%55);
-    ctx.fillRect(bx-20, 120, 40, 80);
-    ctx.fillRect(bx-28, 140, 56, 12);
-  }
-  ctx.globalAlpha = 1;
-
-  // little monkeys (simple pixels)
-  function monkey(mx,my,s){
-    ctx.save();
-    ctx.translate(mx,my);
-    ctx.scale(s,s);
-    ctx.fillStyle="#2a2a2a";
-    ctx.fillRect(-6,-10,12,10); // body
-    ctx.fillRect(-4,-18,8,8);   // head
-    ctx.fillStyle="#444";
-    ctx.fillRect(-8,-12,4,6);   // arm
-    ctx.fillRect(4,-12,4,6);
-    ctx.fillStyle="#2a2a2a";
-    ctx.fillRect(6,-8,8,2);     // tail
-    ctx.restore();
-  }
-  monkey(60, 170, 1);
-  monkey(300, 210, 1);
-}
-
-/* =========================
-   DRAW LOGS
-========================= */
-function drawLog(l){
-  ctx.save();
-  ctx.translate(l.x, l.y);
-
-  // log body
-  ctx.fillStyle="rgba(120,80,40,0.90)";
-  ctx.fillRect(-l.w/2, -l.h/2, l.w, l.h);
-
-  // highlights
-  ctx.fillStyle="rgba(255,255,255,0.10)";
-  ctx.fillRect(-l.w/2+6, -l.h/2+3, l.w-12, 3);
-
-  // end caps
-  ctx.fillStyle="rgba(80,50,25,0.95)";
-  ctx.fillRect(-l.w/2, -l.h/2, 6, l.h);
-  ctx.fillRect(l.w/2-6, -l.h/2, 6, l.h);
-
-  ctx.restore();
-}
-
-/* =========================
-   COLLISION
-========================= */
-function aabb(ax,ay,aw,ah,bx,by,bw,bh){
-  return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-}
-
-/* =========================
-   LOOP
-========================= */
-let tick = 0;
-
-function step(){
-  if(!running) return;
-  tick++;
-
-  // speed ramps slightly
-  scrollSpeed = 1.4 + Math.min(1.6, score*0.12);
-
-  // background parallax step
-  drawForest(tick);
-
-  // move logs down
-  for(const l of logs){
-    l.y += scrollSpeed;
-  }
-
-  // recycle logs
-  for(let i=logs.length-1;i>=0;i--){
-    if(logs[i].y > H + 40){
-      logs.splice(i,1);
-      spawnLog(-40);
+    for (let i = 0; i < GOAL; i++) {
+      const y = startY - i * gapY;
+      logs.push({
+        x: rand(18, canvas.width - LOG_W - 18),
+        y,
+        w: LOG_W,
+        h: LOG_H,
+        dir: Math.random() > 0.5 ? 1 : -1,
+        speed: rand(1.0, 2.2),
+        tint: randi(0, 2), // for slight color variation
+      });
     }
+
+    // Player starts near bottom; first target is logs[0]
+    player.x = canvas.width * 0.5;
+    player.y = canvas.height - 88;
+
+    // Birds (3) with simple A/B/C bob positions
+    birds = Array.from({ length: 3 }, (_, i) => ({
+      x: rand(30, canvas.width - 30),
+      y: rand(60, 170),
+      baseY: 0,
+      phase: randi(0, 3),  // 0=A,1=B,2=C
+      t: 0,
+      speed: rand(0.6, 1.1),
+    }));
+    birds.forEach(b => b.baseY = b.y);
+
+    updateHUD();
+    draw(); // paint initial frame
   }
 
-  // physics
-  player.vy += GRAV;
-  player.y += player.vy;
-
-  // floor fail (slip)
-  if(player.y > H + 80){
-    slips++;
-    missEl.textContent = slips;
-    // reset player
-    player.y = H - 90;
-    player.vy = 0;
-    player.grounded = false;
-    player.lastLogId = null;
+  function updateHUD() {
+    logsCountEl.textContent = String(world.landed);
+    slipsCountEl.textContent = String(world.slips);
   }
 
-  // collision with logs (landing only from above)
-  player.grounded = false;
-  const pBox = { x: player.x - player.w/2, y: player.y - player.h, w: player.w, h: player.h };
+  // ------- INPUT (Tap / Click) -------
+  function onTap() {
+    if (!world.running) return;
+    if (world.currentIndex >= GOAL) return;
 
-  for(const l of logs){
-    const lBox = { x: l.x - l.w/2, y: l.y - l.h/2, w: l.w, h: l.h };
+    const target = logs[world.currentIndex];
 
-    // only consider landing if falling
-    if(player.vy >= 0 && aabb(pBox.x,pBox.y,pBox.w,pBox.h, lBox.x,lBox.y,lBox.w,lBox.h)){
-      const prevY = player.y - player.vy;
-      const prevBottom = prevY;
-      const logTop = l.y - l.h/2;
+    // Overlap check in X
+    const pxL = player.x - player.w/2;
+    const pxR = player.x + player.w/2;
+    const lxL = target.x;
+    const lxR = target.x + target.w;
 
-      if(prevBottom <= logTop + 6){
-        // land
-        player.y = logTop;
-        player.vy = 0;
-        player.grounded = true;
+    const overlap = (pxR > lxL) && (pxL < lxR);
 
-        // score only if it's a new log
-        if(player.lastLogId !== l.id){
-          player.lastLogId = l.id;
-          score++;
-          scoreEl.textContent = score;
+    if (overlap) {
+      // SUCCESS: snap player to log
+      player.y = target.y - player.h + 2;
+      world.landed++;
+      world.currentIndex++;
+      world.flash = 10;
+      updateHUD();
 
-          if(score >= WIN_TARGET){
-            win();
-            return;
-          }
-        }
+      if (world.landed >= GOAL) {
+        // Transition to view page
+        setTimeout(() => {
+          world.running = false;
+          goToViewPage();
+        }, 220);
+      }
+    } else {
+      // SLIP
+      world.slips++;
+      world.shake = 8;
+      updateHUD();
+
+      // optional: small "fall" feeling (just a quick drop)
+      player.y = clamp(player.y + 14, 40, canvas.height - 50);
+
+      if (world.slips >= SLIP_LIMIT) {
+        // you can add a game-over screen if you ever want
       }
     }
   }
 
-  // draw logs
-  for(const l of logs) drawLog(l);
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    onTap();
+  }, { passive: false });
 
-  // draw player (feet sit on player.y)
-  drawAgyGameplay(player.x, player.y);
+  // ------- UPDATE LOOP -------
+  function update(dt) {
+    world.time += dt;
 
-  requestAnimationFrame(step);
-}
-requestAnimationFrame(step);
+    // logs move left-right
+    for (const log of logs) {
+      log.x += log.dir * log.speed;
+      if (log.x <= 10) { log.x = 10; log.dir *= -1; }
+      if (log.x + log.w >= canvas.width - 10) { log.x = canvas.width - 10 - log.w; log.dir *= -1; }
+    }
 
-/* =========================
-   WIN FLOW
-========================= */
-function win(){
-  running = false;
-  titleBlock.classList.add("hide");
-  gameWrap.classList.add("hide");
-  gameHud.classList.add("hide");
-  winWrap.classList.add("show");
-  startViewScene();
-}
+    // birds bob between A/B/C positions + drift a tiny bit
+    for (const b of birds) {
+      b.t += dt * b.speed;
+      // switch phase occasionally for that “A->B->C” vibe
+      if (b.t >= 18) {
+        b.t = 0;
+        b.phase = (b.phase + 1) % 3;
+      }
+      const offsets = [-4, 0, 3];
+      b.y = b.baseY + offsets[b.phase];
 
-/* =========================
-   VIEW SCENE (sunrise + moving clouds + back-facing agy)
-========================= */
-const viewCanvas = document.getElementById("view");
-const vtx = viewCanvas.getContext("2d");
-let viewTick = 0;
+      // tiny lateral drift (wrap)
+      b.x += 0.12 * b.speed;
+      if (b.x > canvas.width + 10) b.x = -10;
+    }
 
-function drawBackAgy(g, cx, cy){
-  // cy is ground line
-  // back hair
-  g.fillStyle="#000";
-  g.fillRect(cx-18, cy-52, 36, 52);
-
-  // body (back)
-  g.fillStyle="#c1272d";
-  g.fillRect(cx-16, cy-18, 32, 18);
-
-  // legs
-  g.fillStyle="#0e0e18";
-  g.fillRect(cx-14, cy-8, 28, 10);
-
-  // shoes
-  g.fillStyle="#fff";
-  g.fillRect(cx-12, cy+2, 24, 4);
-}
-
-function drawView(){
-  viewTick++;
-
-  const W2 = viewCanvas.width;
-  const H2 = viewCanvas.height;
-  vtx.clearRect(0,0,W2,H2);
-
-  // sunrise sky
-  const sky = vtx.createLinearGradient(0,0,0,H2);
-  sky.addColorStop(0, "rgba(255,180,120,0.35)");
-  sky.addColorStop(0.55, "rgba(120,180,255,0.18)");
-  sky.addColorStop(1, "rgba(0,0,0,0.35)");
-  vtx.fillStyle = sky;
-  vtx.fillRect(0,0,W2,H2);
-
-  // sun glow
-  vtx.fillStyle="rgba(255,210,140,0.25)";
-  vtx.fillRect(W2/2-45, 40, 90, 40);
-
-  // side trees silhouettes
-  vtx.fillStyle="rgba(0,0,0,0.40)";
-  vtx.fillRect(0, 60, 32, 180);
-  vtx.fillRect(W2-32, 60, 32, 180);
-  vtx.fillRect(16, 90, 12, 150);
-  vtx.fillRect(W2-28, 90, 12, 150);
-
-  // moving clouds
-  const c1 = (viewTick*0.6) % (W2+120) - 60;
-  const c2 = (viewTick*0.4) % (W2+160) - 80;
-
-  function cloud(x,y){
-    vtx.fillStyle="rgba(255,255,255,0.18)";
-    vtx.fillRect(x, y, 60, 14);
-    vtx.fillRect(x+10, y-8, 42, 10);
-    vtx.fillRect(x+18, y+6, 34, 8);
+    if (world.flash > 0) world.flash -= 1;
+    if (world.shake > 0) world.shake -= 1;
   }
-  cloud(c1, 55);
-  cloud(W2 - c2 - 90, 80);
 
-  // grass patch
-  vtx.fillStyle="rgba(60,120,70,0.40)";
-  vtx.fillRect(0, H2-58, W2, 58);
-  vtx.fillStyle="rgba(0,0,0,0.18)";
-  vtx.fillRect(0, H2-58, W2, 10);
+  // ------- DRAW (PIXEL ART) -------
+  function drawBackground() {
+    // Pixel “forest” vibe (2D arcade, not soft)
+    // Sky gradient blocks
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, "#08242a");
+    g.addColorStop(0.55, "#061b20");
+    g.addColorStop(1, "#041015");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // agy sitting (back facing)
-  drawBackAgy(vtx, W2/2, H2-38);
+    // Vertical “trees” columns
+    for (let x = 0; x < canvas.width; x += 18) {
+      const w = 18;
+      const shade = (x/18) % 2 === 0 ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.03)";
+      ctx.fillStyle = shade;
+      ctx.fillRect(x, 0, w, canvas.height);
+    }
 
-  if(winWrap.classList.contains("show")){
-    requestAnimationFrame(drawView);
+    // Dark canopy blocks near top
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    for (let i=0;i<12;i++){
+      const bx = i * 32;
+      ctx.fillRect(bx, 60 + (i%2)*8, 34, 26);
+    }
+
+    // Hanging vines (pixel strings)
+    ctx.fillStyle = "rgba(121, 214, 148, 0.18)";
+    for (let i=0;i<10;i++){
+      const vx = randi(0, canvas.width);
+      const len = randi(60, 170);
+      for (let y=0;y<len;y+=6){
+        ctx.fillRect(vx, y, 2, 4);
+      }
+    }
   }
-}
-function startViewScene(){ drawView(); }
 
-/* =========================
-   BUTTON: back to map
-========================= */
-nextBtn.addEventListener("click", ()=>{
-  localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
-  location.href = MAP_FILE;
-});
+  function drawBird(b) {
+    // tiny pixel bird (like a V)
+    const x = Math.round(b.x);
+    const y = Math.round(b.y);
+    ctx.fillStyle = "rgba(234,246,255,0.75)";
+    ctx.fillRect(x, y, 2, 2);
+    ctx.fillRect(x-3, y+1, 2, 2);
+    ctx.fillRect(x+3, y+1, 2, 2);
+  }
+
+  function drawLogs() {
+    for (const log of logs) {
+      // simple pixel log plank with a darker underside
+      const base = log.tint === 0 ? "#a56a3a" : (log.tint === 1 ? "#9b5f34" : "#b1723e");
+      ctx.fillStyle = base;
+      ctx.fillRect(Math.round(log.x), Math.round(log.y), log.w, log.h);
+
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(Math.round(log.x), Math.round(log.y + log.h - 4), log.w, 4);
+
+      // light grain lines
+      ctx.fillStyle = "rgba(255,255,255,0.10)";
+      ctx.fillRect(Math.round(log.x + 10), Math.round(log.y + 5), log.w - 20, 1);
+      ctx.fillRect(Math.round(log.x + 14), Math.round(log.y + 9), log.w - 28, 1);
+    }
+  }
+
+  function drawPlayer() {
+    const px = Math.round(player.x - player.w/2);
+    const py = Math.round(player.y);
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(px + 2, py + player.h + 4, player.w - 4, 3);
+
+    // hair / head
+    ctx.fillStyle = player.colorHair;
+    ctx.fillRect(px + 2, py, player.w - 4, 8);
+
+    ctx.fillStyle = player.colorTop;
+    ctx.fillRect(px + 4, py + 6, player.w - 8, 10);
+
+    // glasses
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillRect(px + 4, py + 9, 5, 2);
+    ctx.fillRect(px + player.w - 9, py + 9, 5, 2);
+    ctx.fillRect(px + 9, py + 9, 2, 1);
+
+    // body
+    ctx.fillStyle = player.colorBody;
+    ctx.fillRect(px + 2, py + 16, player.w - 4, 10);
+
+    // legs
+    ctx.fillStyle = "#0f1113";
+    ctx.fillRect(px + 4, py + 26, 5, 8);
+    ctx.fillRect(px + player.w - 9, py + 26, 5, 8);
+  }
+
+  function drawTopBanner() {
+    // subtle “target” indicator for next log
+    if (world.currentIndex < GOAL) {
+      const t = logs[world.currentIndex];
+      ctx.fillStyle = "rgba(159,240,200,0.25)";
+      ctx.fillRect(Math.round(t.x), Math.round(t.y - 6), t.w, 3);
+    }
+
+    if (world.flash > 0) {
+      ctx.fillStyle = "rgba(159,240,200,0.10)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+  }
+
+  function draw() {
+    // small shake on slip
+    const shakeX = world.shake > 0 ? (Math.random() * 4 - 2) : 0;
+    const shakeY = world.shake > 0 ? (Math.random() * 4 - 2) : 0;
+
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+
+    drawBackground();
+    birds.forEach(drawBird);
+    drawLogs();
+    drawPlayer();
+    drawTopBanner();
+
+    ctx.restore();
+  }
+
+  // ------- RAF LOOP -------
+  let last = 0;
+  function loop(ts) {
+    if (!last) last = ts;
+    const dt = Math.min(33, ts - last); // cap dt
+    last = ts;
+
+    if (world.running) {
+      update(dt);
+    }
+    draw();
+
+    requestAnimationFrame(loop);
+  }
+
+  // ------- VIEW PAGE SCENE -------
+  const view = {
+    t: 0,
+    clouds: [
+      { x: -80, y: 60, s: 0.6, sp: 0.18 },
+      { x: 90, y: 95, s: 0.8, sp: 0.12 },
+      { x: 220, y: 70, s: 0.7, sp: 0.14 }
+    ]
+  };
+
+  function drawViewScene(dt) {
+    view.t += dt;
+
+    const W = viewCanvas.width, H = viewCanvas.height;
+
+    // simple arcade sunset sky (similar to your dcop vibe)
+    const g = vctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, "#76c8ff");
+    g.addColorStop(0.45, "#ffd28c");
+    g.addColorStop(1, "#12424b");
+    vctx.fillStyle = g;
+    vctx.fillRect(0,0,W,H);
+
+    // sun
+    vctx.fillStyle = "#ffd35a";
+    vctx.fillRect(280, 40, 48, 48);
+
+    // clouds (pixel blobs) moving
+    for (const c of view.clouds) {
+      c.x += c.sp * dt;
+      if (c.x > W + 80) c.x = -90;
+
+      drawPixelCloud(vctx, c.x, c.y, c.s);
+    }
+
+    // grass patch
+    vctx.fillStyle = "#2b7a43";
+    vctx.fillRect(0, H - 110, W, 110);
+    vctx.fillStyle = "rgba(0,0,0,0.20)";
+    vctx.fillRect(0, H - 110, W, 6);
+
+    // distant “view” blocks (simple skyline / canopy)
+    vctx.fillStyle = "rgba(0,0,0,0.25)";
+    for (let i=0;i<8;i++){
+      vctx.fillRect(i*52 + 4, H - 165 - (i%2)*8, 44, 40);
+    }
+
+    // sitting character (agy96) looking at view
+    drawSittingPixelPerson(vctx, 150, H - 140);
+  }
+
+  function drawPixelCloud(c, x, y, s) {
+    const px = Math.round(x), py = Math.round(y);
+    c.fillStyle = "rgba(255,255,255,0.85)";
+    const w = Math.round(90*s), h = Math.round(26*s);
+    c.fillRect(px, py, w, h);
+    c.fillRect(px + Math.round(12*s), py - Math.round(10*s), Math.round(32*s), Math.round(16*s));
+    c.fillRect(px + Math.round(34*s), py - Math.round(14*s), Math.round(40*s), Math.round(20*s));
+    c.fillRect(px + Math.round(56*s), py - Math.round(8*s), Math.round(28*s), Math.round(14*s));
+  }
+
+  function drawSittingPixelPerson(c, x, y) {
+    // x,y = top-left-ish anchor
+    const px = Math.round(x), py = Math.round(y);
+
+    // hair/head
+    c.fillStyle = "#161616";
+    c.fillRect(px + 10, py, 28, 10);
+
+    c.fillStyle = "#f3d6c3";
+    c.fillRect(px + 12, py + 8, 24, 14);
+
+    // body
+    c.fillStyle = "#d74a4a";
+    c.fillRect(px + 10, py + 22, 28, 14);
+
+    // legs (sitting)
+    c.fillStyle = "#0f1113";
+    c.fillRect(px + 10, py + 36, 14, 8);
+    c.fillRect(px + 24, py + 40, 16, 8);
+
+    // small white shoe line
+    c.fillStyle = "#eaf6ff";
+    c.fillRect(px + 24, py + 46, 16, 2);
+  }
+
+  let viewLast = 0;
+  function viewLoop(ts){
+    if (!viewLast) viewLast = ts;
+    const dt = Math.min(33, ts - viewLast);
+    viewLast = ts;
+
+    if (viewPage.classList.contains("active")) {
+      drawViewScene(dt);
+    }
+    requestAnimationFrame(viewLoop);
+  }
+
+  function goToViewPage() {
+    gamePage.classList.remove("active");
+    viewPage.classList.add("active");
+  }
+
+  function goToGamePage() {
+    viewPage.classList.remove("active");
+    gamePage.classList.add("active");
+  }
+
+  // ------- BUTTONS -------
+  startBtn.addEventListener("click", () => {
+    if (!world.running) {
+      world.running = true;
+      startBtn.textContent = "Running…";
+      startBtn.disabled = true;
+      startBtn.style.opacity = "0.7";
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    startBtn.textContent = "Start";
+    startBtn.disabled = false;
+    startBtn.style.opacity = "1";
+    resetGame();
+  });
+
+  replayBtn.addEventListener("click", () => {
+    goToGamePage();
+    startBtn.textContent = "Start";
+    startBtn.disabled = false;
+    startBtn.style.opacity = "1";
+    resetGame();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    // Hook this to your overall flow (next location / page)
+    // For now: just reload or redirect.
+    // window.location.href = "next.html";
+    alert("Hook this button to your next adventure page.");
+  });
+
+  // ------- INIT -------
+  resetGame();
+  requestAnimationFrame(loop);
+  requestAnimationFrame(viewLoop);
+
+})();
 </script>
 </body>
 </html>
