@@ -692,7 +692,7 @@
   function drawNameTag(c, text, x, y){
   c.save();
   c.textAlign = "center";
-  c.font = "12px Arial";                 // not bold
+  c.font = "10px Arial";                 // not bold
   c.fillStyle = "#f5f5f5";               // soft white
   c.shadowColor = "rgba(0,0,0,0.6)";
   c.shadowBlur = 4;
@@ -726,14 +726,14 @@
     drawSunWithRays(vctx, W-74, 78, 34);
 
     for (const cl of view.clouds){
-      cl.x += cl.sp * dt * 2.2;
+      cl.x += cl.sp * dt * 1.8;
       if (cl.x > W + 190) cl.x = -220;
       drawPrettyCloud(vctx, cl.x, cl.y, cl.s);
     }
 
     for (const p of view.petals){
-      p.y += p.sp * dt * 2.4;
-      p.x += p.drift * dt * 2.4;
+      p.y += p.sp * dt * 1.2;
+      p.x += p.drift * dt * 1.2;
       if (p.y > H + 20){ p.y = -20; p.x = rand(0,W); }
       vctx.fillStyle = `rgba(255, 160, 180, ${p.a})`;
       vctx.beginPath();
@@ -758,7 +758,7 @@
 
     const ax = W/2;
     const ay = H-78; // feet baseline
-    drawNameTag(vctx, "agy96", ax, ay-70);
+    drawNameTag(vctx, "agy96", ax, ay-80);
     drawAgyBackView(ax, ay);
 
     requestAnimationFrame(viewLoop);
