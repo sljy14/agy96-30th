@@ -82,9 +82,7 @@
       font-weight: 800;
     }
 
-    .stage{
-      padding: 8px 12px 10px;
-    }
+    .stage{ padding: 8px 12px 10px; }
     .frame{
       border-radius: 20px;
       background: rgba(0,0,0,0.16);
@@ -203,10 +201,8 @@
       <div class="frame">
         <canvas id="game" width="390" height="520" aria-label="Waterloo balance game"></canvas>
 
-        <!-- on-screen arrow buttons -->
         <div class="controls">
           <div id="leftBtn" class="btnArrow" role="button" aria-label="Left">
-            <!-- not emoji: clean icon -->
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M14.5 5.5L8 12l6.5 6.5" stroke="rgba(30,35,55,0.95)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -220,10 +216,9 @@
       </div>
     </div>
 
-    <div class="hint">Hold it for 10 seconds. Small wobble → tilt → drop → auto restart.</div>
+    <div class="hint">Survive 10 seconds. Tap the correct side when the cue appears above her head.</div>
   </div>
 
-  <!-- Win popup -->
   <div id="overlay" class="overlay" aria-hidden="true">
     <div class="modal">
       <div class="modalTitle">Congratulations! You balanced with grace under pressure. 🙆‍♀️</div>
@@ -231,11 +226,11 @@
     </div>
   </div>
 
-  <!-- BGM -->
   <audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
 
 <script>
 (() => {
+  // ===== DOM =====
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = true;
@@ -252,7 +247,7 @@
   const bgm = document.getElementById("bgm");
   bgm.volume = 0.6;
 
-  // BGM: start on first user interaction; keep it continuous via localStorage flag
+  // ===== BGM =====
   let bgmStarted = false;
   async function ensureBgm(){
     if (bgmStarted) return;
@@ -265,67 +260,88 @@
     }
   }
   if (localStorage.getItem("bgmPlaying")==="true"){
-    // may still require a gesture on iOS; we'll try, and try again on first tap
     bgm.play().catch(()=>{});
   }
 
-  // ===== Gameplay model =====
-  // We use “cue windows” (missed cue == fail). This is what makes it playable + fair.
+  // ===== Utilities =====
+  const rand = (a,b)=>a + Math.random()*(b-a);
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
+  function roundedRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  // ===== Game state =====
   const GAME = {
     totalMs: 10000,
     elapsedMs: 0,
     running: true,
     state: "playing", // playing | dropping | win
-    // lean is what you *see*: -1..1
     lean: 0,
     leanVel: 0,
-    // cue
-    cueDir: 0,          // -1 left, +1 right
-    cueDeadline: 0,     // ms timestamp in game time
-    cueWindowMs: 900,   // ramps down
-    // cosmetics
     shake: 0,
+
+    // cue system
+    cueVisible: true,
+    cueFlashMs: 360,   // 👈👉 appears as a "flash", not permanently
+    cueOffMs: 170,     // small off gap before the next flash
+    cueTimer: 0,       // counts within flash/off cycle
+    cueMode: "on",     // on | off
+
+    // challenge direction (what she is currently leaning toward)
+    // We purposely allow repeats, but we still "flash" again each time.
+    challengeDir: -1,  // -1 means she leans left, +1 leans right
+
+    // confetti
     confetti: []
   };
 
-  function rand(a,b){ return a + Math.random()*(b-a); }
+  // ===== Cue rules =====
+  // IMPORTANT:
+  // If she leans LEFT, cue shows RIGHT 👉 and user must tap RIGHT
+  // If she leans RIGHT, cue shows LEFT 👈 and user must tap LEFT
+  function requiredTap(){
+    return (GAME.challengeDir < 0) ? 1 : -1; // lean left -> tap right
+  }
+  function cueEmoji(){
+    return (GAME.challengeDir < 0) ? "👉" : "👈";
+  }
 
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+  // Randomize challenge direction with "no more than 2 in a row"
+  let streak = 0;
+  let lastChallenge = 0;
+  function pickNextChallenge(){
+    let dir = Math.random() < 0.5 ? -1 : 1;
+    if (dir === lastChallenge) streak++; else streak = 1;
+    if (streak >= 3){
+      dir *= -1;
+      streak = 1;
+    }
+    lastChallenge = dir;
+    GAME.challengeDir = dir;
 
+    // restart the flash cycle so even repeats "re-appear"
+    GAME.cueMode = "on";
+    GAME.cueTimer = 0;
+    GAME.cueVisible = true;
+  }
+
+  // ===== Balance label =====
   function setBalanceLabel(){
     const a = Math.abs(GAME.lean);
     let label = "steady";
-    if (a > 0.55) label = "danger";
-    else if (a > 0.28) label = "wobble";
+    if (a > 0.70) label = "danger";
+    else if (a > 0.34) label = "wobble";
     balanceStateEl.textContent = label;
   }
 
-  // Keep it fair: no more than 2 same directions in a row
-  let sameStreak = 0;
-  let lastDir = 0;
-
-  function nextCue(nowMs){
-    let dir = Math.random() < 0.5 ? -1 : 1;
-    if (dir === lastDir) sameStreak++; else sameStreak = 1;
-    if (sameStreak >= 3){
-      dir *= -1;
-      sameStreak = 1;
-    }
-    lastDir = dir;
-    GAME.cueDir = dir;
-
-    // difficulty ramp: 900ms -> 520ms across the 10s
-    const t = clamp(GAME.elapsedMs / GAME.totalMs, 0, 1);
-    GAME.cueWindowMs = Math.round(900 + (520 - 900) * t);
-
-    // “feel” of rhythm: cue interval slightly shorter as time passes
-    const minI = 480 + (360 - 480) * t;
-    const maxI = 760 + (520 - 760) * t;
-    const interval = rand(minI, maxI);
-
-    GAME.cueDeadline = nowMs + Math.min(GAME.cueWindowMs, interval);
-  }
-
+  // ===== Reset / win / drop =====
   function resetGame(){
     GAME.elapsedMs = 0;
     GAME.running = true;
@@ -333,55 +349,31 @@
     GAME.lean = 0;
     GAME.leanVel = 0;
     GAME.shake = 0;
+
     GAME.confetti = [];
     overlay.classList.remove("show");
     overlay.setAttribute("aria-hidden","true");
 
-    // new cue
-    sameStreak = 0;
-    lastDir = 0;
-    nextCue(0);
+    streak = 0;
+    lastChallenge = 0;
+
+    pickNextChallenge();
 
     timeLeftEl.textContent = "10.0";
     setBalanceLabel();
   }
 
-  // ===== Input =====
-  // “Failure rules: tapped wrong side”
-  // We’ll also fail if a cue is missed (no tap before deadline) because otherwise you can just do nothing and win.
-  function handleTap(dir){
-    ensureBgm();
-    if (!GAME.running || GAME.state !== "playing") return;
-
-    if (dir === GAME.cueDir){
-      // Correct: recover toward center + tiny overshoot for satisfaction
-      GAME.leanVel += (-GAME.lean) * 0.06;
-      GAME.leanVel += dir * 0.09; // gives a little “snap”
-      GAME.shake = 5;
-
-      // Immediately switch to next cue
-      nextCue(GAME.elapsedMs);
-    } else {
-      // Wrong: drop
-      triggerDrop();
-    }
-  }
-
-  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap(-1); }, {passive:false});
-  rightBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap( 1); }, {passive:false});
-
-  // ===== Drop / win =====
   function triggerDrop(){
     if (GAME.state !== "playing") return;
     GAME.state = "dropping";
     GAME.running = false;
     GAME.shake = 10;
-    // quick restart after the drop animation
+    // quick restart
     setTimeout(resetGame, 650);
   }
 
   function spawnConfetti(){
-    const n = 240; // chaotic overload
+    const n = 240;
     for (let i=0;i<n;i++){
       GAME.confetti.push({
         x: canvas.width/2 + rand(-30, 30),
@@ -405,20 +397,32 @@
     overlay.setAttribute("aria-hidden","false");
   }
 
-  // ===== Drawing helpers =====
-  function roundedRect(x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
+  // ===== Input =====
+  function handleTap(dir){
+    ensureBgm();
+    if (!GAME.running || GAME.state !== "playing") return;
+
+    const needed = requiredTap();
+
+    if (dir === needed){
+      // Correct: push back toward center and then pick next challenge
+      GAME.leanVel += (-GAME.lean) * 0.09;
+      GAME.leanVel += dir * 0.05;
+      GAME.shake = 4;
+
+      pickNextChallenge();
+    } else {
+      triggerDrop();
+    }
   }
 
-  // Background: clean ballet studio + mirror wall + barre + top lights + spotlight
+  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap(-1); }, {passive:false});
+  rightBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleTap( 1); }, {passive:false});
+
+  canvas.addEventListener("pointerdown", ()=>ensureBgm(), {passive:true});
+
+  // ===== Background: ballet studio =====
   function drawStudio(){
-    // soft wall gradient
     const g = ctx.createLinearGradient(0,0,0,canvas.height);
     g.addColorStop(0, "#f7f0ff");
     g.addColorStop(0.55, "#f2e9ff");
@@ -426,7 +430,7 @@
     ctx.fillStyle = g;
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // ceiling lights (simple, clean)
+    // ceiling lights
     ctx.globalAlpha = 0.8;
     for (let i=0;i<4;i++){
       const x = 60 + i*85;
@@ -439,11 +443,11 @@
     }
     ctx.globalAlpha = 1;
 
-    // mirror wall panel
+    // mirror
     ctx.fillStyle = "rgba(255,255,255,0.60)";
     roundedRect(22, 90, canvas.width-44, 210, 18);
     ctx.fill();
-    // mirror seams
+
     ctx.strokeStyle = "rgba(150,120,170,0.18)";
     ctx.lineWidth = 2;
     for (let i=1;i<4;i++){
@@ -461,21 +465,21 @@
     ctx.fillStyle = "rgba(0,0,0,0.07)";
     roundedRect(18, 331, canvas.width-36, 4, 2);
     ctx.fill();
-    // barre supports
+
     ctx.fillStyle = "rgba(110,100,125,0.35)";
     for (let i=0;i<4;i++){
       const x = 70 + i*85;
       ctx.fillRect(x, 332, 6, 54);
     }
 
-    // floor (wood)
+    // floor
     const f = ctx.createLinearGradient(0, 360, 0, canvas.height);
     f.addColorStop(0, "#e7b881");
     f.addColorStop(1, "#d8a76b");
     ctx.fillStyle = f;
     ctx.fillRect(0, 360, canvas.width, canvas.height-360);
 
-    // floor boards
+    // boards
     ctx.strokeStyle = "rgba(120,80,50,0.10)";
     ctx.lineWidth = 2;
     for (let x=20; x<canvas.width; x+=28){
@@ -485,7 +489,7 @@
       ctx.stroke();
     }
 
-    // spotlight cone on dancer
+    // spotlight
     ctx.globalAlpha = 0.55;
     const cone = ctx.createRadialGradient(canvas.width/2, 250, 10, canvas.width/2, 360, 240);
     cone.addColorStop(0, "rgba(255,255,255,0.95)");
@@ -497,48 +501,32 @@
     ctx.globalAlpha = 1;
   }
 
-  // Cue arrow above head (NOT emoji; pixel-ish arrow)
+  // ===== Cue above head (emoji flash) =====
   function drawCue(){
+    if (!GAME.cueVisible) return;
+
     const cx = canvas.width/2;
     const cy = 190;
 
-    // faint bubble behind
-    ctx.globalAlpha = 0.85;
+    ctx.globalAlpha = 0.88;
     ctx.fillStyle = "rgba(255,255,255,0.45)";
     roundedRect(cx-44, cy-34, 88, 64, 18);
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // arrow drawing
+    const emoji = cueEmoji();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "34px system-ui, -apple-system, Segoe UI, Roboto, Arial";
     ctx.fillStyle = "rgba(55, 40, 90, 0.95)";
-    const dir = GAME.cueDir; // -1 or +1
+    ctx.fillText(emoji, cx, cy);
 
-    // simple arrow made of rects (pixel vibe)
-    // base position
-    const x0 = cx + (dir < 0 ? -10 : 10);
-    const y0 = cy - 2;
-
-    function px(x,y,w,h){ ctx.fillRect(x,y,w,h); }
-
-    // shaft
-    px(x0-10, y0-4, 20, 8);
-
-    // head
-    if (dir < 0){
-      px(x0-20, y0-10, 10, 20);
-      px(x0-28, y0-6, 8, 12);
-    } else {
-      px(x0+10, y0-10, 10, 20);
-      px(x0+20, y0-6, 8, 12);
-    }
-
-    // tiny “pulse” outline (so it pops vs the buttons)
     ctx.strokeStyle = "rgba(255, 160, 220, 0.65)";
     ctx.lineWidth = 2;
     ctx.strokeRect(cx-34, cy-24, 68, 44);
   }
 
-  // ===== Avatar: keep your Chinatown face/glasses/hair proportions; change outfit + pose =====
+  // ===== Avatar drawing =====
   function drawGlasses(localCtx, leftX, gy, lensW, lensH, thick, gap, armLen){
     localCtx.fillStyle = "#000";
     localCtx.fillRect(leftX, gy, lensW, thick);
@@ -559,13 +547,12 @@
 
   function drawAgyBallet(x, y, lean){
     // y is feet baseline
-    // Apply lean by rotating around hips area (looks like tipping)
     const pivotX = x;
     const pivotY = y - 26;
 
     ctx.save();
     ctx.translate(pivotX, pivotY);
-    ctx.rotate(lean * 0.42); // visual tilt (tuned so it won't look insane)
+    ctx.rotate(lean * 0.34); // ✅ slower / less dramatic tilt
     ctx.translate(-pivotX, -pivotY);
 
     // hair (same style)
@@ -576,69 +563,77 @@
     ctx.fillStyle="#f1c7a6";
     ctx.fillRect(x-12, y-76, 24, 28);
 
-    // glasses (same)
+    // glasses
     const gy = y - 70;
     const lensW = 11, lensH = 9;
     const thick = 2, gap = 5, armLen = 4;
     const leftX = x - 14;
     drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
 
-    // sleeveless light blue top
+    // top (light blue, sleeveless)
     ctx.fillStyle="#8fd1ff";
     ctx.fillRect(x-16, y-48, 32, 22);
-    // tiny straps / arm cut (subtle)
-    ctx.fillStyle="rgba(0,0,0,0.05)";
-    ctx.fillRect(x-16, y-48, 6, 4);
-    ctx.fillRect(x+10, y-48, 6, 4);
 
-    // arms: rounded-ish (two curved strokes feel)
-    // (still “pixel” but less weird)
+    // arms (kept same as your “good” version)
     ctx.strokeStyle = "#f1c7a6";
     ctx.lineWidth = 6;
     ctx.lineCap = "round";
 
-    // left rounded arm
     ctx.beginPath();
     ctx.moveTo(x-18, y-44);
     ctx.quadraticCurveTo(x-36, y-58, x-22, y-66);
     ctx.stroke();
 
-    // right rounded arm
     ctx.beginPath();
     ctx.moveTo(x+18, y-44);
     ctx.quadraticCurveTo(x+36, y-58, x+22, y-66);
     ctx.stroke();
 
-    // pink tutu (simple band + skirt flare)
+    // tutu
     ctx.fillStyle="#ff9cc7";
     ctx.fillRect(x-22, y-28, 44, 10);
     ctx.fillStyle="#ff84bd";
     ctx.fillRect(x-26, y-18, 52, 16);
 
-    // legs: piqué-ish: one straight down on pointe, other slightly behind
+    // ✅ legs: "I \ / I" silhouette (as requested)
     ctx.fillStyle="#f1c7a6";
-    // main leg
-    ctx.fillRect(x-4, y-2, 8, 34);
-    // back leg (diagonal)
+
+    // center straight leg (I)
+    ctx.fillRect(x-3, y-2, 6, 34);
+
+    // left diagonal (\)
     ctx.save();
-    ctx.translate(x+8, y+12);
-    ctx.rotate(0.42);
-    ctx.fillRect(-3, 0, 7, 26);
+    ctx.translate(x-4, y+8);
+    ctx.rotate(-0.38);
+    ctx.fillRect(-3, 0, 6, 26);
     ctx.restore();
 
-    // pointe shoes
+    // right diagonal (/)
+    ctx.save();
+    ctx.translate(x+10, y+8);
+    ctx.rotate(0.38);
+    ctx.fillRect(-3, 0, 6, 26);
+    ctx.restore();
+
+    // pointe shoes aligned to legs
     ctx.fillStyle="#ffe6f1";
-    ctx.fillRect(x-10, y+30, 20, 6); // front shoe
-    // back shoe
+    ctx.fillRect(x-10, y+30, 20, 6); // center shoe
+
+    ctx.save();
+    ctx.translate(x-14, y+30);
+    ctx.rotate(-0.18);
+    ctx.fillRect(-6, 0, 14, 6);
+    ctx.restore();
+
     ctx.save();
     ctx.translate(x+18, y+30);
-    ctx.rotate(0.25);
-    ctx.fillRect(-10, 0, 18, 6);
+    ctx.rotate(0.18);
+    ctx.fillRect(-8, 0, 14, 6);
     ctx.restore();
 
     ctx.restore();
 
-    // soft shadow on floor (doesn't rotate)
+    // shadow
     ctx.globalAlpha = 0.18;
     ctx.fillStyle = "#000";
     ctx.beginPath();
@@ -647,7 +642,7 @@
     ctx.globalAlpha = 1;
   }
 
-  // ===== Confetti draw/update =====
+  // ===== Confetti =====
   function updateConfetti(dt){
     for (const p of GAME.confetti){
       p.x += p.vx * dt * 0.9;
@@ -656,7 +651,6 @@
       p.ang += p.spin * dt;
       p.a = Math.max(0, p.a - 0.0009 * dt);
     }
-    // prune
     GAME.confetti = GAME.confetti.filter(p => p.a > 0.02 && p.y < canvas.height + 80);
   }
 
@@ -666,7 +660,6 @@
       ctx.globalAlpha = p.a;
       ctx.translate(p.x, p.y);
       ctx.rotate(p.ang);
-      // vibrant-ish without hardcoding too many colors:
       const hue = (p.x * 2 + p.y) % 360;
       ctx.fillStyle = `hsla(${hue}, 92%, 68%, ${p.a})`;
       ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
@@ -675,7 +668,7 @@
     ctx.globalAlpha = 1;
   }
 
-  // ===== Main update loop =====
+  // ===== Update / draw =====
   function update(dt){
     if (GAME.state !== "playing") return;
 
@@ -685,29 +678,33 @@
     const left = Math.max(0, (GAME.totalMs - GAME.elapsedMs) / 1000);
     timeLeftEl.textContent = left.toFixed(1);
 
-    // win?
     if (GAME.elapsedMs >= GAME.totalMs){
       win();
       return;
     }
 
-    // drift (faster drift, but controllable)
-    // cueDir sets where she’s leaning; we nudge toward cueDir over time
+    // ✅ slower drift outward (playable)
     const t = clamp(GAME.elapsedMs / GAME.totalMs, 0, 1);
-    const driftStrength = 0.0022 + 0.0012 * t; // ramps up
-    GAME.leanVel += GAME.cueDir * driftStrength * dt;
+    const driftStrength = 0.0009 + 0.00055 * t; // slower than before
+    GAME.leanVel += GAME.challengeDir * driftStrength * dt;
 
     // damping
-    GAME.leanVel *= 0.985;
+    GAME.leanVel *= 0.972;
     GAME.lean += GAME.leanVel;
 
-    // clamp lean
+    // clamp
     GAME.lean = clamp(GAME.lean, -1.2, 1.2);
 
-    // missed cue (no tap before deadline) == fail (otherwise you can AFK win)
-    if (GAME.elapsedMs > GAME.cueDeadline){
-      triggerDrop();
-      return;
+    // cue flash cycle (so repeats "re-appear")
+    GAME.cueTimer += dt;
+    if (GAME.cueMode === "on" && GAME.cueTimer > GAME.cueFlashMs){
+      GAME.cueMode = "off";
+      GAME.cueTimer = 0;
+      GAME.cueVisible = false;
+    } else if (GAME.cueMode === "off" && GAME.cueTimer > GAME.cueOffMs){
+      GAME.cueMode = "on";
+      GAME.cueTimer = 0;
+      GAME.cueVisible = true;
     }
 
     setBalanceLabel();
@@ -722,55 +719,47 @@
     ctx.translate(shakeX, shakeY);
 
     drawStudio();
+    drawCue();
 
-    // cue arrow bubble (above)
-    if (GAME.state === "playing") drawCue();
-
-    // dancer position
+    // dancer
     const x = canvas.width/2;
-    const y = 390; // baseline on floor
-    const visibleLean = GAME.state === "playing" ? GAME.lean : GAME.lean;
+    const y = 390;
 
-    // balance-to-visual mapping (more readable)
-    const leanVisual = clamp(visibleLean, -1, 1);
-
+    // visual lean (cap)
+    const leanVisual = clamp(GAME.lean, -1, 1);
     drawAgyBallet(x, y, leanVisual);
 
-    // balance meter at bottom (visual feedback)
+    // balance meter
     const barY = canvas.height - 58;
     const barX = 28;
     const barW = canvas.width - 56;
     const barH = 10;
 
-    // base bar
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     roundedRect(barX, barY, barW, barH, 999);
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // safe zone highlight
     ctx.globalAlpha = 0.28;
     ctx.fillStyle = "rgba(120,255,190,0.55)";
     roundedRect(barX + barW*0.35, barY, barW*0.30, barH, 999);
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // indicator dot
-    const p = (leanVisual + 1) / 2; // 0..1
+    const p = (leanVisual + 1) / 2;
     const dotX = barX + p * barW;
     ctx.fillStyle = "rgba(255,120,190,0.95)";
     ctx.beginPath();
     ctx.arc(dotX, barY + barH/2, 7.5, 0, Math.PI*2);
     ctx.fill();
 
-    // confetti (on win)
     if (GAME.confetti.length) drawConfetti();
 
     ctx.restore();
   }
 
-  // ===== RAF loop =====
+  // ===== RAF =====
   let last = 0;
   function loop(ts){
     if (!last) last = ts;
@@ -784,22 +773,16 @@
     requestAnimationFrame(loop);
   }
 
-  // ===== Win button: go back to map with stadium prompt =====
+  // ===== Win button -> map with stadium prompt =====
   nextBtn.addEventListener("click", () => {
-    // Stadium prompt is index 3 in your map.html prompts array
-    localStorage.setItem("mapPromptIndex", "3");
-    // optional breadcrumb if you ever want it:
+    localStorage.setItem("mapPromptIndex", "3"); // stadium question
     localStorage.setItem("returnFrom", "waterloo");
     location.href = "./map.html";
   });
 
-  // Also allow tap anywhere on canvas to start bgm (iOS-friendly)
-  canvas.addEventListener("pointerdown", ()=>ensureBgm(), {passive:true});
-
   // ===== init =====
   resetGame();
   requestAnimationFrame(loop);
-
 })();
 </script>
 </body>
