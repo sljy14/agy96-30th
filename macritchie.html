@@ -727,7 +727,7 @@
     drawSunWithRays(vctx, W-74, 78, 34);
 
     for (const cl of view.clouds){
-      cl.x += cl.sp * dt * 3.2;
+      cl.x += cl.sp * dt * 2.2;
       if (cl.x > W + 190) cl.x = -220;
       drawPrettyCloud(vctx, cl.x, cl.y, cl.s);
     }
@@ -759,7 +759,7 @@
 
     const ax = W/2;
     const ay = H-78; // feet baseline
-    drawNameTag(vctx, "agy96", ax, ay-150);
+    drawNameTag(vctx, "agy96", ax, ay-70);
     drawAgyBackView(ax, ay);
 
     requestAnimationFrame(viewLoop);
