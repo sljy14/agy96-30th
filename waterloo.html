@@ -6,26 +6,22 @@
   <title>Waterloo Ballet Studio</title>
   <style>
     :root{
-      --cardBg1: rgba(40, 18, 64, 0.20);
-      --cardBg2: rgba(20, 8, 34, 0.18);
-      --border: rgba(255,255,255,0.14);
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.78);
-      --pink: #ff7fb6;
-      --soft: #f7eaff;
+      --cardBg1: rgba(25, 10, 40, 0.72);
+      --cardBg2: rgba(12, 6, 24, 0.70);
+      --border: rgba(255,255,255,0.12);
+      --text: #f4efff;
+      --muted: rgba(244,239,255,0.78);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--text);
       background:
-        radial-gradient(900px 520px at 50% 20%, rgba(255, 170, 230, 0.14), transparent 62%),
-        radial-gradient(900px 520px at 50% 80%, rgba(170, 210, 255, 0.12), transparent 62%),
-        linear-gradient(160deg,#2a1040,#070714);
-      min-height:100svh;
+        radial-gradient(900px 520px at 50% 18%, rgba(255,180,230,0.10), transparent 60%),
+        radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 60%),
+        linear-gradient(160deg,#1b0b2e,#060514);
+      color: var(--text);
     }
-
     .wrap{
       min-height:100svh;
       display:flex;
@@ -37,10 +33,9 @@
       border-radius: 24px;
       background: linear-gradient(180deg, var(--cardBg1), var(--cardBg2));
       border: 1px solid var(--border);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.55);
       overflow:hidden;
     }
-
     .header{
       padding: 16px 16px 10px;
       text-align:center;
@@ -51,7 +46,7 @@
       line-height: 1.08;
       font-weight: 900;
       letter-spacing: -0.02em;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
     .sub{
       margin: 0;
@@ -65,397 +60,129 @@
       gap: 10px;
       justify-content: space-between;
       padding: 0 14px 10px;
-      align-items:center;
+      flex-wrap: wrap;
     }
     .pill{
       flex:1;
+      min-width: 170px;
       display:flex;
       align-items:center;
       justify-content:center;
       gap:10px;
       border-radius: 999px;
       padding: 10px 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
       font-weight: 900;
       letter-spacing: 0.2px;
-      min-width: 0;
     }
     .pill small{
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .stage{ padding: 8px 12px 10px; }
+    .stage{ padding: 8px 12px 12px; }
     .frame{
       border-radius: 20px;
-      background: rgba(0,0,0,0.10);
+      background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.10);
       padding: 10px;
+      position: relative;
     }
-
-    .arena{
-      position:relative;
+    canvas{
       width:100%;
-      aspect-ratio: 1 / 1.22;
+      height:auto;
+      display:block;
       border-radius: 16px;
-      overflow:hidden;
-      background:
-        radial-gradient(120% 100% at 50% 40%, rgba(0,0,0,0.00) 55%, rgba(0,0,0,0.10) 100%),
-        linear-gradient(180deg,#fbf7ff 0%, #f2e8ff 60%, #f1d8ff 60%, #f1d8ff 100%);
-      border: 1px solid rgba(0,0,0,0.08);
+      background: #f3eaff; /* fallback */
+      touch-action: manipulation;
     }
 
-    /* mirror band */
-    .arena::before{
-      content:"";
-      position:absolute;
-      left:0; right:0;
-      top:18%;
-      height:38%;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.10)),
-        linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0.00), rgba(0,0,0,0.08));
-      opacity:0.70;
-      pointer-events:none;
-    }
-
-    /* mirror trim */
-    .arena::after{
-      content:"";
-      position:absolute;
-      left:0; right:0;
-      top:56%;
-      height:3px;
-      background:rgba(140,110,170,0.25);
-      pointer-events:none;
-    }
-
-    /* ballet barre */
-    .barre{
-      position:absolute;
-      left:6%;
-      right:6%;
-      top:62%;
-      height:12px;
-      background:linear-gradient(180deg,#d7a26a,#b87942);
-      border-radius:999px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      pointer-events:none;
-    }
-    .barre::before{
-      content:"";
-      position:absolute;
-      left:10%;
-      top:12px;
-      width:10px;height:40px;
-      background:linear-gradient(180deg,#8f7b8f,#6a566a);
-      border-radius:8px;
-      opacity:0.9;
-    }
-    .barre::after{
-      content:"";
-      position:absolute;
-      right:10%;
-      top:12px;
-      width:10px;height:40px;
-      background:linear-gradient(180deg,#8f7b8f,#6a566a);
-      border-radius:8px;
-      opacity:0.9;
-    }
-
-    /* floor */
-    .floor{
-      position:absolute;
-      bottom:0;
-      width:100%;
-      height:35%;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.20), rgba(0,0,0,0.02)),
-        repeating-linear-gradient(
-          90deg,
-          rgba(255,255,255,0.06) 0 18px,
-          rgba(0,0,0,0.05) 18px 20px
-        ),
-        linear-gradient(180deg,#f2c58a,#e1a866);
-      pointer-events:none;
-    }
-
-    /* avatar */
-    .avatar{
-      position:absolute;
-      bottom:35%;
-      left:50%;
-      width:110px;
-      height:170px;
-      transform:translateX(-50%) rotate(0deg);
-      transform-origin: 50% 92%;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.18));
-    }
-
-    .hair{
-      position:absolute;
-      width:64px;height:96px;
-      background:#000;
-      left:50%;transform:translateX(-50%);
-      top:0;border-radius:10px;
-    }
-    .face{
-      position:absolute;
-      width:42px;height:50px;
-      background:#f1c7a6;
-      left:50%;transform:translateX(-50%);
-      top:26px;
-    }
-
-    .glasses{
-      position:absolute;
-      top:48px;
-      left:50%;
-      transform:translateX(-50%);
-      display:flex;
-      gap:6px;
-      align-items:center;
-    }
-    .glasses .lens{
-      width:16px;height:13px;
-      border:3px solid #000;
-      box-sizing:border-box;
-      background:transparent;
-    }
-    .glasses .bridge{
-      width:10px;height:3px;
-      background:#000;
-      margin-top:-2px;
-    }
-
-    .top{
-      position:absolute;
-      top:92px;
-      left:50%;
-      transform:translateX(-50%);
-      width:52px;height:30px;
-      background:#8ecaff;
-      border-radius:2px;
-    }
-    .tutu{
-      position:absolute;
-      top:114px;
-      left:50%;
-      transform:translateX(-50%);
-      width:78px;height:20px;
-      background:#ff9ccf;
-      border-radius:2px;
-    }
-
-    /* rounded arms */
-    .arm{
-      position:absolute;
-      top:92px;
-      width:44px;
-      height:44px;
-      border:6px solid #f1c7a6;
-      border-color:#f1c7a6 transparent transparent transparent;
-      border-radius:50%;
-      opacity:0.95;
-    }
-    .arcL{ left:6px; transform:rotate(-20deg); }
-    .arcR{ right:6px; transform:rotate(20deg) scaleX(-1); }
-
-    /* legs */
-    .leg{
-      position:absolute;
-      width:10px;
-      background:#f1c7a6;
-      border-radius:4px;
-    }
-    .leg.support{
-      height:44px;
-      top:132px;
-      left:52%;
-      transform:translateX(-50%);
-    }
-    .shoe{
-      position:absolute;
-      width:18px;height:8px;
-      background:#ffe7f2;
-      border-radius:4px;
-    }
-    .shoe.pointe{
-      top:172px;
-      left:52%;
-      transform:translateX(-50%);
-    }
-
-    .leg.back{
-      height:34px;
-      top:140px;
-      left:66%;
-      transform:rotate(22deg);
-      opacity:0.95;
-    }
-    .shoe.backShoe{
-      top:170px;
-      left:73%;
-      transform:rotate(18deg);
-      opacity:0.95;
-    }
-
-    /* controls */
     .controls{
       position:absolute;
-      left:0; right:0;
-      top:50%;
-      transform:translateY(-15%);
-      display:flex;
-      justify-content:space-between;
-      padding: 0 18px;
-      pointer-events:none; /* only buttons receive */
+      inset: 0;
+      pointer-events:none; /* buttons will re-enable */
     }
-    .btnArrow{
-      pointer-events:auto;
-      width:64px;height:64px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.30);
+    .btnPad{
+      position:absolute;
+      top: 52%;
+      transform: translateY(-50%);
+      width: 82px;
+      height: 82px;
+      border-radius: 18px;
       background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.20);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:28px;
-      font-weight:900;
-      color:#2a1040;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+      font-size: 34px;
       user-select:none;
+      pointer-events:auto;
+      backdrop-filter: blur(6px);
     }
-    .btnArrow:active{ transform: translateY(1px) scale(0.98); }
+    .btnPad:active{ transform: translateY(-50%) scale(0.98); }
+    .btnLeft{ left: 18px; }
+    .btnRight{ right: 18px; }
 
-    /* balance meter */
     .meterWrap{
-      position:absolute;
-      left:50%;
-      bottom: 18px;
-      transform:translateX(-50%);
-      width: min(86%, 380px);
-      height: 14px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.12);
-      border: 1px solid rgba(255,255,255,0.22);
-      overflow:hidden;
-    }
-    .meterCenter{
-      position:absolute;
-      left:50%;
-      top:0;
-      width:2px;
-      height:100%;
-      background: rgba(255,255,255,0.55);
-    }
-    .meterFill{
-      position:absolute;
-      left:0; top:0; bottom:0;
-      width:100%;
-      background: linear-gradient(90deg,
-        rgba(255, 86, 136, 0.35) 0%,
-        rgba(255, 210, 120, 0.35) 50%,
-        rgba(106, 255, 190, 0.35) 100%);
-      opacity:0.7;
-    }
-    .meterDot{
-      position:absolute;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:18px;height:18px;
-      border-radius:999px;
-      background: var(--pink);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.18);
-      border: 2px solid rgba(255,255,255,0.70);
-      left:50%;
-    }
-
-    .hint{
       padding: 0 16px 14px;
-      text-align:center;
       color: var(--muted);
       font-size: 12px;
-      line-height: 1.35;
+      text-align:center;
+      line-height:1.35;
     }
 
-    /* timer pill */
-    .timeStrong{ font-variant-numeric: tabular-nums; }
-
-    /* fail flash */
-    .flash{
-      position:absolute;
-      inset:0;
-      background: rgba(255, 64, 120, 0.14);
-      opacity:0;
-      pointer-events:none;
-    }
-    .flash.on{ opacity:1; transition: opacity 120ms ease; }
-    .shake{
-      animation: shake 220ms linear 1;
-    }
-    @keyframes shake{
-      0%,100%{ transform:translateX(-50%) rotate(0deg); }
-      20%{ transform:translateX(calc(-50% - 2px)) rotate(-2deg); }
-      40%{ transform:translateX(calc(-50% + 2px)) rotate(2deg); }
-      60%{ transform:translateX(calc(-50% - 2px)) rotate(-2deg); }
-      80%{ transform:translateX(calc(-50% + 2px)) rotate(2deg); }
-    }
-
-    /* win overlay */
+    /* Popup */
     .overlay{
-      position:absolute;
+      position:fixed;
       inset:0;
       display:none;
       align-items:center;
       justify-content:center;
-      padding:16px;
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(6px);
+      padding: 18px;
+      background: rgba(0,0,0,0.35);
+      z-index: 50;
     }
     .overlay.show{ display:flex; }
     .modal{
-      width:min(380px, 92%);
-      border-radius:18px;
-      padding:14px 14px 12px;
-      background: rgba(255,255,255,0.14);
-      border:1px solid rgba(255,255,255,0.22);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+      width:min(520px, 100%);
+      border-radius: 20px;
+      background: rgba(18,10,30,0.86);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 26px 80px rgba(0,0,0,0.55);
+      padding: 16px;
       text-align:center;
     }
     .modal h2{
-      margin: 2px 0 6px;
+      margin: 6px 0 8px;
       font-size: 18px;
-      font-weight: 900;
-      letter-spacing:-0.01em;
+      font-weight: 1000;
+      letter-spacing: -0.01em;
     }
     .modal p{
       margin: 0 0 12px;
-      color: rgba(255,255,255,0.86);
+      color: rgba(244,239,255,0.82);
       font-size: 13px;
-      line-height: 1.35;
     }
-    .btn{
+    .modal button{
       appearance:none;
       border:0;
-      border-radius:999px;
-      padding: 12px 14px;
-      width:100%;
-      font-weight:900;
-      letter-spacing:0.2px;
-      background: linear-gradient(180deg, rgba(255, 200, 230, 0.30), rgba(255, 200, 230, 0.16));
-      border:1px solid rgba(255,255,255,0.24);
-      color:#fff;
+      border-radius: 999px;
+      padding: 14px 16px;
+      width: min(360px, 100%);
+      font-weight: 1000;
+      letter-spacing: 0.2px;
+      background: linear-gradient(180deg, rgba(255,170,210,0.28), rgba(255,170,210,0.14));
+      color: var(--text);
+      border: 1px solid rgba(255,170,210,0.30);
       cursor:pointer;
     }
-    .btn:active{ transform: translateY(1px); }
 
-    /* confetti */
-    canvas#confetti{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+    /* keep no scrolling on typical phones */
+    @media (max-height: 740px){
+      h1{ font-size: 28px; }
+      .btnPad{ width: 74px; height: 74px; border-radius: 16px; }
     }
   </style>
 </head>
@@ -463,355 +190,537 @@
 <body>
 <div class="wrap">
   <div class="card">
-
     <div class="header">
       <h1>Welcome to the Waterloo ballet studio! 🩰</h1>
       <p class="sub">Tap left or right to balance your piqué pose.</p>
     </div>
 
     <div class="hud">
-      <div class="pill">⏱️ <span class="timeStrong"><strong id="timeLeft">10.0</strong></span>&nbsp;<small>s left</small></div>
-      <div class="pill">⚖️ <span>Balance:&nbsp;<strong id="statusTxt">steady</strong></span></div>
+      <div class="pill"><span>⏱️</span><span><strong id="timeLeft">10.0</strong><small>&nbsp;s left</small></span></div>
+      <div class="pill"><span>⚖️</span><span>Balance:&nbsp;<strong id="balanceText">steady</strong></span></div>
     </div>
 
     <div class="stage">
       <div class="frame">
-        <div class="arena" id="arena">
+        <canvas id="c" width="390" height="520"></canvas>
 
-          <div class="barre"></div>
-          <div class="floor"></div>
-
-          <div class="avatar" id="avatar" aria-label="agy96 in piqué pose">
-            <div class="hair"></div>
-            <div class="face"></div>
-
-            <div class="glasses">
-              <div class="lens"></div>
-              <div class="lens"></div>
-              <div class="bridge"></div>
-            </div>
-
-            <div class="arm arcL"></div>
-            <div class="arm arcR"></div>
-
-            <div class="top"></div>
-            <div class="tutu"></div>
-
-            <div class="leg support"></div>
-            <div class="shoe pointe"></div>
-
-            <div class="leg back"></div>
-            <div class="shoe backShoe"></div>
-          </div>
-
-          <div class="controls">
-            <div class="btnArrow" id="leftBtn" aria-label="Left">⬅️</div>
-            <div class="btnArrow" id="rightBtn" aria-label="Right">➡️</div>
-          </div>
-
-          <div class="meterWrap" aria-label="Balance meter">
-            <div class="meterFill"></div>
-            <div class="meterCenter"></div>
-            <div class="meterDot" id="meterDot"></div>
-          </div>
-
-          <div class="flash" id="flash"></div>
-
-          <canvas id="confetti" width="600" height="800"></canvas>
-
-          <div class="overlay" id="winOverlay">
-            <div class="modal">
-              <h2>Congratulations! 🎉</h2>
-              <p>You balanced with grace under pressure.</p>
-              <button class="btn" id="nextBtn">On to my next mission!</button>
-            </div>
-          </div>
-
+        <div class="controls" aria-hidden="true">
+          <div id="leftBtn" class="btnPad btnLeft" role="button" aria-label="Left">⬅️</div>
+          <div id="rightBtn" class="btnPad btnRight" role="button" aria-label="Right">➡️</div>
         </div>
       </div>
     </div>
 
-    <div class="hint">Hold it for 10 seconds. Small wobble → tilt → drop → auto restart.</div>
-
+    <div class="meterWrap">Hold it for 10 seconds. Small wobble → tilt → drop → auto restart.</div>
   </div>
 </div>
 
-<!-- BGM (starts on first user tap; keep looping) -->
-<audio id="bgm" src="./arcade.mp3" preload="auto" loop></audio>
+<!-- BGM -->
+<audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
+
+<!-- Win popup -->
+<div id="overlay" class="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2>Congratulations! You balanced with grace under pressure.</h2>
+    <p>Chaotic confetti courtesy of your inner ballerina 💥</p>
+    <button id="nextMissionBtn">On to my next mission!</button>
+  </div>
+</div>
 
 <script>
 (() => {
-  // ===== DOM =====
-  const bgm = document.getElementById("bgm");
-  const arena = document.getElementById("arena");
-  const avatar = document.getElementById("avatar");
-  const meterDot = document.getElementById("meterDot");
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+
   const timeLeftEl = document.getElementById("timeLeft");
-  const statusTxt = document.getElementById("statusTxt");
+  const balanceTextEl = document.getElementById("balanceText");
+
   const leftBtn = document.getElementById("leftBtn");
   const rightBtn = document.getElementById("rightBtn");
-  const flash = document.getElementById("flash");
-  const winOverlay = document.getElementById("winOverlay");
-  const nextBtn = document.getElementById("nextBtn");
 
-  // confetti canvas
-  const conf = document.getElementById("confetti");
-  const cctx = conf.getContext("2d");
+  const overlay = document.getElementById("overlay");
+  const nextMissionBtn = document.getElementById("nextMissionBtn");
 
-  // ===== Resize confetti to arena =====
-  function resizeConfetti(){
-    const r = arena.getBoundingClientRect();
-    conf.width = Math.max(1, Math.floor(r.width));
-    conf.height = Math.max(1, Math.floor(r.height));
-  }
-  window.addEventListener("resize", resizeConfetti);
-
-  // ===== BGM =====
+  const bgm = document.getElementById("bgm");
   let bgmStarted = false;
   async function ensureBgm(){
     if (bgmStarted) return;
+    bgmStarted = true;
     try{
-      bgm.volume = 0.55;
+      bgm.volume = 0.7;
       await bgm.play();
-      bgmStarted = true;
       localStorage.setItem("bgmPlaying","true");
     }catch(e){
       bgmStarted = false;
     }
   }
-  // auto-attempt if already playing before
-  if (localStorage.getItem("bgmPlaying")==="true"){
-    // still needs a user gesture on iOS sometimes; we'll also call ensureBgm on first tap
-    bgm.volume = 0.55;
-    bgm.play().then(()=>bgmStarted=true).catch(()=>{});
+  // If already playing in other scenes, try autoplay; iOS may still block until tap.
+  if (localStorage.getItem("bgmPlaying")==="true") ensureBgm();
+
+  const rand = (a,b)=>a + Math.random()*(b-a);
+
+  // ===== Game State =====
+  const HOLD_MS = 10000;
+
+  const state = {
+    running: true,
+    won: false,
+    tStart: performance.now(),
+    holdLeft: HOLD_MS,
+
+    // balance in [-1.2, 1.2] where |balance|>1 => drop
+    balance: 0,
+    balVel: 0,
+
+    // drift that changes direction randomly
+    driftTarget: 0,
+    driftT: 0,
+
+    // tap impulse (stronger than drift)
+    tapImpulse: 0.22,
+
+    // visuals
+    confetti: [],
+    confettiOn: false
+  };
+
+  function resetRun(){
+    state.running = true;
+    state.won = false;
+    state.tStart = performance.now();
+    state.holdLeft = HOLD_MS;
+
+    state.balance = 0;
+    state.balVel = 0;
+    state.driftTarget = rand(-0.30, 0.30);
+    state.driftT = 0;
+
+    state.confetti = [];
+    state.confettiOn = false;
+
+    overlay.classList.remove("show");
+    updateHUD();
   }
 
-  // ===== GAME STATE =====
-  const TARGET_MS = 10000; // 10s
-  const FAIL_THRESHOLD = 1.00; // if |balance| >= 1 => fail
-  const TILT_THRESHOLD = 0.70; // tilt visual
-  const STEADY_THRESHOLD = 0.35;
+  function updateHUD(){
+    timeLeftEl.textContent = (state.holdLeft/1000).toFixed(1);
 
-  // Drift tuning: fast + jittery
-  const DRIFT_BASE = 0.00095;    // base acceleration per ms (in balance units/ms^2)
-  const DRIFT_JITTER = 0.00125;  // random accel component
-  const TAP_FORCE = 0.060;       // impulse per tap (in balance units)
-  const DAMPING = 0.00055;       // velocity damping per ms
-  const SPRING = 0.00035;        // spring back to center per ms
-
-  let running = true;
-  let won = false;
-
-  // balance is -1..1. 0 is centered.
-  let balance = 0;
-  let vel = 0;
-  let driftDir = Math.random() < 0.5 ? -1 : 1;
-
-  let elapsed = 0;
-  let lastTs = 0;
-
-  // ===== UI HELPERS =====
-  function setStatus(){
-    const a = Math.abs(balance);
-    if (a < STEADY_THRESHOLD) statusTxt.textContent = "steady";
-    else if (a < TILT_THRESHOLD) statusTxt.textContent = "wobble";
-    else statusTxt.textContent = "tilt";
+    const a = Math.abs(state.balance);
+    let txt = "steady";
+    if (a > 0.25) txt = "wobble";
+    if (a > 0.55) txt = "tilting";
+    if (a > 0.82) txt = "danger";
+    balanceTextEl.textContent = txt;
   }
 
-  function updateMeter(){
-    // clamp and map [-1,1] -> [0,100%]
-    const cl = Math.max(-1, Math.min(1, balance));
-    const pct = (cl * 0.5 + 0.5) * 100;
-    meterDot.style.left = pct + "%";
-  }
-
-  function updateAvatarTilt(){
-    // rotate proportional
-    const cl = Math.max(-1, Math.min(1, balance));
-    const deg = cl * 14; // max tilt
-    avatar.style.transform = `translateX(-50%) rotate(${deg}deg)`;
-  }
-
-  function hardRestart(){
-    running = true;
-    won = false;
-    elapsed = 0;
-    balance = 0;
-    vel = 0;
-    driftDir = Math.random() < 0.5 ? -1 : 1;
-    winOverlay.classList.remove("show");
-    cctx.clearRect(0,0,conf.width, conf.height);
-    timeLeftEl.textContent = "10.0";
-    setStatus();
-    updateMeter();
-    updateAvatarTilt();
-  }
-
-  function fail(){
-    // fail feedback
-    flash.classList.add("on");
-    avatar.classList.add("shake");
-    setTimeout(()=>flash.classList.remove("on"), 120);
-    setTimeout(()=>avatar.classList.remove("shake"), 240);
-    // restart after short delay
-    running = false;
-    setTimeout(()=>hardRestart(), 520);
-  }
-
-  // ===== INPUT =====
-  function tapLeft(){
+  // ===== Input =====
+  function nudge(dir){
     ensureBgm();
-    if (!running || won) return;
-    vel -= TAP_FORCE;
-  }
-  function tapRight(){
-    ensureBgm();
-    if (!running || won) return;
-    vel += TAP_FORCE;
+    if (!state.running || state.won) return;
+    state.balVel += dir * state.tapImpulse; // impulse to velocity (feels responsive)
   }
 
-  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); tapLeft(); }, {passive:false});
-  rightBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); tapRight(); }, {passive:false});
+  const bindHold = (el, dir) => {
+    let held = false;
+    let holdRAF = 0;
 
-  // also allow tap anywhere on left/right half (nice on mobile)
-  arena.addEventListener("pointerdown", (e)=>{
-    ensureBgm();
-    if (!running || won) return;
-    const r = arena.getBoundingClientRect();
-    const x = e.clientX - r.left;
-    if (x < r.width/2) tapLeft(); else tapRight();
-  });
+    const start = (e) => {
+      e.preventDefault();
+      ensureBgm();
+      held = true;
+      // immediate nudge
+      nudge(dir);
 
-  // ===== CONFETTI (chaotic overload) =====
-  let confetti = [];
-  function spawnConfettiBurst(){
-    confetti = [];
-    const N = 220; // overload
+      const tick = () => {
+        if (!held) return;
+        // gentle repeat while held (not too OP)
+        state.balVel += dir * (state.tapImpulse * 0.25);
+        holdRAF = requestAnimationFrame(tick);
+      };
+      holdRAF = requestAnimationFrame(tick);
+    };
+
+    const end = () => {
+      held = false;
+      if (holdRAF) cancelAnimationFrame(holdRAF);
+      holdRAF = 0;
+    };
+
+    el.addEventListener("pointerdown", start, {passive:false});
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    window.addEventListener("blur", end);
+  };
+
+  bindHold(leftBtn, -1);
+  bindHold(rightBtn, +1);
+
+  // Also allow tapping anywhere left/right of center on canvas
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (canvas.width / r.width);
+    nudge(x < canvas.width/2 ? -1 : +1);
+  }, {passive:false});
+
+  // ===== Avatar (pixel-ish, clean proportions) =====
+  function drawGlassesLocal(x, y){
+    // y is top of lens row
+    ctx.fillStyle = "#000";
+    const thick = 2;
+    const lensW = 12, lensH = 9, gap = 5;
+
+    const leftX = x - (lensW*2 + gap)/2;
+    // left lens
+    ctx.fillRect(leftX, y, lensW, thick);
+    ctx.fillRect(leftX, y + lensH - thick, lensW, thick);
+    ctx.fillRect(leftX, y, thick, lensH);
+    ctx.fillRect(leftX + lensW - thick, y, thick, lensH);
+
+    const rightX = leftX + lensW + gap;
+    ctx.fillRect(rightX, y, lensW, thick);
+    ctx.fillRect(rightX, y + lensH - thick, lensW, thick);
+    ctx.fillRect(rightX, y, thick, lensH);
+    ctx.fillRect(rightX + lensW - thick, y, thick, lensH);
+
+    // bridge
+    ctx.fillRect(leftX + lensW, y + Math.floor(lensH/2) - 1, gap, 2);
+    // small arms
+    ctx.fillRect(leftX - 4, y + 2, 4, 2);
+    ctx.fillRect(rightX + lensW, y + 2, 4, 2);
+  }
+
+  function drawBalletAgy(cx, cy, tiltRad){
+    // cx,cy is "feet baseline-ish" for the standing leg area
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(tiltRad);
+    ctx.translate(-cx, -cy);
+
+    // proportions tuned to look like Chinatown but in tutu + pose
+    const x = cx;
+    const y = cy; // baseline reference (near feet)
+
+    // Hair (rectangle blob like Chinatown)
+    ctx.fillStyle = "#000";
+    ctx.fillRect(x-18, y-150, 36, 62);
+
+    // Face
+    ctx.fillStyle = "#f1c7a6";
+    ctx.fillRect(x-12, y-136, 24, 30);
+
+    // Glasses
+    drawGlassesLocal(x, y-125);
+
+    // Neck (tiny)
+    ctx.fillStyle = "#f1c7a6";
+    ctx.fillRect(x-4, y-106, 8, 6);
+
+    // Top (sleeveless light blue)
+    ctx.fillStyle = "#86c8ff";
+    ctx.fillRect(x-15, y-100, 30, 26);
+
+    // Bare arms (rounded-ish)
+    ctx.fillStyle = "#f1c7a6";
+    // arms rounded (front view) -> two curved-ish segments
+    ctx.fillRect(x-28, y-98, 8, 16);
+    ctx.fillRect(x+20, y-98, 8, 16);
+
+    // Arms "rounded" (ballet-ish) using arcs + small rects
+    ctx.strokeStyle = "rgba(241,199,166,0.95)";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(x, y-92, 26, Math.PI*0.15, Math.PI*0.85, false); // soft rounded arms
+    ctx.stroke();
+
+    // Tutu (pink skirt)
+    ctx.fillStyle = "#ff8fc2";
+    ctx.fillRect(x-22, y-76, 44, 16);
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.fillRect(x-18, y-72, 36, 2);
+
+    // Legs (piqué-ish):
+    // Standing leg straight down on pointe
+    ctx.fillStyle = "#f1c7a6";
+    ctx.fillRect(x-6, y-60, 10, 54);
+
+    // Pointe shoe (standing)
+    ctx.fillStyle = "#ffe7ef";
+    ctx.fillRect(x-8, y-6, 14, 6);
+    ctx.fillStyle = "rgba(0,0,0,0.08)";
+    ctx.fillRect(x-8, y-2, 14, 2);
+
+    // Back leg slightly behind, angled
+    ctx.save();
+    ctx.translate(x+6, y-40);
+    ctx.rotate(-0.55);
+    ctx.translate(-(x+6), -(y-40));
+    ctx.fillStyle = "#f1c7a6";
+    ctx.fillRect(x+6, y-40, 8, 44);
+
+    // Back shoe
+    ctx.fillStyle = "#ffe7ef";
+    ctx.fillRect(x+4, y+2, 14, 6);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // ===== Studio Background (cleaner, mirror wall + barre + lights + spotlight) =====
+  function drawStudio(){
+    const W = canvas.width, H = canvas.height;
+
+    // wall gradient
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, "#f7f0ff");
+    g.addColorStop(0.55, "#f3eaff");
+    g.addColorStop(1, "#efe0ff");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    // subtle vignette
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.fillRect(0,0,W,6);
+
+    // mirror band
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillRect(0, 170, W, 130);
+    ctx.fillStyle = "rgba(170,140,210,0.18)";
+    ctx.fillRect(0, 170, W, 2);
+    ctx.fillRect(0, 300, W, 2);
+
+    // mirror vertical seams
+    ctx.fillStyle = "rgba(120,90,160,0.10)";
+    for (let x=18; x<W; x+=74){
+      ctx.fillRect(x, 176, 2, 118);
+    }
+
+    // ballet barre + brackets
+    ctx.fillStyle = "rgba(140, 90, 70, 0.55)";
+    ctx.fillRect(0, 310, W, 10);
+    ctx.fillStyle = "rgba(90, 60, 50, 0.35)";
+    for (let x=26; x<W; x+=90){
+      ctx.fillRect(x, 320, 8, 28);
+    }
+
+    // floor
+    ctx.fillStyle = "#e7be8e";
+    ctx.fillRect(0, 340, W, H-340);
+
+    // floor planks
+    ctx.fillStyle = "rgba(120,80,55,0.12)";
+    for (let x=16; x<W; x+=34){
+      ctx.fillRect(x, 340, 2, H-340);
+    }
+
+    // base shadow line
+    ctx.fillStyle = "rgba(0,0,0,0.10)";
+    ctx.fillRect(0, 340, W, 4);
+
+    // lights above (simple)
+    for (let i=0;i<4;i++){
+      const lx = 60 + i*90;
+      ctx.fillStyle = "rgba(255,255,255,0.70)";
+      ctx.fillRect(lx, 40, 46, 10);
+      ctx.fillStyle = "rgba(255,255,255,0.38)";
+      ctx.fillRect(lx+6, 52, 34, 6);
+    }
+
+    // spotlight cone (center)
+    const spot = ctx.createRadialGradient(W/2, 210, 10, W/2, 260, 250);
+    spot.addColorStop(0, "rgba(255,255,255,0.70)");
+    spot.addColorStop(1, "rgba(255,255,255,0.00)");
+    ctx.fillStyle = spot;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // ===== Balance Meter =====
+  function drawBalanceMeter(){
+    const W = canvas.width, H = canvas.height;
+
+    const barX = 34;
+    const barY = H - 44;
+    const barW = W - 68;
+    const barH = 10;
+
+    // track
+    ctx.fillStyle = "rgba(0,0,0,0.14)";
+    ctx.fillRect(barX, barY, barW, barH);
+
+    // safe zone
+    ctx.fillStyle = "rgba(120,255,190,0.25)";
+    ctx.fillRect(barX + barW*0.30, barY, barW*0.40, barH);
+
+    // danger tint ends
+    ctx.fillStyle = "rgba(255,120,150,0.18)";
+    ctx.fillRect(barX, barY, barW*0.22, barH);
+    ctx.fillRect(barX + barW*0.78, barY, barW*0.22, barH);
+
+    // knob from balance [-1..1]
+    const clamped = Math.max(-1, Math.min(1, state.balance));
+    const t = (clamped + 1) / 2; // 0..1
+    const knobX = barX + t * barW;
+
+    ctx.fillStyle = "#ff77b7";
+    ctx.beginPath();
+    ctx.arc(knobX, barY + barH/2, 9, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.beginPath();
+    ctx.arc(knobX-2, barY + barH/2 - 2, 3, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // ===== Confetti =====
+  function startConfettiExplosion(){
+    state.confettiOn = true;
+    state.confetti = [];
+    const W = canvas.width;
+
+    // overload 💥
+    const N = 220;
     for (let i=0;i<N;i++){
-      confetti.push({
-        x: Math.random()*conf.width,
-        y: -20 - Math.random()*conf.height*0.2,
-        vx: (Math.random()*2-1) * (2.2 + Math.random()*2.0),
-        vy: (2.6 + Math.random()*4.2),
-        r: 2 + Math.random()*5,
-        rot: Math.random()*Math.PI,
-        vr: (Math.random()*2-1)*0.20,
-        a: 0.65 + Math.random()*0.35,
-        life: 0,
-        max: 1200 + Math.random()*800
+      const angle = rand(-Math.PI, 0);     // mostly downward burst
+      const speed = rand(3.0, 9.0);
+      state.confetti.push({
+        x: W/2 + rand(-10,10),
+        y: 140 + rand(-10,10),
+        vx: Math.cos(angle)*speed + rand(-1.5,1.5),
+        vy: Math.sin(angle)*speed + rand(-1.0,2.0),
+        g: rand(0.08, 0.16),
+        s: rand(3,7),
+        a: rand(0.55, 1.0),
+        rot: rand(0, Math.PI*2),
+        vr: rand(-0.18, 0.18)
       });
     }
   }
 
   function drawConfetti(dt){
-    cctx.clearRect(0,0,conf.width, conf.height);
-    for (const p of confetti){
-      p.life += dt;
-      p.x += p.vx * dt * 0.06;
-      p.y += p.vy * dt * 0.08;
-      p.rot += p.vr * dt * 0.04;
-      // gravity
-      p.vy += 0.008 * dt;
-      // fade
-      const fade = Math.max(0, 1 - (p.life / p.max));
-      const alpha = p.a * fade;
+    if (!state.confettiOn) return;
+    const H = canvas.height, W = canvas.width;
 
-      if (alpha <= 0) continue;
+    for (const p of state.confetti){
+      p.vy += p.g * dt;
+      p.x += p.vx * dt * 0.35;
+      p.y += p.vy * dt * 0.35;
+      p.rot += p.vr * dt * 0.18;
 
-      cctx.save();
-      cctx.globalAlpha = alpha;
-      cctx.translate(p.x, p.y);
-      cctx.rotate(p.rot);
+      ctx.save();
+      ctx.globalAlpha = p.a;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
 
-      // bright random colors
-      const hue = (p.life*0.06 + p.x*0.3) % 360;
-      cctx.fillStyle = `hsl(${hue} 90% 65%)`;
-      cctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+      // random bright colors
+      const colors = ["#ff5aa7","#7df0ff","#ffe36a","#9cff7b","#b28dff","#ff9c6a"];
+      ctx.fillStyle = colors[(p.s * 13 + (p.x|0)) % colors.length];
+      ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s*0.7);
 
-      cctx.restore();
+      ctx.restore();
     }
-    // prune
-    confetti = confetti.filter(p => p.life < p.max && p.y < conf.height + 80);
+
+    // stop once all below bottom (but keep some)
+    if (state.confetti.every(p => p.y > H + 60)){
+      state.confettiOn = false;
+    }
   }
 
-  // ===== WIN =====
-  function win(){
-    won = true;
-    running = false;
-    winOverlay.classList.add("show");
-    spawnConfettiBurst();
+  // ===== Game Loop =====
+  function step(dt){
+    if (!state.running || state.won) return;
+
+    // countdown
+    state.holdLeft = Math.max(0, HOLD_MS - (performance.now() - state.tStart));
+
+    // drift target changes every ~0.7s
+    state.driftT += dt;
+    if (state.driftT > 700){
+      state.driftT = 0;
+      state.driftTarget = rand(-0.45, 0.45); // faster drift, but not insane
+    }
+
+    // physics: balance accelerates toward driftTarget
+    // Make failing possible: if you do nothing, it will walk to the edge.
+    const driftForce = state.driftTarget * 0.0021;
+    state.balVel += driftForce * dt;
+
+    // damping (keeps it controllable)
+    state.balVel *= 0.985;
+
+    // integrate
+    state.balance += state.balVel * dt * 0.18;
+
+    // clamps beyond drop threshold
+    const absB = Math.abs(state.balance);
+
+    // WIN
+    if (state.holdLeft <= 0){
+      state.won = true;
+      state.running = false;
+      startConfettiExplosion();
+      setTimeout(() => overlay.classList.add("show"), 380);
+    }
+
+    // FAIL: drop
+    if (absB > 1.02){
+      // small wobble -> tilt -> drop -> auto restart
+      state.running = false;
+      setTimeout(() => {
+        resetRun();
+      }, 520);
+    }
+
+    updateHUD();
   }
 
-  nextBtn.addEventListener("click", ()=>{
-    // IMPORTANT: return to map at STADIUM prompt
-    localStorage.setItem("mapPromptIndex", "3"); // stadium question index
-    window.location.href = "./map.html";         // change if your map filename differs
-  });
+  function draw(dt){
+    drawStudio();
 
-  // ===== MAIN LOOP =====
+    // dancer position
+    const cx = canvas.width/2;
+    const cy = 340; // near floor top
+
+    // tilt based on balance (soft)
+    const tilt = Math.max(-0.18, Math.min(0.18, state.balance * 0.18)); // rad clamp
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.12)";
+    ctx.beginPath();
+    ctx.ellipse(cx, 404, 44, 10, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    drawBalletAgy(cx, 402, tilt);
+    drawBalanceMeter();
+
+    // confetti on top
+    drawConfetti(dt);
+  }
+
+  let last = 0;
   function loop(ts){
-    if (!lastTs) lastTs = ts;
-    const dt = Math.min(33, ts - lastTs);
-    lastTs = ts;
+    if (!last) last = ts;
+    const dt = Math.min(33, ts - last);
+    last = ts;
 
-    if (won){
-      drawConfetti(dt);
-      requestAnimationFrame(loop);
-      return;
-    }
-
-    if (running){
-      elapsed += dt;
-
-      // time left
-      const left = Math.max(0, (TARGET_MS - elapsed)/1000);
-      timeLeftEl.textContent = left.toFixed(1);
-
-      // drift direction changes (randomly) so it feels mean
-      if (Math.random() < 0.010 * (dt/16)){
-        driftDir *= -1;
-      }
-
-      // acceleration = base + jitter, pushes to a side
-      const accel = driftDir * (DRIFT_BASE + Math.random()*DRIFT_JITTER);
-
-      // integrate velocity + balance
-      vel += accel * dt;
-
-      // damping + spring toward center
-      vel *= (1 - DAMPING * dt);
-      vel += (-balance) * SPRING * dt;
-
-      balance += vel;
-
-      // UI
-      setStatus();
-      updateMeter();
-      updateAvatarTilt();
-
-      // FAIL CHECK (THIS is what you were missing)
-      if (Math.abs(balance) >= FAIL_THRESHOLD){
-        fail();
-      }
-
-      // WIN CHECK
-      if (elapsed >= TARGET_MS){
-        win();
-      }
-    } else {
-      // if paused for fail animation, still paint confetti none
-    }
+    step(dt);
+    draw(dt);
 
     requestAnimationFrame(loop);
   }
 
-  // ===== INIT =====
-  resizeConfetti();
-  setStatus();
-  updateMeter();
-  updateAvatarTilt();
+  // ===== Button: go back to map with Stadium prompt =====
+  const MAP_URL = "./map.html"; // <-- change if your map file has a different name
+  nextMissionBtn.addEventListener("click", () => {
+    // Stadium is prompt index 3 in your prompt order.
+    localStorage.setItem("mapPromptIndex", "3");
+    location.href = MAP_URL;
+  });
 
-  // start immediately (no Start button)
+  // Start
+  resetRun();
   requestAnimationFrame(loop);
 
 })();
