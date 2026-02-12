@@ -208,7 +208,6 @@
   const viewPage = document.getElementById("viewPage");
   const logsCountEl = document.getElementById("logsCount");
   const slipsCountEl = document.getElementById("slipsCount");
-  const replayBtn = document.getElementById("replayBtn");
   const nextBtn = document.getElementById("nextBtn");
   const bgm = document.getElementById("bgm");
 
@@ -765,12 +764,6 @@
     requestAnimationFrame(viewLoop);
   }
 
-  // ===== NAV =====
-  replayBtn.addEventListener("click", ()=>{
-    viewPage.classList.remove("active");
-    gamePage.classList.add("active");
-    resetGame();
-  });
 
   nextBtn.addEventListener("click", ()=>{
     alert("Hook this to your next adventure page.");
