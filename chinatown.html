@@ -347,7 +347,6 @@ function drawLantern(x,y,s){
    draws: --[]-[]-- with bridge + temple arms
 ========================= */
 function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
-  // x,y = top-left of left lens frame
   g.fillStyle = "#000";
 
   // left lens
@@ -363,17 +362,14 @@ function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
   g.fillRect(rx, y + lensH - thick, lensW, thick);
   g.fillRect(rx + lensW - thick, y, thick, lensH);
 
-  // bridge
-  const bridgeW = Math.max(3, Math.floor(gap * 0.7));
-  const bridgeX = x + lensW;
-  const bridgeY = y + Math.floor(lensH/2) - 1;
-  g.fillRect(bridgeX, bridgeY, bridgeW, 2);
+  // bridge (centered on lens midline)
+  const armY = y + Math.floor(lensH / 2); // <-- use midline for arms AND bridge
+  const bridgeW = Math.max(3, gap - 1);
+  g.fillRect(x + lensW, armY, bridgeW, 2);
 
-  // temple arms (the missing “--”)
-  // left arm
-  g.fillRect(x - armLen, y + 2, armLen, 2);
-  // right arm
-  g.fillRect(rx + lensW, y + 2, armLen, 2);
+  // temple arms (same midline so you always see the “--”)
+  g.fillRect(x - armLen, armY, armLen, 2);
+  g.fillRect(rx + lensW, armY, armLen, 2);
 }
 
 /* =========================
@@ -383,23 +379,22 @@ function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
    - fixes: not sleeveless (adds sleeves)
 ========================= */
 function drawAgyGameplay(px, py){
-  // px,py = bottom-ish of body (same as your earlier code)
   const x = px, y = py;
 
-  // hair
+  // hair (clean old-good silhouette)
   ctx.fillStyle="#000";
-  ctx.fillRect(x-18, y-56, 36, 56);
-  ctx.fillRect(x-22, y-40, 44, 44);
+  ctx.fillRect(x-16, y-58, 32, 58);   // main hair
+  ctx.fillRect(x-18, y-52, 36, 44);   // slight width mid-body
+  ctx.fillRect(x-16, y-58, 32, 6);    // top cap
 
   // face
   ctx.fillStyle="#f1c7a6";
   ctx.fillRect(x-12, y-44, 24, 28);
 
-  // glasses (raise them a bit + add temple arms)
-  // tuned to fit this face size
-  const gy = y - 37;                 // higher than before
-  const lensW = 12, lensH = 9;
-  const thick = 2, gap = 6, armLen = 6;
+  // glasses (slightly higher + slightly smaller so arms fit nicely)
+  const gy = y - 38;                  // higher than your current y-37
+  const lensW = 11, lensH = 9;
+  const thick = 2, gap = 5, armLen = 7;
   const leftX = x - 16;
   drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
 
@@ -407,7 +402,7 @@ function drawAgyGameplay(px, py){
   ctx.fillStyle="#c1272d";
   ctx.fillRect(x-16, y-16, 32, 22);
 
-  // sleeves (fix “sleeveless” look)
+  // sleeves (avoid “sleeveless” look)
   ctx.fillRect(x-22, y-16, 6, 8);
   ctx.fillRect(x+16, y-16, 6, 8);
 
@@ -616,7 +611,7 @@ function drawAgyEating(g, cx, cy){
 
   // glasses (old-size, but with temple arms + bridge)
   const lensW = 12, lensH = 9;
-  const thick = 2, gap = 6, armLen = 8;
+  const thick = 2, gap = 5, armLen = 7;
   const gy = cy - 50;     // keep nice placement
   const leftX = cx - 18;
   drawGlasses(g, leftX, gy, lensW, lensH, thick, gap, armLen);
@@ -665,9 +660,9 @@ function drawEating(){
   // utensil (closer to hand)
   const bob = Math.sin(eatTick*0.18) * 6;
   eatCtx.fillStyle="#d1b15a";
-  eatCtx.fillRect(cx+30, cy-22 + bob, 4, 18);   // moved from +40 to +30
+  eatCtx.fillRect(cx+22, cy-22 + bob, 4, 18);   // moved from +40 to +30
   eatCtx.fillStyle="#fff";
-  eatCtx.fillRect(cx+28, cy-28 + bob, 8, 6);
+  eatCtx.fillRect(cx+20, cy-28 + bob, 8, 6);
 
   if(winWrap.classList.contains("show")){
     requestAnimationFrame(drawEating);
