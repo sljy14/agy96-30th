@@ -1,169 +1,337 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>Waterloo — Ballet Balance</title>
-  <link rel="stylesheet" href="./css/style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Waterloo Ballet Studio</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:linear-gradient(180deg,#f6eaff,#e7d9ff);
+  overflow:hidden;
+  color:#fff;
+}
+
+.wrap{
+  height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:14px;
+  box-sizing:border-box;
+}
+
+h1{
+  margin:8px 0 4px;
+  font-weight:1000;
+  font-size:26px;
+  text-align:center;
+}
+
+.sub{
+  font-size:14px;
+  opacity:0.9;
+  margin-bottom:10px;
+  text-align:center;
+}
+
+.stage{
+  position:relative;
+  width:100%;
+  max-width:420px;
+  aspect-ratio: 1 / 1.25;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.3);
+  background:
+    linear-gradient(#fff 0 60%, #f8d9ff 60% 100%);
+}
+
+/* wooden floor */
+.floor{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:35%;
+  background:linear-gradient(180deg,#f4c68b,#e8ad68);
+}
+
+/* balance bar */
+.meter{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70%;
+  height:8px;
+  background:rgba(0,0,0,0.2);
+  border-radius:999px;
+}
+.indicator{
+  position:absolute;
+  top:-4px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#ff5fa2;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+/* arrows */
+.arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:46px;
+  font-weight:1000;
+  background:rgba(255,255,255,0.2);
+  border-radius:50%;
+  width:70px;
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+}
+.left{ left:10px; }
+.right{ right:10px; }
+
+/* avatar */
+.avatar{
+  position:absolute;
+  bottom:36%;
+  left:50%;
+  transform:translateX(-50%);
+  width:90px;
+  height:150px;
+}
+
+.hair{
+  position:absolute;
+  width:60px;height:90px;
+  background:#000;
+  left:50%;transform:translateX(-50%);
+  top:0;border-radius:8px;
+}
+.face{
+  position:absolute;
+  width:40px;height:48px;
+  background:#f1c7a6;
+  left:50%;transform:translateX(-50%);
+  top:22px;
+}
+.glasses{
+  position:absolute;
+  top:42px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+}
+.glasses div{
+  width:14px;height:12px;
+  border:3px solid #000;
+  margin:0 4px;
+}
+.bridge{
+  position:absolute;
+  top:6px;
+  left:50%;
+  width:8px;height:3px;
+  background:#000;
+  transform:translateX(-50%);
+}
+
+.top{
+  position:absolute;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  width:50px;height:28px;
+  background:#8ecaff;
+}
+.tutu{
+  position:absolute;
+  top:100px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70px;height:20px;
+  background:#ff9ccf;
+}
+.leg-main{
+  position:absolute;
+  top:120px;
+  left:50%;
+  transform:translateX(-50%);
+  width:10px;height:36px;
+  background:#f1c7a6;
+}
+.leg-back{
+  position:absolute;
+  top:130px;
+  left:65%;
+  width:8px;height:28px;
+  background:#f1c7a6;
+  transform:rotate(20deg);
+}
+
+/* popup */
+.popup{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.box{
+  background:#fff;
+  color:#333;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+  max-width:280px;
+}
+.box button{
+  margin-top:12px;
+  padding:12px 18px;
+  border:none;
+  border-radius:999px;
+  background:#ff5fa2;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+</style>
 </head>
+
 <body>
-<div id="wrap">
-  <div class="bg"></div>
-  <canvas id="c"></canvas>
+<div class="wrap">
+<h1>Welcome to the Waterloo ballet studio! 🩰</h1>
+<div class="sub">Tap left or right to balance your piqué pose.</div>
 
-  <div class="hud">
-    <div>
-      <div class="title">Waterloo 🩰</div>
-      <div class="sub">Balance the pirouette — keep it centered ✨</div>
+<div class="stage" id="stage">
+  <div class="floor"></div>
+
+  <div class="arrow left" id="leftBtn">⬅️</div>
+  <div class="arrow right" id="rightBtn">➡️</div>
+
+  <div class="avatar" id="avatar">
+    <div class="hair"></div>
+    <div class="face"></div>
+    <div class="glasses">
+      <div></div><div></div>
     </div>
-    <div class="right">
-      <div>Hold: <span id="hold">0.0</span>s / 5.0s</div>
-      <div>Strikes: <span id="strikes">0</span> / 3</div>
+    <div class="bridge"></div>
+    <div class="top"></div>
+    <div class="tutu"></div>
+    <div class="leg-main"></div>
+    <div class="leg-back"></div>
+  </div>
+
+  <div class="meter">
+    <div class="indicator" id="indicator"></div>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="box">
+      <div>Congratulations! You balanced with grace under pressure.</div>
+      <button id="nextBtn">On to my next mission!</button>
     </div>
   </div>
 
-  <div class="centerOverlay" id="overlay">
-    <div class="card">
-      <div class="big" id="big">Grace under pressure 🩰</div>
-      <div class="small" id="small">Tap LEFT or RIGHT to steady her. Stay centered for 5 seconds.</div>
-      <div class="hint">Tap to start</div>
-    </div>
-  </div>
-
-  <div class="zone" id="leftZone"></div>
-  <div class="zone" id="rightZone"></div>
+</div>
 </div>
 
-<script type="module">
-  import { fitCanvas, rand, clamp, tapPrevent, setDone } from "./js/app.js";
+<audio id="bgm" src="./arcade.mp3" loop></audio>
 
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
-  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
-  fitCanvas(canvas,ctx);
+<script>
+const bgm=document.getElementById("bgm");
+bgm.volume=0.5;
+bgm.play().catch(()=>{});
 
-  const overlay = document.getElementById("overlay");
-  const big = document.getElementById("big");
-  const small = document.getElementById("small");
-  const holdEl = document.getElementById("hold");
-  const strikesEl = document.getElementById("strikes");
-  const leftZone = document.getElementById("leftZone");
-  const rightZone = document.getElementById("rightZone");
+let balance=0;
+let speed=0.002;
+let startTime=Date.now();
+let alive=true;
 
-  const GOAL = 5.0;
-  const MAX_STRIKES = 3;
+const indicator=document.getElementById("indicator");
+const avatar=document.getElementById("avatar");
+const popup=document.getElementById("popup");
 
-  let running=false, won=false;
-  let balance=0;      // -1..+1
-  let vel=0;
-  let hold=0;
-  let strikes=0;
+function update(){
+  if(!alive)return;
 
-  function hud(){
-    holdEl.textContent = hold.toFixed(1);
-    strikesEl.textContent = strikes;
+  balance += (Math.random()>0.5?1:-1)*speed*100;
+
+  indicator.style.left = `calc(50% + ${balance}px)`;
+  avatar.style.transform = `translateX(calc(-50% + ${balance}px)) rotate(${balance/6}deg)`;
+
+  speed+=0.00005;
+
+  if(Math.abs(balance)>90){
+    fall();
   }
 
-  function show(t, msg, hint="Tap to continue"){
-    big.textContent=t;
-    small.innerHTML=msg;
-    overlay.querySelector(".hint").textContent = hint;
-    overlay.style.display="flex";
-  }
-  function hide(){ overlay.style.display="none"; }
-
-  function reset(){
-    running=true; won=false;
-    balance=0; vel=0; hold=0; strikes=0;
-    hide(); hud();
+  if((Date.now()-startTime)/1000>=10){
+    win();
   }
 
-  function strike(){
-    strikes++; hud();
-    running=false;
-    show("Try again! 😗", "Steady… steady…<br/>You’ve got this ✨", "Tap to continue");
-    balance=0; vel=0;
-    if (strikes>=MAX_STRIKES){
-      strikes=0; hold=0; hud();
-      show("Reset 🩰", "Ballet is repetition.<br/>One more clean run.", "Tap to restart");
-    }
+  requestAnimationFrame(update);
+}
+
+function fall(){
+  alive=false;
+  avatar.style.transition="transform 0.3s";
+  avatar.style.transform+=" rotate(40deg)";
+  setTimeout(()=>location.reload(),700);
+}
+
+function win(){
+  alive=false;
+  popup.style.display="flex";
+  confetti();
+}
+
+document.getElementById("leftBtn").onclick=()=>balance-=15;
+document.getElementById("rightBtn").onclick=()=>balance+=15;
+
+document.getElementById("nextBtn").onclick=()=>{
+  localStorage.setItem("mapPromptIndex","3");
+  location.href="./map.html";
+};
+
+update();
+
+/* 💥 CHAOTIC CONFETTI */
+function confetti(){
+  for(let i=0;i<200;i++){
+    const div=document.createElement("div");
+    div.style.position="fixed";
+    div.style.width="8px";
+    div.style.height="8px";
+    div.style.background=`hsl(${Math.random()*360},100%,60%)`;
+    div.style.left=Math.random()*100+"vw";
+    div.style.top="-10px";
+    div.style.zIndex="999";
+    document.body.appendChild(div);
+
+    const fall=Math.random()*2000+2000;
+    div.animate([
+      {transform:"translateY(0) rotate(0deg)"},
+      {transform:`translateY(100vh) rotate(${Math.random()*720}deg)`}
+    ],{
+      duration:fall,
+      easing:"linear"
+    });
+
+    setTimeout(()=>div.remove(),fall);
   }
-
-  function win(){
-    running=false; won=true;
-    setDone("waterloo", true);
-    show("Encore? You nailed it ✨", "Quiet strength. Pure focus.<br/><b>Back to the map?</b>", "Tap to go back");
-  }
-
-  // tap controls:
-  const tapImpulse = 0.09;
-  function tap(side){
-    if (overlay.style.display!=="none"){
-      if (won) location.href="./map.html";
-      else reset();
-      return;
-    }
-    if (!running) return;
-    if (side==="left") vel += tapImpulse;
-    else vel -= tapImpulse;
-  }
-
-  tapPrevent(leftZone, ()=>tap("left"));
-  tapPrevent(rightZone, ()=>tap("right"));
-  overlay.addEventListener("click", ()=>{ if (won) location.href="./map.html"; else reset(); });
-
-  let last=0;
-  function loop(ts){
-    requestAnimationFrame(loop);
-    const dt = Math.min(32, ts-last||16); last=ts;
-
-    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-
-    // simple studio floor + mirror vibe
-    ctx.globalAlpha=0.10; ctx.fillStyle="#fff";
-    ctx.fillRect(0, window.innerHeight*0.72, window.innerWidth, window.innerHeight*0.28);
-    ctx.fillRect(window.innerWidth*0.18, window.innerHeight*0.20, window.innerWidth*0.64, window.innerHeight*0.36);
-    ctx.globalAlpha=1;
-
-    // physics
-    if (running){
-      vel += rand(-0.015, 0.015) * (dt/16);
-      vel *= 0.985;
-      balance += vel * (dt/16);
-      balance = clamp(balance, -1.2, 1.2);
-
-      if (Math.abs(balance) < 0.14) hold += dt/1000;
-      else hold = Math.max(0, hold - dt/1200);
-
-      hud();
-      if (Math.abs(balance) > 1.05) strike();
-      if (hold >= GOAL) win();
-    }
-
-    // draw ballerina (emoji placeholder now; swap to PNG later)
-    const cx = window.innerWidth/2 + balance*140;
-    const cy = window.innerHeight*0.62;
-
-    ctx.font="44px system-ui";
-    ctx.textAlign="center";
-    ctx.fillText("🩰", cx, cy-60);
-    ctx.font="34px system-ui";
-    ctx.fillText("🧍‍♀️", cx, cy);
-
-    // balance meter
-    const mx = window.innerWidth/2, my = window.innerHeight*0.86, mw = Math.min(320, window.innerWidth*0.78);
-    ctx.globalAlpha=0.9;
-    ctx.fillStyle="rgba(255,255,255,0.12)";
-    ctx.fillRect(mx-mw/2, my, mw, 10);
-    ctx.fillStyle="rgba(255,255,255,0.95)";
-    ctx.fillRect(mx-2 + balance*(mw/2-10), my-6, 4, 22);
-
-    // center window marker
-    ctx.globalAlpha=0.25;
-    ctx.fillRect(mx-10, my-10, 20, 30);
-    ctx.globalAlpha=1;
-  }
-  requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>
