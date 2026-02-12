@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Happy Birthday</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+    .msg{max-width:560px}
+    .big2{font-size:24px;font-weight:1000}
+    .soft{opacity:0.92;line-height:1.45;margin-top:10px}
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+  <div class="wrap">
+    <div class="card msg">
+      <div class="big2">Happy Birthday 🥳✨</div>
+      <div class="soft" id="out"></div>
+
+      <div class="btnRow">
+        <button onclick="location.href='./map.html'">Back to map</button>
+        <button onclick="location.href='./index.html'">Home</button>
+      </div>
+      <div class="hint">We can revise the wording + add audio later.</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { loadState } from "./js/app.js";
+  const s = loadState();
+  const a1 = s.answers?.a1 || "";
+  const a2 = s.answers?.a2 || "";
+
+  const out = document.getElementById("out");
+  out.innerHTML = `
+    You deserve the best — always.<br/><br/>
+    <b>What you wrote:</b><br/>
+    <div style="text-align:left;margin-top:10px;opacity:0.95">
+      <div>🫶 21-year-old you:</div>
+      <div style="white-space:pre-wrap;opacity:0.9;margin:6px 0 12px">${escapeHtml(a1) || "<i>(empty)</i>"}</div>
+      <div>✨ 30-year-old you:</div>
+      <div style="white-space:pre-wrap;opacity:0.9;margin-top:6px">${escapeHtml(a2) || "<i>(empty)</i>"}</div>
+    </div>
+    <br/>
+    <b>From me:</b> I’m proud of you. And I’m rooting for you — loudly. 💖
+  `;
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+</script>
+</body>
+</html>

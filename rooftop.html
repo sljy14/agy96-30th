@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Rooftop Reflection</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .panel{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;padding:14px}
+    textarea{width:100%;min-height:110px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06);color:#fff;padding:12px;font-size:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .note{opacity:0.85;font-size:13px;line-height:1.35}
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+
+  <div class="panel">
+    <div class="card">
+      <div class="big">Rooftop 🌌</div>
+      <div class="small">Now the quiet part. Answer these however you want.</div>
+      <div class="note">You can type OR record voice. If recording works, you can download it after.</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Prompt 1: 21-year-old you 🫶</div>
+      <textarea id="t1" placeholder="Type here..."></textarea>
+    </div>
+
+    <div class="card">
+      <div class="title">Prompt 2: 30-year-old you ✨</div>
+      <textarea id="t2" placeholder="Type here..."></textarea>
+    </div>
+
+    <div class="card">
+      <div class="title">Optional: Voice recording 🎙️</div>
+      <div class="row">
+        <button id="rec1">Record Prompt 1</button>
+        <button id="rec2">Record Prompt 2</button>
+        <button id="stop" disabled>Stop</button>
+        <a id="dl" style="display:none" download>Download recording</a>
+      </div>
+      <div class="note" id="recStatus">If recording fails on your phone, just type — totally fine.</div>
+    </div>
+
+    <div class="row" style="justify-content:center">
+      <button id="save">Save + Continue ➜</button>
+      <button onclick="location.href='./map.html'">Back to map</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { loadState, saveState, allLocationsDone } from "./js/app.js";
+
+  if (!allLocationsDone()){
+    alert("Finish all 4 locations first 😗");
+    location.href="./map.html";
+  }
+
+  const t1 = document.getElementById("t1");
+  const t2 = document.getElementById("t2");
+  const st = loadState();
+  t1.value = st.answers?.a1 || "";
+  t2.value = st.answers?.a2 || "";
+
+  document.getElementById("save").onclick = ()=>{
+    const s = loadState();
+    s.answers = s.answers || {};
+    s.answers.a1 = t1.value.trim();
+    s.answers.a2 = t2.value.trim();
+    saveState(s);
+    location.href="./final.html";
+  };
+
+  // Simple recorder (downloads file; doesn’t store permanently)
+  const recStatus = document.getElementById("recStatus");
+  const rec1 = document.getElementById("rec1");
+  const rec2 = document.getElementById("rec2");
+  const stopBtn = document.getElementById("stop");
+  const dl = document.getElementById("dl");
+
+  let mediaRecorder=null;
+  let chunks=[];
+  let which="";
+
+  async function startRec(whichPrompt){
+    which = whichPrompt;
+    dl.style.display="none";
+    chunks=[];
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type:"audio/webm" });
+        const url = URL.createObjectURL(blob);
+        dl.href = url;
+        dl.download = `rooftop_${which}.webm`;
+        dl.textContent = `Download ${which} recording`;
+        dl.style.display="inline-block";
+        recStatus.textContent = "Recording stopped. Download if you want.";
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      mediaRecorder.start();
+      recStatus.textContent = `Recording ${which}… speak freely ✨`;
+      stopBtn.disabled=false;
+    } catch (e){
+      recStatus.textContent = "Recording not available on this device/browser. Just type 🙂";
+    }
+  }
+
+  rec1.onclick = ()=>startRec("prompt1");
+  rec2.onclick = ()=>startRec("prompt2");
+  stopBtn.onclick = ()=>{
+    stopBtn.disabled=true;
+    if (mediaRecorder && mediaRecorder.state !== "inactive"){
+      mediaRecorder.stop();
+    }
+  };
+</script>
+</body>
+</html>

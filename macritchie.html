@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>MacRitchie — Logs</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div>
+      <div class="title">MacRitchie 🌲</div>
+      <div class="sub">Tap to jump log-to-log. Get 8!</div>
+    </div>
+    <div class="right">Score: <span id="score">0</span> / 8</div>
+  </div>
+
+  <div class="centerOverlay" id="overlay">
+    <div class="card">
+      <div class="big" id="big">Breathe. Jump. 🌿</div>
+      <div class="small" id="small">Tap anywhere to jump. Miss a log = Try again 😗</div>
+      <div class="hint">Tap to start</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { fitCanvas, rand, clamp, setDone } from "./js/app.js";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
+  fitCanvas(canvas,ctx);
+
+  const overlay = document.getElementById("overlay");
+  const big = document.getElementById("big");
+  const small = document.getElementById("small");
+  const scoreEl = document.getElementById("score");
+
+  let running=false, won=false;
+  let score=0;
+
+  const player = { x: 90, y: window.innerHeight*0.62, vy:0, onLog:true };
+  const gravity = 0.65;
+  const jumpV = -12.5;
+
+  let logs = [];
+  function makeLogs(){
+    logs = [];
+    let x = 120;
+    for(let i=0;i<10;i++){
+      logs.push({
+        x, y: rand(window.innerHeight*0.55, window.innerHeight*0.72),
+        w: rand(70, 110),
+        vx: rand(-1.2, 1.2)
+      });
+      x += rand(120, 160);
+    }
+  }
+
+  function updateHUD(){ scoreEl.textContent = score; }
+
+  function showOverlay(t,msg,hint="Tap to continue"){
+    big.textContent=t; small.innerHTML=msg;
+    overlay.querySelector(".hint").textContent=hint;
+    overlay.style.display="flex";
+  }
+  function hideOverlay(){ overlay.style.display="none"; }
+
+  function reset(){
+    score=0; won=false; running=true;
+    player.x=90; player.y=window.innerHeight*0.62; player.vy=0; player.onLog=true;
+    makeLogs(); updateHUD(); hideOverlay();
+  }
+
+  function win(){
+    won=true; running=false;
+    setDone("macritchie", true);
+    showOverlay("Enjoy the view 🌞", "You deserve it.<br/>Take 5 seconds ✨", "Tap to go back to map");
+    setTimeout(()=>{}, 5000);
+  }
+
+  function lose(){
+    running=false;
+    showOverlay("Try again! 😗", "You slipped. One more run.", "Tap to retry");
+  }
+
+  document.addEventListener("click", ()=>{
+    if (overlay.style.display!=="none"){
+      if (won) location.href="./map.html";
+      else reset();
+      return;
+    }
+    if (!running) return;
+    if (player.onLog){
+      player.vy = jumpV;
+      player.onLog = false;
+    }
+  });
+
+  makeLogs();
+
+  let last=0;
+  function loop(ts){
+    requestAnimationFrame(loop);
+    const dt = Math.min(32, ts-last||16); last=ts;
+
+    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+
+    // sky + canopy specks
+    ctx.globalAlpha=0.18;
+    ctx.fillStyle="#fff";
+    for(let i=0;i<40;i++){
+      ctx.fillRect((i*43)%window.innerWidth, 60+((i*97)%180), 2, 2);
+    }
+    ctx.globalAlpha=1;
+
+    // move logs (gentle)
+    for(const log of logs){
+      log.x -= 2.0*(dt/16);
+      log.y += log.vx*(dt/16);
+      if (log.y < window.innerHeight*0.50 || log.y > window.innerHeight*0.78) log.vx *= -1;
+    }
+
+    // draw logs
+    ctx.fillStyle="rgba(255,255,255,0.18)";
+    for(const log of logs){
+      ctx.fillRect(log.x-log.w/2, log.y, log.w, 10);
+    }
+
+    // player physics
+    if (running){
+      player.vy += gravity*(dt/16);
+      player.y += player.vy*(dt/16);
+      player.x += 2.0*(dt/16);
+
+      // landing check
+      player.onLog = false;
+      for(const log of logs){
+        const withinX = Math.abs(player.x - log.x) < (log.w/2 - 10);
+        const nearY = (player.y >= log.y-8 && player.y <= log.y+16);
+        if (withinX && nearY && player.vy >= 0){
+          player.y = log.y;
+          player.vy = 0;
+          if (!player.onLog){
+            // count only when newly landing
+            score++;
+            updateHUD();
+            if (score>=8) win();
+          }
+          player.onLog = true;
+          break;
+        }
+      }
+
+      // lose if fell too low
+      if (player.y > window.innerHeight*0.90) lose();
+    }
+
+    // draw player
+    ctx.font="32px system-ui";
+    ctx.textAlign="center";
+    ctx.fillText("🧍‍♀️", player.x, player.y-10);
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>

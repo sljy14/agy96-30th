@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Tampines Maze</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .mazeLine{opacity:0.9;font-size:14px;line-height:1.35}
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+  <div class="centerOverlay" id="overlay">
+    <div class="card">
+      <div class="big">Tampines: the maze 😵‍💫</div>
+      <div class="small mazeLine" id="line"></div>
+      <div class="choices">
+        <button id="leftBtn">Left ⬅️</button>
+        <button id="rightBtn">Right ➡️</button>
+      </div>
+      <div class="hint" id="hint">Pick the right turns to get out.</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  const steps = [
+    { text:"You exit the MRT and immediately… everything looks the same. Choose:", correct:"left" },
+    { text:"You see two corridors. One feels like it loops forever. Choose:", correct:"right" },
+    { text:"Final fork. One leads to sunlight. Choose:", correct:"left" },
+  ];
+  let i = 0;
+
+  const line = document.getElementById("line");
+  const hint = document.getElementById("hint");
+  function render(){
+    line.textContent = steps[i].text;
+    hint.textContent = `Step ${i+1} / ${steps.length}`;
+  }
+  render();
+
+  function choose(side){
+    if (side === steps[i].correct){
+      i++;
+      if (i >= steps.length){
+        location.href = "./map.html";
+        return;
+      }
+      render();
+    } else {
+      hint.textContent = "Try again! 😗";
+      i = 0;
+      setTimeout(render, 550);
+    }
+  }
+  document.getElementById("leftBtn").onclick = () => choose("left");
+  document.getElementById("rightBtn").onclick = () => choose("right");
+</script>
+</body>
+</html>

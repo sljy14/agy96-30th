@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Chinatown — Ingredients</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div>
+      <div class="title">Chinatown 🌶️</div>
+      <div class="sub">Let’s get you full of energy first!</div>
+    </div>
+    <div class="right">
+      <div>Score: <span id="score">0</span> / 10</div>
+      <div>Lives: <span id="lives">3</span></div>
+    </div>
+  </div>
+
+  <div class="centerOverlay" id="overlay">
+    <div class="card">
+      <div class="big" id="big">Ready? 🍜</div>
+      <div class="small" id="small">Tap LEFT/RIGHT to move. Catch ingredients, avoid 💣.</div>
+      <div class="hint">Tap to start</div>
+    </div>
+  </div>
+
+  <div class="zone" id="leftZone"></div>
+  <div class="zone" id="rightZone"></div>
+</div>
+
+<script type="module">
+  import { fitCanvas, rand, clamp, tapPrevent, setDone } from "./js/app.js";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
+  fitCanvas(canvas,ctx);
+
+  const scoreEl = document.getElementById("score");
+  const livesEl = document.getElementById("lives");
+  const overlay = document.getElementById("overlay");
+  const big = document.getElementById("big");
+  const small = document.getElementById("small");
+
+  const leftZone = document.getElementById("leftZone");
+  const rightZone = document.getElementById("rightZone");
+
+  let running=false, won=false;
+  let score=0, lives=3;
+
+  const player = { x: window.innerWidth/2, y: window.innerHeight*0.78, w: 36, h: 36 };
+  const items = []; // falling objects
+
+  function reset(){
+    score=0; lives=3; items.length=0;
+    player.x = window.innerWidth/2;
+    running=true; won=false;
+    overlay.style.display="none";
+    updateHUD();
+  }
+  function updateHUD(){
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+  }
+
+  function showOverlay(t, msg, hint="Tap to continue"){
+    big.textContent=t;
+    small.innerHTML=msg;
+    overlay.querySelector(".hint").textContent = hint;
+    overlay.style.display="flex";
+  }
+
+  function endWin(){
+    won=true; running=false;
+    setDone("chinatown", true);
+    showOverlay("Yum. Powered up ✨", "Energy: MAX 🍜<br/>Back to the map?", "Tap to go back");
+  }
+  function endLose(){
+    running=false;
+    showOverlay("Try again! 😗", "Bombs got you.<br/>One more round.", "Tap to retry");
+  }
+
+  overlay.addEventListener("click", ()=>{
+    if (won){ location.href="./map.html"; return; }
+    reset();
+  });
+
+  // Controls: tap left/right to move
+  function move(dir){
+    if (!running) return;
+    player.x += dir * 38;
+    player.x = clamp(player.x, player.w/2, window.innerWidth-player.w/2);
+  }
+  tapPrevent(leftZone, ()=>{ if(overlay.style.display!=="none" && !running){ reset(); return; } move(-1); });
+  tapPrevent(rightZone, ()=>{ if(overlay.style.display!=="none" && !running){ reset(); return; } move(+1); });
+
+  function spawn(){
+    const isBomb = Math.random()<0.22;
+    const emoji = isBomb ? "💣" : (["🌶️","🥬","🧄","🍗","🍜"][Math.floor(Math.random()*5)]);
+    items.push({
+      x: rand(20, window.innerWidth-20),
+      y: -20,
+      vy: rand(2.6, 4.2),
+      r: 18,
+      bomb: isBomb,
+      e: emoji
+    });
+  }
+
+  function collide(a,b){
+    return Math.abs(a.x-b.x) < (a.w/2 + b.r) && Math.abs(a.y-b.y) < (a.h/2 + b.r);
+  }
+
+  let last=0;
+  function loop(ts){
+    requestAnimationFrame(loop);
+    const dt = Math.min(32, ts-last || 16);
+    last=ts;
+
+    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+
+    // background hint of lanterns
+    ctx.globalAlpha=0.15;
+    ctx.fillStyle="#fff";
+    for(let i=0;i<8;i++){
+      ctx.fillRect(20+i*45, 90+(i%2)*22, 14, 14);
+    }
+    ctx.globalAlpha=1;
+
+    // player
+    ctx.font="32px system-ui";
+    ctx.textAlign="center";
+    ctx.fillText("🧍‍♀️", player.x, player.y);
+
+    if (!running) return;
+
+    // spawn rate
+    if (Math.random() < 0.05) spawn();
+
+    // items update/draw
+    ctx.font="28px system-ui";
+    for (let i=items.length-1;i>=0;i--){
+      const it = items[i];
+      it.y += it.vy * (dt/16);
+      ctx.fillText(it.e, it.x, it.y);
+
+      if (collide(player,it)){
+        items.splice(i,1);
+        if (it.bomb){
+          lives--;
+          updateHUD();
+          if (lives<=0) endLose();
+        } else {
+          score++;
+          updateHUD();
+          if (score>=10) endWin();
+        }
+        continue;
+      }
+      if (it.y > window.innerHeight+40) items.splice(i,1);
+    }
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>

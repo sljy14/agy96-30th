@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Stadium — Hurdles</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div>
+      <div class="title">Stadium 🏟️</div>
+      <div class="sub">Tap to jump barricades. Score 10!</div>
+    </div>
+    <div class="right">Score: <span id="score">0</span> / 10</div>
+  </div>
+
+  <div class="centerOverlay" id="overlay">
+    <div class="card">
+      <div class="big" id="big">Ready, set… 🏃‍♀️</div>
+      <div class="small" id="small">Tap to jump. Hit a barricade = Try again 😗</div>
+      <div class="hint">Tap to start</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { fitCanvas, rand, setDone } from "./js/app.js";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
+  fitCanvas(canvas,ctx);
+
+  const overlay = document.getElementById("overlay");
+  const big = document.getElementById("big");
+  const small = document.getElementById("small");
+  const scoreEl = document.getElementById("score");
+
+  let running=false, won=false;
+  let score=0;
+
+  const player = { x: 90, y: window.innerHeight*0.78, vy:0, onGround:true };
+  const gravity = 0.75, jumpV = -13;
+  const hurdles = [];
+
+  function hud(){ scoreEl.textContent = score; }
+  function show(t,msg,h="Tap to continue"){
+    big.textContent=t; small.innerHTML=msg;
+    overlay.querySelector(".hint").textContent=h;
+    overlay.style.display="flex";
+  }
+  function hide(){ overlay.style.display="none"; }
+
+  function reset(){
+    score=0; hud();
+    hurdles.length=0;
+    player.y=window.innerHeight*0.78; player.vy=0; player.onGround=true;
+    running=true; won=false; hide();
+  }
+
+  function win(){
+    running=false; won=true;
+    setDone("stadium", true);
+    show("Dusk victory 🌇✨", "You cleared it.<br/>Back to the map?", "Tap to go back");
+  }
+
+  function lose(){
+    running=false;
+    show("Try again! 😗", "You clipped a barricade.<br/>One more lap.", "Tap to retry");
+  }
+
+  document.addEventListener("click", ()=>{
+    if (overlay.style.display!=="none"){
+      if (won) location.href="./map.html";
+      else reset();
+      return;
+    }
+    if (!running) return;
+    if (player.onGround){
+      player.vy = jumpV;
+      player.onGround = false;
+    }
+  });
+
+  let lastSpawn=0;
+  function spawn(){
+    hurdles.push({ x: window.innerWidth+40, w: 26, h: rand(26, 42) });
+  }
+
+  let last=0;
+  function loop(ts){
+    requestAnimationFrame(loop);
+    const dt = Math.min(32, ts-last||16); last=ts;
+
+    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+
+    // dusk gradient overlay lines
+    ctx.globalAlpha=0.15;
+    ctx.fillStyle="#fff";
+    for(let i=0;i<12;i++) ctx.fillRect(0, 80+i*34, window.innerWidth, 1);
+    ctx.globalAlpha=1;
+
+    // track
+    ctx.globalAlpha=0.12; ctx.fillStyle="#fff";
+    ctx.fillRect(0, window.innerHeight*0.82, window.innerWidth, window.innerHeight*0.18);
+    ctx.globalAlpha=1;
+
+    // spawn hurdles
+    if (running){
+      lastSpawn += dt;
+      if (lastSpawn > 900 + Math.random()*500){
+        lastSpawn = 0;
+        spawn();
+      }
+    }
+
+    // update hurdles
+    for (let i=hurdles.length-1;i>=0;i--){
+      const h = hurdles[i];
+      if (running) h.x -= 5.2*(dt/16);
+      ctx.globalAlpha=0.95;
+      ctx.fillStyle="rgba(255,255,255,0.22)";
+      ctx.fillRect(h.x, window.innerHeight*0.78 - h.h, h.w, h.h);
+      ctx.globalAlpha=1;
+
+      // collision
+      const px = player.x, py = player.y;
+      const withinX = (px+18 > h.x && px-10 < h.x+h.w);
+      const hitY = (py > (window.innerHeight*0.78 - h.h));
+      if (running && withinX && hitY) lose();
+
+      if (h.x < -60) hurdles.splice(i,1);
+      // scoring when passed
+      if (running && !h.scored && h.x + h.w < player.x){
+        h.scored=true;
+        score++; hud();
+        if (score>=10) win();
+      }
+    }
+
+    // player physics
+    if (running){
+      player.vy += gravity*(dt/16);
+      player.y += player.vy*(dt/16);
+      if (player.y >= window.innerHeight*0.78){
+        player.y = window.innerHeight*0.78;
+        player.vy=0; player.onGround=true;
+      }
+    }
+
+    // player draw
+    ctx.font="34px system-ui";
+    ctx.textAlign="center";
+    ctx.fillText("🧍‍♀️", player.x, player.y);
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>

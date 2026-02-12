@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Map Hub</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    #mapWrap{position:absolute;inset:0;display:flex;flex-direction:column}
+    #topBar{padding:14px}
+    #prompt{font-weight:900;font-size:16px}
+    #promptSub{opacity:0.9;font-size:13px;margin-top:6px}
+    #grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
+    .tile{
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06);
+      border-radius:18px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .tile small{display:block;font-weight:700;opacity:0.85;margin-top:6px}
+    #char{
+      position:absolute;left:50%;top:55%;
+      transform:translate(-50%,-50%);
+      font-size:34px;
+      filter:drop-shadow(0 6px 0 rgba(0,0,0,0.25));
+      pointer-events:none;
+    }
+    @keyframes jump {
+      0%{transform:translate(-50%,-50%)}
+      50%{transform:translate(-50%,-70%)}
+      100%{transform:translate(-50%,-50%)}
+    }
+    .jumpOnce{animation:jump 0.28s ease-out 1}
+    .jumpTwice{animation:jump 0.28s ease-out 2}
+    #bottom{padding:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .doneTag{
+      position:absolute;top:10px;right:10px;
+      font-size:12px;font-weight:900;
+      background:rgba(0,0,0,0.35);
+      border:1px solid rgba(255,255,255,0.15);
+      padding:6px 8px;border-radius:999px;
+    }
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div class="bg"></div>
+
+  <div id="mapWrap">
+    <div id="topBar">
+      <div id="prompt">Prompt loading…</div>
+      <div id="promptSub"></div>
+    </div>
+
+    <div id="grid">
+      <div class="tile" data-place="chinatown">Chinatown 🌶️<small>Food power</small></div>
+      <div class="tile" data-place="macritchie">MacRitchie 🌲<small>Green mode</small></div>
+      <div class="tile" data-place="waterloo">Waterloo 🩰<small>Ballet time</small></div>
+      <div class="tile" data-place="stadium">Stadium 🏟️<small>Go go go</small></div>
+      <div id="char">🧍‍♀️✨</div>
+    </div>
+
+    <div id="bottom">
+      <button id="toRooftop" style="display:none">Go Rooftop 🌌</button>
+      <button onclick="location.href='./index.html'">Home</button>
+    </div>
+  </div>
+
+  <div class="centerOverlay" id="overlay" style="display:none">
+    <div class="card">
+      <div class="big" id="ovTitle"></div>
+      <div class="small" id="ovText"></div>
+      <div class="hint">Tap to continue</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { isDone, allLocationsDone, qs, setDone } from "./js/app.js";
+
+  const prompts = [
+    { text:"Click the place with the most mala energy 🌶️", answer:"chinatown" },
+    { text:"Click the place with the most greenery 🌲", answer:"macritchie" },
+    { text:"Click the place with the most discipline + grace 🩰", answer:"waterloo" },
+    { text:"Click the place where you’d jump over barricades 🏟️", answer:"stadium" },
+  ];
+
+  // Choose the next prompt that isn’t done yet
+  function currentPrompt(){
+    for (const p of prompts){
+      if (!isDone(p.answer)) return p;
+    }
+    // if all done, show rooftop unlock
+    return { text:"All cleared ✨ Go rooftop?", answer:"rooftop" };
+  }
+
+  const promptEl = qs("#prompt");
+  const promptSub = qs("#promptSub");
+  const overlay = qs("#overlay");
+  const ovTitle = qs("#ovTitle");
+  const ovText = qs("#ovText");
+  const char = qs("#char");
+  const toRooftop = qs("#toRooftop");
+
+  function refreshTiles(){
+    document.querySelectorAll(".tile").forEach(tile=>{
+      const place = tile.dataset.place;
+      tile.querySelectorAll(".doneTag").forEach(n=>n.remove());
+      if (isDone(place)){
+        const tag = document.createElement("div");
+        tag.className = "doneTag";
+        tag.textContent = "DONE ✅";
+        tile.appendChild(tag);
+      }
+    });
+
+    if (allLocationsDone()){
+      toRooftop.style.display = "inline-block";
+    }
+  }
+
+  function setPromptUI(){
+    const p = currentPrompt();
+    promptEl.textContent = p.text;
+    promptSub.textContent = allLocationsDone()
+      ? "All 4 cleared. Rooftop is unlocked 🌌"
+      : "Pick the correct place. Wrong = Try again + jump 2x 😗";
+  }
+
+  function showOverlay(title, text){
+    ovTitle.textContent = title;
+    ovText.innerHTML = text;
+    overlay.style.display = "flex";
+  }
+  function hideOverlay(){ overlay.style.display = "none"; }
+
+  function jump(times){
+    char.classList.remove("jumpOnce","jumpTwice");
+    void char.offsetWidth;
+    char.classList.add(times===2 ? "jumpTwice":"jumpOnce");
+  }
+
+  function goTo(place){
+    const url = {
+      chinatown:"./chinatown.html",
+      macritchie:"./macritchie.html",
+      waterloo:"./waterloo.html",
+      stadium:"./stadium.html",
+      rooftop:"./rooftop.html"
+    }[place];
+    location.href = url;
+  }
+
+  document.querySelectorAll(".tile").forEach(tile=>{
+    tile.addEventListener("click", ()=>{
+      const p = currentPrompt();
+      const pick = tile.dataset.place;
+
+      if (p.answer === "rooftop"){
+        goTo("rooftop");
+        return;
+      }
+
+      if (pick === p.answer){
+        jump(1);
+        showOverlay("Correct ✅", "Let’s go! ✨");
+        overlay.onclick = () => { overlay.onclick=null; hideOverlay(); goTo(pick); };
+      } else {
+        jump(2);
+        showOverlay("Try again! 😗", "Not this one.<br/>Read the prompt again.");
+        overlay.onclick = () => { overlay.onclick=null; hideOverlay(); setPromptUI(); };
+      }
+    });
+  });
+
+  toRooftop.onclick = () => goTo("rooftop");
+
+  // If user returns from a game, refresh
+  refreshTiles();
+  setPromptUI();
+</script>
+</body>
+</html>
