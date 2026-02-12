@@ -327,7 +327,15 @@ const prompts = [
 
 let promptIndex = Number(localStorage.getItem("mapPromptIndex") || 0);
 if (!Number.isFinite(promptIndex) || promptIndex < 0) promptIndex = 0;
-if (promptIndex >= prompts.length) promptIndex = 0;
+
+// ✅ allow an "end state" index after stadium
+// 0..3 = prompts, 4 = rooftop
+const END_INDEX = prompts.length; // 4
+if (promptIndex > END_INDEX) promptIndex = 0; // only reset if truly corrupted
+if (promptIndex === END_INDEX){
+  location.replace("./rooftop.html"); // change filename if yours is different
+}
+
 
 let current = prompts[promptIndex];
 
@@ -358,8 +366,8 @@ document.querySelectorAll(".spot").forEach(el=>{
     const pick = el.dataset.place;
     if (pick === current.correct){
       // advance prompt for next time you return to map
-      localStorage.setItem("mapPromptIndex", String(Math.min(promptIndex + 1, prompts.length - 1)));
-      location.href = current.next;
+      localStorage.setItem("mapPromptIndex", String(promptIndex + 1)); // ✅ allow 4
+location.href = current.next;
     } else {
       jumpTwice();
     }
