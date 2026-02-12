@@ -1,172 +1,645 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>MacRitchie — Logs</title>
-  <link rel="stylesheet" href="./css/style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Welcome to MacRitchie!</title>
+
+<style>
+  :root{
+    --maxw: 420px;
+    --stroke: rgba(255,255,255,0.14);
+  }
+
+  html,body{
+    margin:0;height:100%;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:#fff;
+    background:
+      radial-gradient(900px 520px at 50% 22%, rgba(120,255,235,0.12), transparent 62%),
+      radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 62%),
+      linear-gradient(160deg,#06202a,#070714);
+  }
+
+  .wrap{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:16px 14px 14px;
+    box-sizing:border-box;
+  }
+
+  h1{
+    margin:6px 0 6px;
+    font-weight:1000;
+    letter-spacing:-0.5px;
+    font-size:26px;
+    text-align:center;
+  }
+
+  .sub{
+    margin:0 0 8px;
+    opacity:0.86;
+    text-align:center;
+    font-size:13px;
+    line-height:1.25;
+  }
+
+  .hint{
+    margin:0 0 10px;
+    opacity:0.75;
+    text-align:center;
+    font-size:12px;
+  }
+
+  .titleBlock.hide{ display:none; }
+
+  .hud{
+    width:min(var(--maxw), 94vw);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:6px 0 10px;
+  }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--stroke);
+    background:rgba(0,0,0,0.20);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    font-weight:1000;
+    font-size:12px;
+  }
+
+  .stageCard{
+    width:min(var(--maxw), 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:12px;
+    box-sizing:border-box;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    aspect-ratio: 3 / 4;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.10) 65%, rgba(0,0,0,0.18) 100%),
+      linear-gradient(180deg, rgba(70,255,120,0.06), rgba(0,0,0,0.00)),
+      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06));
+  }
+
+  canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    image-rendering:pixelated;
+  }
+
+  .gameWrap.hide{ display:none; }
+  .hud.hide{ display:none; }
+
+  /* VIEW SCENE */
+  .winWrap{
+    width:min(var(--maxw), 94vw);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    margin-top:10px;
+  }
+  .winWrap.show{ display:flex; }
+
+  .winText{
+    width:min(var(--maxw), 94vw);
+    text-align:center;
+    font-weight:1000;
+    font-size:16px;
+    line-height:1.25;
+  }
+
+  .viewStage{
+    width:min(var(--maxw), 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:12px;
+    box-sizing:border-box;
+  }
+  .viewBox{
+    position:relative;
+    width:100%;
+    aspect-ratio: 3 / 2;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.10) 65%, rgba(0,0,0,0.18) 100%),
+      linear-gradient(180deg, rgba(255,140,80,0.12), rgba(0,0,0,0.00));
+  }
+
+  .btn{
+    width:min(var(--maxw), 94vw);
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.10);
+    color:#fff;
+    font-weight:1000;
+    font-size:16px;
+    letter-spacing:0.2px;
+  }
+  .btn:active{ transform:scale(0.98); }
+
+  @media (max-width: 360px){
+    h1{ font-size:24px; }
+    .sub{ font-size:12px; }
+    .pill{ font-size:11px; }
+  }
+</style>
 </head>
+
 <body>
-<div id="wrap">
-  <div class="bg"></div>
-  <canvas id="c"></canvas>
+<div class="wrap">
 
-  <div class="hud">
-    <div>
-      <div class="title">MacRitchie 🌲</div>
-      <div class="sub">Tap to jump log-to-log. Get 8!</div>
-    </div>
-    <div class="right">Score: <span id="score">0</span> / 8</div>
+  <div class="titleBlock" id="titleBlock">
+    <h1>Welcome to the MacRitchie hike! ⛰️</h1>
+    <div class="sub">Tap to jump onto the logs!</div>
+    <div class="hint">Land on 10 logs to reach the top.</div>
   </div>
 
-  <div class="centerOverlay" id="overlay">
-    <div class="card">
-      <div class="big" id="big">Breathe. Jump. 🌿</div>
-      <div class="small" id="small">Tap anywhere to jump. Miss a log = Try again 😗</div>
-      <div class="hint">Tap to start</div>
+  <div class="hud" id="gameHud">
+    <div class="pill">🪵 Logs: <span id="score">0</span> / 10</div>
+    <div class="pill">🙈 Slips: <span id="miss">0</span></div>
+  </div>
+
+  <div class="stageCard" id="gameWrap">
+    <div class="stage">
+      <canvas id="game" width="360" height="480" aria-label="MacRitchie log hopping game"></canvas>
     </div>
   </div>
+
+  <!-- VIEW SCENE -->
+  <div class="winWrap" id="winWrap">
+    <div class="winText">Enjoy the view, you deserve it! 🌅</div>
+    <div class="viewStage">
+      <div class="viewBox">
+        <canvas id="view" width="360" height="240" aria-label="MacRitchie sunrise view scene"></canvas>
+      </div>
+    </div>
+    <button class="btn" id="nextBtn">I’m ready for my next adventure!</button>
+  </div>
+
 </div>
 
-<script type="module">
-  import { fitCanvas, rand, clamp, setDone } from "./js/app.js";
+<audio id="bgm" src="./arcade.mp3" loop></audio>
 
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
-  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
-  fitCanvas(canvas,ctx);
+<script>
+/* =========================
+   SETTINGS YOU CAN EDIT
+========================= */
+const MAP_FILE = "./map.html";
+const NEXT_PROMPT_INDEX = 2; // 2 = Waterloo
+const WIN_TARGET = 10;
 
-  const overlay = document.getElementById("overlay");
-  const big = document.getElementById("big");
-  const small = document.getElementById("small");
-  const scoreEl = document.getElementById("score");
+/* =========================
+   BGM
+========================= */
+const bgm = document.getElementById("bgm");
+bgm.volume = 0.5;
+function tryPlayBgm(){
+  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
+}
+if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
-  let running=false, won=false;
-  let score=0;
+/* =========================
+   GAME CANVAS
+========================= */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  const player = { x: 90, y: window.innerHeight*0.62, vy:0, onLog:true };
-  const gravity = 0.65;
-  const jumpV = -12.5;
+const scoreEl = document.getElementById("score");
+const missEl  = document.getElementById("miss");
 
-  let logs = [];
-  function makeLogs(){
-    logs = [];
-    let x = 120;
-    for(let i=0;i<10;i++){
-      logs.push({
-        x, y: rand(window.innerHeight*0.55, window.innerHeight*0.72),
-        w: rand(70, 110),
-        vx: rand(-1.2, 1.2)
-      });
-      x += rand(120, 160);
-    }
-  }
+const titleBlock = document.getElementById("titleBlock");
+const gameWrap = document.getElementById("gameWrap");
+const gameHud  = document.getElementById("gameHud");
 
-  function updateHUD(){ scoreEl.textContent = score; }
+const winWrap = document.getElementById("winWrap");
+const nextBtn = document.getElementById("nextBtn");
 
-  function showOverlay(t,msg,hint="Tap to continue"){
-    big.textContent=t; small.innerHTML=msg;
-    overlay.querySelector(".hint").textContent=hint;
-    overlay.style.display="flex";
-  }
-  function hideOverlay(){ overlay.style.display="none"; }
+const W = canvas.width, H = canvas.height;
 
-  function reset(){
-    score=0; won=false; running=true;
-    player.x=90; player.y=window.innerHeight*0.62; player.vy=0; player.onLog=true;
-    makeLogs(); updateHUD(); hideOverlay();
-  }
+let running = true;
+let score = 0;
+let slips = 0;
 
-  function win(){
-    won=true; running=false;
-    setDone("macritchie", true);
-    showOverlay("Enjoy the view 🌞", "You deserve it.<br/>Take 5 seconds ✨", "Tap to go back to map");
-    setTimeout(()=>{}, 5000);
-  }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
-  function lose(){
-    running=false;
-    showOverlay("Try again! 😗", "You slipped. One more run.", "Tap to retry");
-  }
+/* =========================
+   GLASSES (single source of truth)
+   draws: --[]-[]-- with bridge + temple arms
+========================= */
+function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
+  g.fillStyle = "#000";
 
-  document.addEventListener("click", ()=>{
-    if (overlay.style.display!=="none"){
-      if (won) location.href="./map.html";
-      else reset();
-      return;
-    }
-    if (!running) return;
-    if (player.onLog){
-      player.vy = jumpV;
-      player.onLog = false;
-    }
+  // left lens
+  g.fillRect(x, y, lensW, thick);
+  g.fillRect(x, y, thick, lensH);
+  g.fillRect(x, y + lensH - thick, lensW, thick);
+  g.fillRect(x + lensW - thick, y, thick, lensH);
+
+  // right lens
+  const rx = x + lensW + gap;
+  g.fillRect(rx, y, lensW, thick);
+  g.fillRect(rx, y, thick, lensH);
+  g.fillRect(rx, y + lensH - thick, lensW, thick);
+  g.fillRect(rx + lensW - thick, y, thick, lensH);
+
+  // bridge
+  const bridgeW = Math.max(3, Math.floor(gap * 0.7));
+  const bridgeX = x + lensW;
+  const bridgeY = y + Math.floor(lensH/2) - 1;
+  g.fillRect(bridgeX, bridgeY, bridgeW, 2);
+
+  // temple arms
+  g.fillRect(x - armLen, y + 2, armLen, 2);
+  g.fillRect(rx + lensW, y + 2, armLen, 2);
+}
+
+/* =========================
+   AVATAR (same small gameplay vibe)
+   - fixed x (no left/right movement)
+========================= */
+function drawAgyGameplay(px, py){
+  const x = px, y = py;
+
+  // hair (simple rectangular blob)
+  ctx.fillStyle="#000";
+  ctx.fillRect(x-18, y-60, 36, 60);
+
+  // face
+  ctx.fillStyle="#f1c7a6";
+  ctx.fillRect(x-12, y-44, 24, 28);
+
+  // glasses (temple arms + bridge)
+  const gy = y - 38;
+  const lensW = 11, lensH = 9;
+  const thick = 2, gap = 5, armLen = 4;
+  const leftX = x - 14;
+  drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
+
+  // shirt
+  ctx.fillStyle="#c1272d";
+  ctx.fillRect(x-16, y-16, 32, 22);
+
+  // sleeves
+  ctx.fillRect(x-22, y-16, 6, 8);
+  ctx.fillRect(x+16, y-16, 6, 8);
+
+  // arms
+  ctx.fillStyle="#f1c7a6";
+  ctx.fillRect(x-22, y-8, 6, 10);
+  ctx.fillRect(x+16, y-8, 6, 10);
+
+  // pants + shoes
+  ctx.fillStyle="#0e0e18";
+  ctx.fillRect(x-16, y+6, 32, 16);
+
+  ctx.fillStyle="#fff";
+  ctx.fillRect(x-14, y+22, 28, 5);
+}
+
+/* =========================
+   GAME: LOG HOPPING
+========================= */
+// Player stays centered; you only tap to jump.
+const player = {
+  x: W/2,
+  y: H - 90,
+  w: 26,
+  h: 44,
+  vy: 0,
+  grounded: false,
+  lastLogId: null
+};
+
+const GRAV = 0.55;
+const JUMP = -9.5;
+
+// Logs move DOWN to simulate climbing up.
+const logs = [];
+let logIdSeq = 1;
+let scrollSpeed = 1.4; // increases slightly with score
+
+function spawnLog(y){
+  logs.push({
+    id: logIdSeq++,
+    x: W/2 + rand(-20, 20), // tiny wobble
+    y,
+    w: 92,
+    h: 14
   });
+}
 
-  makeLogs();
+// initial logs
+spawnLog(H - 40);
+spawnLog(H - 140);
+spawnLog(H - 240);
+spawnLog(H - 340);
+spawnLog(H - 440);
 
-  let last=0;
-  function loop(ts){
-    requestAnimationFrame(loop);
-    const dt = Math.min(32, ts-last||16); last=ts;
+// Tap = jump (only if grounded)
+function jump(){
+  tryPlayBgm();
+  if(player.grounded){
+    player.vy = JUMP;
+    player.grounded = false;
+  }
+}
 
-    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+canvas.addEventListener("mousedown", ()=> jump());
+canvas.addEventListener("touchstart", (e)=>{ jump(); }, {passive:true});
 
-    // sky + canopy specks
-    ctx.globalAlpha=0.18;
-    ctx.fillStyle="#fff";
-    for(let i=0;i<40;i++){
-      ctx.fillRect((i*43)%window.innerWidth, 60+((i*97)%180), 2, 2);
+/* =========================
+   BACKGROUND (dense forest + monkeys)
+========================= */
+function drawForest(bgStep){
+  ctx.clearRect(0,0,W,H);
+
+  // deep fog gradient
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, "rgba(10,30,22,0.75)");
+  g.addColorStop(1, "rgba(2,8,10,0.85)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  // far trees (static silhouettes, slight parallax)
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  for(let i=0;i<10;i++){
+    const tx = i*40 + ((bgStep*0.3)%40);
+    ctx.fillRect(tx-8, 40, 16, H);
+    ctx.fillRect(tx-16, 60, 32, 10);
+  }
+
+  // mid foliage blobs
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = "rgba(0,0,0,0.45)";
+  for(let i=0;i<7;i++){
+    const bx = i*55 + ((bgStep*0.6)%55);
+    ctx.fillRect(bx-20, 120, 40, 80);
+    ctx.fillRect(bx-28, 140, 56, 12);
+  }
+  ctx.globalAlpha = 1;
+
+  // little monkeys (simple pixels)
+  function monkey(mx,my,s){
+    ctx.save();
+    ctx.translate(mx,my);
+    ctx.scale(s,s);
+    ctx.fillStyle="#2a2a2a";
+    ctx.fillRect(-6,-10,12,10); // body
+    ctx.fillRect(-4,-18,8,8);   // head
+    ctx.fillStyle="#444";
+    ctx.fillRect(-8,-12,4,6);   // arm
+    ctx.fillRect(4,-12,4,6);
+    ctx.fillStyle="#2a2a2a";
+    ctx.fillRect(6,-8,8,2);     // tail
+    ctx.restore();
+  }
+  monkey(60, 170, 1);
+  monkey(300, 210, 1);
+}
+
+/* =========================
+   DRAW LOGS
+========================= */
+function drawLog(l){
+  ctx.save();
+  ctx.translate(l.x, l.y);
+
+  // log body
+  ctx.fillStyle="rgba(120,80,40,0.90)";
+  ctx.fillRect(-l.w/2, -l.h/2, l.w, l.h);
+
+  // highlights
+  ctx.fillStyle="rgba(255,255,255,0.10)";
+  ctx.fillRect(-l.w/2+6, -l.h/2+3, l.w-12, 3);
+
+  // end caps
+  ctx.fillStyle="rgba(80,50,25,0.95)";
+  ctx.fillRect(-l.w/2, -l.h/2, 6, l.h);
+  ctx.fillRect(l.w/2-6, -l.h/2, 6, l.h);
+
+  ctx.restore();
+}
+
+/* =========================
+   COLLISION
+========================= */
+function aabb(ax,ay,aw,ah,bx,by,bw,bh){
+  return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+}
+
+/* =========================
+   LOOP
+========================= */
+let tick = 0;
+
+function step(){
+  if(!running) return;
+  tick++;
+
+  // speed ramps slightly
+  scrollSpeed = 1.4 + Math.min(1.6, score*0.12);
+
+  // background parallax step
+  drawForest(tick);
+
+  // move logs down
+  for(const l of logs){
+    l.y += scrollSpeed;
+  }
+
+  // recycle logs
+  for(let i=logs.length-1;i>=0;i--){
+    if(logs[i].y > H + 40){
+      logs.splice(i,1);
+      spawnLog(-40);
     }
-    ctx.globalAlpha=1;
+  }
 
-    // move logs (gentle)
-    for(const log of logs){
-      log.x -= 2.0*(dt/16);
-      log.y += log.vx*(dt/16);
-      if (log.y < window.innerHeight*0.50 || log.y > window.innerHeight*0.78) log.vx *= -1;
-    }
+  // physics
+  player.vy += GRAV;
+  player.y += player.vy;
 
-    // draw logs
-    ctx.fillStyle="rgba(255,255,255,0.18)";
-    for(const log of logs){
-      ctx.fillRect(log.x-log.w/2, log.y, log.w, 10);
-    }
+  // floor fail (slip)
+  if(player.y > H + 80){
+    slips++;
+    missEl.textContent = slips;
+    // reset player
+    player.y = H - 90;
+    player.vy = 0;
+    player.grounded = false;
+    player.lastLogId = null;
+  }
 
-    // player physics
-    if (running){
-      player.vy += gravity*(dt/16);
-      player.y += player.vy*(dt/16);
-      player.x += 2.0*(dt/16);
+  // collision with logs (landing only from above)
+  player.grounded = false;
+  const pBox = { x: player.x - player.w/2, y: player.y - player.h, w: player.w, h: player.h };
 
-      // landing check
-      player.onLog = false;
-      for(const log of logs){
-        const withinX = Math.abs(player.x - log.x) < (log.w/2 - 10);
-        const nearY = (player.y >= log.y-8 && player.y <= log.y+16);
-        if (withinX && nearY && player.vy >= 0){
-          player.y = log.y;
-          player.vy = 0;
-          if (!player.onLog){
-            // count only when newly landing
-            score++;
-            updateHUD();
-            if (score>=8) win();
+  for(const l of logs){
+    const lBox = { x: l.x - l.w/2, y: l.y - l.h/2, w: l.w, h: l.h };
+
+    // only consider landing if falling
+    if(player.vy >= 0 && aabb(pBox.x,pBox.y,pBox.w,pBox.h, lBox.x,lBox.y,lBox.w,lBox.h)){
+      const prevY = player.y - player.vy;
+      const prevBottom = prevY;
+      const logTop = l.y - l.h/2;
+
+      if(prevBottom <= logTop + 6){
+        // land
+        player.y = logTop;
+        player.vy = 0;
+        player.grounded = true;
+
+        // score only if it's a new log
+        if(player.lastLogId !== l.id){
+          player.lastLogId = l.id;
+          score++;
+          scoreEl.textContent = score;
+
+          if(score >= WIN_TARGET){
+            win();
+            return;
           }
-          player.onLog = true;
-          break;
         }
       }
-
-      // lose if fell too low
-      if (player.y > window.innerHeight*0.90) lose();
     }
-
-    // draw player
-    ctx.font="32px system-ui";
-    ctx.textAlign="center";
-    ctx.fillText("🧍‍♀️", player.x, player.y-10);
   }
-  requestAnimationFrame(loop);
+
+  // draw logs
+  for(const l of logs) drawLog(l);
+
+  // draw player (feet sit on player.y)
+  drawAgyGameplay(player.x, player.y);
+
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+
+/* =========================
+   WIN FLOW
+========================= */
+function win(){
+  running = false;
+  titleBlock.classList.add("hide");
+  gameWrap.classList.add("hide");
+  gameHud.classList.add("hide");
+  winWrap.classList.add("show");
+  startViewScene();
+}
+
+/* =========================
+   VIEW SCENE (sunrise + moving clouds + back-facing agy)
+========================= */
+const viewCanvas = document.getElementById("view");
+const vtx = viewCanvas.getContext("2d");
+let viewTick = 0;
+
+function drawBackAgy(g, cx, cy){
+  // cy is ground line
+  // back hair
+  g.fillStyle="#000";
+  g.fillRect(cx-18, cy-52, 36, 52);
+
+  // body (back)
+  g.fillStyle="#c1272d";
+  g.fillRect(cx-16, cy-18, 32, 18);
+
+  // legs
+  g.fillStyle="#0e0e18";
+  g.fillRect(cx-14, cy-8, 28, 10);
+
+  // shoes
+  g.fillStyle="#fff";
+  g.fillRect(cx-12, cy+2, 24, 4);
+}
+
+function drawView(){
+  viewTick++;
+
+  const W2 = viewCanvas.width;
+  const H2 = viewCanvas.height;
+  vtx.clearRect(0,0,W2,H2);
+
+  // sunrise sky
+  const sky = vtx.createLinearGradient(0,0,0,H2);
+  sky.addColorStop(0, "rgba(255,180,120,0.35)");
+  sky.addColorStop(0.55, "rgba(120,180,255,0.18)");
+  sky.addColorStop(1, "rgba(0,0,0,0.35)");
+  vtx.fillStyle = sky;
+  vtx.fillRect(0,0,W2,H2);
+
+  // sun glow
+  vtx.fillStyle="rgba(255,210,140,0.25)";
+  vtx.fillRect(W2/2-45, 40, 90, 40);
+
+  // side trees silhouettes
+  vtx.fillStyle="rgba(0,0,0,0.40)";
+  vtx.fillRect(0, 60, 32, 180);
+  vtx.fillRect(W2-32, 60, 32, 180);
+  vtx.fillRect(16, 90, 12, 150);
+  vtx.fillRect(W2-28, 90, 12, 150);
+
+  // moving clouds
+  const c1 = (viewTick*0.6) % (W2+120) - 60;
+  const c2 = (viewTick*0.4) % (W2+160) - 80;
+
+  function cloud(x,y){
+    vtx.fillStyle="rgba(255,255,255,0.18)";
+    vtx.fillRect(x, y, 60, 14);
+    vtx.fillRect(x+10, y-8, 42, 10);
+    vtx.fillRect(x+18, y+6, 34, 8);
+  }
+  cloud(c1, 55);
+  cloud(W2 - c2 - 90, 80);
+
+  // grass patch
+  vtx.fillStyle="rgba(60,120,70,0.40)";
+  vtx.fillRect(0, H2-58, W2, 58);
+  vtx.fillStyle="rgba(0,0,0,0.18)";
+  vtx.fillRect(0, H2-58, W2, 10);
+
+  // agy sitting (back facing)
+  drawBackAgy(vtx, W2/2, H2-38);
+
+  if(winWrap.classList.contains("show")){
+    requestAnimationFrame(drawView);
+  }
+}
+function startViewScene(){ drawView(); }
+
+/* =========================
+   BUTTON: back to map
+========================= */
+nextBtn.addEventListener("click", ()=>{
+  localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
+  location.href = MAP_FILE;
+});
 </script>
 </body>
 </html>
