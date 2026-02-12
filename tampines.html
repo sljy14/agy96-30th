@@ -1,63 +1,411 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>Tampines Maze</title>
-  <link rel="stylesheet" href="./css/style.css">
-  <style>
-    .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-    .mazeLine{opacity:0.9;font-size:14px;line-height:1.35}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Tampines Maze</title>
+
+<style>
+  html,body{
+    margin:0;height:100%;
+    background:
+      radial-gradient(900px 520px at 50% 25%, rgba(120,255,235,0.14), transparent 62%),
+      radial-gradient(900px 520px at 50% 75%, rgba(160,120,255,0.12), transparent 62%),
+      linear-gradient(160deg,#06202a,#070714);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:#fff;
+  }
+
+  .wrap{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:18px 16px 14px;
+    box-sizing:border-box;
+  }
+
+  h1{
+    margin:6px 0 6px;
+    font-weight:1000;
+    letter-spacing:-0.5px;
+    font-size:28px;
+    text-align:center;
+  }
+  .sub{
+    margin:0 0 12px;
+    opacity:0.86;
+    text-align:center;
+    font-size:14px;
+  }
+
+  .gameCard{
+    width:min(380px, 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:14px;
+    box-sizing:border-box;
+  }
+
+  .hudRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:10px;
+  }
+  .hint{
+    font-size:12px;
+    opacity:0.9;
+  }
+  .badge{
+    font-weight:900;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.08);
+    white-space:nowrap;
+  }
+
+  /* ===== Maze canvas area ===== */
+  .stage{
+    position:relative;
+    width:100%;
+    aspect-ratio: 3 / 4; /* nice phone ratio */
+    border-radius:14px;
+    overflow:hidden;
+    background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.28));
+    border:1px solid rgba(255,255,255,0.10);
+  }
+
+  canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    image-rendering:pixelated;
+  }
+
+  /* avatar label overlay */
+  .nameLabel{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-weight:900;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(0,0,0,0.28);
+  }
+
+  /* Controls */
+  .controls{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin-top:12px;
+  }
+
+  .btn{
+    width:140px;
+    padding:14px 0;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.10);
+    color:#fff;
+    font-weight:1000;
+    font-size:16px;
+    letter-spacing:0.6px;
+    text-align:center;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active{ transform:scale(0.98); }
+
+  /* success overlay */
+  .overlay{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,0.55);
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    width:min(360px, 92vw);
+    border-radius:18px;
+    padding:18px 16px;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.16);
+    text-align:center;
+  }
+  .modal h2{ margin:0 0 8px; font-size:22px; font-weight:1000; }
+  .modal p{ margin:0 0 14px; opacity:0.9; }
+  .next{
+    width:100%;
+    padding:14px 0;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-weight:1000;
+    font-size:16px;
+  }
+  .next:active{ transform:scale(0.98); }
+
+  /* Small screens safety */
+  @media (max-height: 720px){
+    h1{ font-size:24px; }
+    .gameCard{ padding:12px; }
+  }
+</style>
 </head>
+
 <body>
-<div id="wrap">
-  <div class="bg"></div>
-  <div class="centerOverlay" id="overlay">
-    <div class="card">
-      <div class="big">Tampines: the maze 😵‍💫</div>
-      <div class="small mazeLine" id="line"></div>
-      <div class="choices">
-        <button id="leftBtn">Left ⬅️</button>
-        <button id="rightBtn">Right ➡️</button>
-      </div>
-      <div class="hint" id="hint">Pick the right turns to get out.</div>
+<div class="wrap">
+  <h1>First Stop: Tampines 🏡</h1>
+  <div class="sub">Turn left/right to get outside of the house.</div>
+
+  <div class="gameCard">
+    <div class="hudRow">
+      <div class="hint">You always walk forward. You only steer ⬅️ ➡️</div>
+      <div class="badge" id="steps">0 moves</div>
+    </div>
+
+    <div class="stage">
+      <div class="nameLabel">agy96</div>
+      <canvas id="cv" width="240" height="320"></canvas>
+    </div>
+
+    <div class="controls">
+      <div class="btn" id="leftBtn">⬅️ Left</div>
+      <div class="btn" id="rightBtn">Right ➡️</div>
     </div>
   </div>
 </div>
 
-<script type="module">
-  const steps = [
-    { text:"You exit the MRT and immediately… everything looks the same. Choose:", correct:"left" },
-    { text:"You see two corridors. One feels like it loops forever. Choose:", correct:"right" },
-    { text:"Final fork. One leads to sunlight. Choose:", correct:"left" },
-  ];
-  let i = 0;
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>You found it! 🗺️</h2>
+    <p>Map unlocked. Next up: choose your destination.</p>
+    <button class="next" id="nextBtn">Go to Map</button>
+  </div>
+</div>
 
-  const line = document.getElementById("line");
-  const hint = document.getElementById("hint");
-  function render(){
-    line.textContent = steps[i].text;
-    hint.textContent = `Step ${i+1} / ${steps.length}`;
-  }
-  render();
+<!-- BGM -->
+<audio id="bgm" src="./arcade.mp3" loop></audio>
 
-  function choose(side){
-    if (side === steps[i].correct){
-      i++;
-      if (i >= steps.length){
-        location.href = "./map.html";
-        return;
+<script>
+/* =========================
+   BGM logic (works after first tap on mobile)
+========================= */
+const bgm = document.getElementById("bgm");
+bgm.volume = 0.5;
+
+function tryPlayBgm(){
+  bgm.play().then(()=> {
+    localStorage.setItem("bgmPlaying", "true");
+  }).catch(()=>{});
+}
+if (localStorage.getItem("bgmPlaying")==="true") {
+  tryPlayBgm();
+} else {
+  // will start on first button tap
+}
+
+/* =========================
+   Maze game (simple tile maze)
+   - player auto-walks down every tick
+   - user can move left/right
+========================= */
+
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+
+const TILE = 16;              // keep it pixel-y
+const COLS = 15;              // 240/16
+const ROWS = 20;              // 320/16
+
+// 1 = wall/hedge, 0 = path
+// This maze is “inspired by” your image: thick outer hedge + internal corridors.
+// Exit is bottom-right opening.
+const maze = [
+  "111111111111111",
+  "100000000000001",
+  "101111011111101",
+  "101000010000101",
+  "101011110110101",
+  "101010000010101",
+  "101010111010101",
+  "101010101010101",
+  "101000101000101",
+  "101111101111101",
+  "100000001000001",
+  "111111101011111",
+  "100000101010001",
+  "101110101011101",
+  "101000100000101",
+  "101011111110101",
+  "101000000010101",
+  "101111111010101",
+  "100000000000001",
+  "111111111111101" // exit at (13,19) because last char is 1, but we open (13,19) below
+].map(r => r.split("").map(n => +n));
+
+// Open an exit tile (path) near bottom-right
+const EXIT = { x: 13, y: 19 };
+maze[EXIT.y][EXIT.x] = 0;
+
+// Player starts near top middle
+let p = { x: 1, y: 1 };
+let moves = 0;
+let won = false;
+
+const stepsEl = document.getElementById("steps");
+const overlay = document.getElementById("overlay");
+
+function inBounds(x,y){
+  return x>=0 && y>=0 && x<COLS && y<ROWS;
+}
+function isWall(x,y){
+  return !inBounds(x,y) || maze[y][x] === 1;
+}
+
+function draw(){
+  // background grass
+  ctx.clearRect(0,0,cv.width,cv.height);
+
+  // subtle grass pixels
+  ctx.fillStyle = "#2f8f3b";
+  ctx.fillRect(0,0,cv.width,cv.height);
+
+  // draw walls (hedges)
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      if(maze[y][x]===1){
+        // hedge tile
+        ctx.fillStyle = "#1f6a2b";
+        ctx.fillRect(x*TILE,y*TILE,TILE,TILE);
+        // top highlight
+        ctx.fillStyle = "rgba(255,255,255,0.06)";
+        ctx.fillRect(x*TILE,y*TILE,TILE,3);
+      } else {
+        // path sparkle
+        if ((x+y)%7===0){
+          ctx.fillStyle = "rgba(255,255,255,0.08)";
+          ctx.fillRect(x*TILE+6,y*TILE+6,2,2);
+        }
       }
-      render();
-    } else {
-      hint.textContent = "Try again! 😗";
-      i = 0;
-      setTimeout(render, 550);
     }
   }
-  document.getElementById("leftBtn").onclick = () => choose("left");
-  document.getElementById("rightBtn").onclick = () => choose("right");
+
+  // exit marker (map emoji)
+  ctx.font = "14px system-ui";
+  ctx.fillText("🗺️", EXIT.x*TILE+1, EXIT.y*TILE+14);
+
+  // draw player (mini agy96)
+  drawAgy(p.x*TILE, p.y*TILE);
+
+  // vignette
+  const g = ctx.createLinearGradient(0,0,0,cv.height);
+  g.addColorStop(0,"rgba(0,0,0,0.10)");
+  g.addColorStop(1,"rgba(0,0,0,0.22)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,cv.width,cv.height);
+}
+
+function drawAgy(px, py){
+  // simple pixel avatar inside 1 tile footprint-ish (we use 1x2 tiles area)
+  // head
+  ctx.fillStyle="#000";                // hair block
+  ctx.fillRect(px+2,py+0,12,14);
+  ctx.fillStyle="#f1c7a6";             // face
+  ctx.fillRect(px+4,py+4,8,8);
+
+  // glasses
+  ctx.fillStyle="#000";
+  ctx.fillRect(px+4,py+7,3,2);
+  ctx.fillRect(px+9,py+7,3,2);
+  ctx.fillRect(px+7,py+8,2,1);
+
+  // body (red tee)
+  ctx.fillStyle="#c1272d";
+  ctx.fillRect(px+4,py+13,8,9);
+
+  // pants
+  ctx.fillStyle="#0e0e18";
+  ctx.fillRect(px+4,py+22,8,8);
+
+  // shoes
+  ctx.fillStyle="#fff";
+  ctx.fillRect(px+4,py+30,8,2);
+}
+
+function setMoves(){
+  stepsEl.textContent = `${moves} moves`;
+}
+
+// move left/right via buttons
+function tryMove(dx){
+  if (won) return;
+  const nx = p.x + dx;
+  const ny = p.y;
+  if (!isWall(nx,ny)){
+    p.x = nx;
+    moves++;
+    setMoves();
+    draw();
+    checkWin();
+  }
+}
+
+// auto-walk forward (down)
+function autoForward(){
+  if (won) return;
+  const nx = p.x;
+  const ny = p.y + 1;
+  if (!isWall(nx,ny)){
+    p.y = ny;
+    moves++;
+    setMoves();
+    draw();
+    checkWin();
+  } else {
+    // if blocked, player waits — user must steer
+  }
+}
+
+function checkWin(){
+  if (p.x === EXIT.x && p.y === EXIT.y){
+    won = true;
+    overlay.classList.add("show");
+  }
+}
+
+// Controls: touch + click
+document.getElementById("leftBtn").addEventListener("click", () => { tryPlayBgm(); tryMove(-1); });
+document.getElementById("rightBtn").addEventListener("click", () => { tryPlayBgm(); tryMove(1); });
+
+// Keyboard support (desktop)
+window.addEventListener("keydown", (e)=>{
+  if (e.key === "ArrowLeft") tryMove(-1);
+  if (e.key === "ArrowRight") tryMove(1);
+});
+
+// Game loop
+draw();
+setMoves();
+const tick = setInterval(autoForward, 380);
+
+// Next
+document.getElementById("nextBtn").addEventListener("click", ()=>{
+  location.href = "./map.html";
+});
 </script>
 </body>
 </html>
