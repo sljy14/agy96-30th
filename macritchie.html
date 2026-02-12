@@ -6,52 +6,47 @@
   <title>MacRitchie Hike</title>
   <style>
     :root{
-      --bg1:#071c1f;
-      --bg2:#0b2a2f;
-      --panel: rgba(10, 22, 28, 0.55);
-      --panel2: rgba(255,255,255,0.08);
-      --text:#eaf6ff;
-      --muted: rgba(234,246,255,0.75);
-      --accent:#9ff0c8;
-      --warn:#ffb870;
+      --cardBg1: rgba(7, 24, 28, 0.74);
+      --cardBg2: rgba(5, 18, 22, 0.70);
+      --border: rgba(255,255,255,0.12);
+      --text: #eaf6ff;
+      --muted: rgba(234,246,255,0.78);
     }
-
-    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background: radial-gradient(1200px 600px at 50% -10%, #123d45, #06161a);
       color: var(--text);
     }
-
     .wrap{
       min-height:100svh;
       display:flex;
       justify-content:center;
       padding: 18px 14px 24px;
     }
-
     .card{
-      width:min(520px, 100%);
+      width:min(560px, 100%);
       border-radius: 26px;
-      background: linear-gradient(180deg, rgba(7, 24, 28, 0.7), rgba(5, 18, 22, 0.65));
-      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, var(--cardBg1), var(--cardBg2));
+      border: 1px solid var(--border);
       box-shadow: 0 30px 80px rgba(0,0,0,0.55);
       overflow:hidden;
     }
+    .page{ display:none; }
+    .page.active{ display:block; }
 
     .header{
-      padding: 22px 18px 14px;
+      padding: 22px 18px 12px;
       text-align:center;
     }
-
     h1{
       margin: 0 0 6px;
       font-size: 34px;
-      line-height: 1.1;
-      font-weight: 800;
+      line-height: 1.08;
+      font-weight: 900;
       letter-spacing: -0.02em;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
     .sub{
       margin: 0;
@@ -66,7 +61,6 @@
       justify-content: space-between;
       padding: 0 16px 12px;
     }
-
     .pill{
       flex:1;
       display:flex;
@@ -77,34 +71,28 @@
       padding: 12px 12px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.2px;
       min-width: 0;
     }
     .pill small{
       color: var(--muted);
-      font-weight: 600;
-      letter-spacing: 0;
+      font-weight: 700;
     }
 
-    .stage{
-      padding: 10px 14px 16px;
-    }
-
+    .stage{ padding: 10px 14px 16px; }
     .frame{
       border-radius: 22px;
-      background: rgba(0,0,0,0.18);
+      background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.10);
       padding: 10px;
     }
-
     canvas{
       width:100%;
       height:auto;
       display:block;
       border-radius: 18px;
-      image-rendering: pixelated;
-      background: #061319;
+      background: #dff3ff;
       touch-action: manipulation;
     }
 
@@ -116,24 +104,23 @@
       justify-content:center;
       flex-wrap: wrap;
     }
-
     .btn{
       appearance:none;
       border: 0;
       border-radius: 999px;
       padding: 14px 16px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.2px;
       background: rgba(255,255,255,0.10);
       color: var(--text);
       border: 1px solid rgba(255,255,255,0.16);
       cursor:pointer;
     }
-    .btn:active{ transform: translateY(1px); }
     .btn.primary{
       background: linear-gradient(180deg, rgba(159,240,200,0.22), rgba(159,240,200,0.12));
       border: 1px solid rgba(159,240,200,0.28);
     }
+    .btn:active{ transform: translateY(1px); }
     .hint{
       width: 100%;
       text-align:center;
@@ -142,19 +129,12 @@
       line-height: 1.35;
     }
 
-    /* Pages */
-    .page{ display:none; }
-    .page.active{ display:block; }
-
-    /* View page */
-    .viewWrap{
-      padding: 14px;
-    }
+    .viewWrap{ padding: 14px; }
     .viewTitle{
       text-align:center;
       font-weight: 900;
       font-size: 22px;
-      margin: 6px 0 10px;
+      margin: 6px 0 8px;
       letter-spacing: -0.01em;
     }
     .viewSubtitle{
@@ -167,493 +147,562 @@
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.10);
       overflow:hidden;
-      background: rgba(0,0,0,0.18);
-    }
-    .viewCanvas{
-      width:100%;
-      display:block;
-      image-rendering: pixelated;
-      background:#061319;
+      background: rgba(0,0,0,0.16);
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
+<div class="wrap">
+  <div class="card">
 
-      <!-- GAME PAGE -->
-      <section id="gamePage" class="page active">
-        <div class="header">
-          <h1>Welcome to the MacRitchie hike! 🥾</h1>
-          <p class="sub">Tap to jump onto the logs.<br/>Land on 10 logs to reach the top.</p>
+    <!-- GAME PAGE -->
+    <section id="gamePage" class="page active">
+      <div class="header">
+        <h1>Welcome to the MacRitchie hike! 🥾</h1>
+        <p class="sub">Tap to jump onto the logs.<br/>Land on 10 logs to reach the top.</p>
+      </div>
+
+      <div class="hud">
+        <div class="pill"><span>🪵</span><span>Logs:&nbsp;<strong id="logsCount">0</strong>&nbsp;<small>/ 10</small></span></div>
+        <div class="pill"><span>🙈</span><span>Slips:&nbsp;<strong id="slipsCount">0</strong></span></div>
+      </div>
+
+      <div class="stage">
+        <div class="frame">
+          <canvas id="game" width="390" height="560" aria-label="MacRitchie hike game"></canvas>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button id="startBtn" class="btn primary">Start</button>
+        <button id="resetBtn" class="btn">Reset</button>
+        <div class="hint">Tap when your avatar is aligned with the next moving log.</div>
+      </div>
+    </section>
+
+    <!-- VIEW PAGE -->
+    <section id="viewPage" class="page">
+      <div class="viewWrap">
+        <div class="viewTitle">Enjoy the view, you deserve it! 🌅</div>
+        <div class="viewSubtitle">MacRitchie complete — you made it to the top.</div>
+
+        <div class="viewFrame">
+          <canvas id="view" width="390" height="460" aria-label="View scene"></canvas>
         </div>
 
-        <div class="hud">
-          <div class="pill"><span>🪵</span><span>Logs:&nbsp;<strong id="logsCount">0</strong>&nbsp;<small>/ 10</small></span></div>
-          <div class="pill"><span>🙈</span><span>Slips:&nbsp;<strong id="slipsCount">0</strong></span></div>
+        <div class="footer" style="padding-top:14px;">
+          <button id="nextBtn" class="btn primary">I’m ready for my next adventure!</button>
+          <button id="replayBtn" class="btn">Replay MacRitchie</button>
         </div>
+      </div>
+    </section>
 
-        <div class="stage">
-          <div class="frame">
-            <canvas id="game" width="360" height="520" aria-label="MacRitchie hike game"></canvas>
-          </div>
-        </div>
-
-        <div class="footer">
-          <button id="startBtn" class="btn primary">Start</button>
-          <button id="resetBtn" class="btn">Reset</button>
-          <div class="hint">
-            Tip: logs move left-right. Tap at the right moment to land cleanly.
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW PAGE -->
-      <section id="viewPage" class="page">
-        <div class="viewWrap">
-          <div class="viewTitle">Enjoy the view, you deserve it! 🌅</div>
-          <div class="viewSubtitle">MacRitchie complete — you made it to the top.</div>
-
-          <div class="viewFrame">
-            <canvas id="view" class="viewCanvas" width="360" height="420" aria-label="View scene"></canvas>
-          </div>
-
-          <div class="footer" style="padding-top:14px;">
-            <button id="nextBtn" class="btn primary">I’m ready for my next adventure!</button>
-            <button id="replayBtn" class="btn">Replay MacRitchie</button>
-          </div>
-        </div>
-      </section>
-
-    </div>
   </div>
+</div>
 
 <script>
-/* =========================
-   MACRITCHIE — PIXEL ARCADE
-   =========================
-   Mechanics:
-   - Logs move side-to-side
-   - Tap to jump to the next log
-   - Success if your x overlaps the target log at tap moment
-   - After 10 successful landings -> view page
-*/
-
 (() => {
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
+  // ===== DOM =====
+  const gamePage = document.getElementById("gamePage");
+  const viewPage = document.getElementById("viewPage");
 
   const logsCountEl = document.getElementById("logsCount");
   const slipsCountEl = document.getElementById("slipsCount");
 
   const startBtn = document.getElementById("startBtn");
   const resetBtn = document.getElementById("resetBtn");
+  const replayBtn = document.getElementById("replayBtn");
+  const nextBtn = document.getElementById("nextBtn");
 
-  const gamePage = document.getElementById("gamePage");
-  const viewPage = document.getElementById("viewPage");
+  // ===== CANVAS =====
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
 
   const viewCanvas = document.getElementById("view");
   const vctx = viewCanvas.getContext("2d");
-  vctx.imageSmoothingEnabled = false;
+  vctx.imageSmoothingEnabled = true;
 
-  const nextBtn = document.getElementById("nextBtn");
-  const replayBtn = document.getElementById("replayBtn");
-
-  // ------- GAME CONFIG -------
+  // ===== GAME CONFIG =====
   const GOAL = 10;
-  const SLIP_LIMIT = 999; // no forced game over unless you want it
-  const LOG_W = 110;
-  const LOG_H = 16;
 
+  // Shorter logs (you asked shorter length)
+  const LOG_W = 88;
+  const LOG_H = 14;
+
+  // Upward spacing between logs (controls "hike" feel)
+  const LOG_GAP_Y = 68;
+
+  // Avatar size (keep consistent with your Chinatown-style chunky avatar)
+  const AVATAR_W = 44;
+  const AVATAR_H = 72;
+
+  // Camera / world
   const world = {
     running: false,
-    time: 0,
+    state: "idle",       // idle | playing | falling | win
+    t: 0,
     landed: 0,
     slips: 0,
-    currentIndex: 0,      // which target log we are jumping to next
-    flash: 0,             // small feedback flash
-    shake: 0,             // small shake on slip
+    currentIndex: 0,     // next log to land on
+    camY: 0,             // camera offset
+    camTargetY: 0,
+    shake: 0,
   };
 
+  // Avatar (centered X like a timing game, like your existing mini-games)
   const player = {
-    // fixed-ish position: this is a TIMING game (logs move)
     x: canvas.width * 0.5,
-    y: canvas.height - 88,
-    w: 20,
-    h: 26,
-    colorTop: "#f3d6c3",
-    colorBody: "#d74a4a",
-    colorHair: "#161616",
-    glasses: true,
+    y: 0,                // will be placed at start
+    vy: 0,
+    onLogY: 0,
+    // Colors (tweak if Chinatown avatar uses different palette)
+    hair: "#2b1f17",
+    skin: "#f0c7a6",
+    shirt: "#d64a4a",
+    pants: "#1d1f25",
+    shoe: "#ffffff"
   };
 
   let logs = [];
   let birds = [];
 
-  // ------- HELPERS -------
-  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const randi = (a, b) => Math.floor(rand(a, b));
+  // ===== HELPERS =====
+  const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
+  const rand = (a,b)=>a + Math.random()*(b-a);
+  const randi = (a,b)=>Math.floor(rand(a,b));
 
-  function resetGame() {
-    world.running = false;
-    world.time = 0;
-    world.landed = 0;
-    world.slips = 0;
-    world.currentIndex = 0;
-    world.flash = 0;
-    world.shake = 0;
-
-    // Create 10 logs stacked upward
-    logs = [];
-    const startY = canvas.height - 120;
-    const gapY = 38;
-
-    for (let i = 0; i < GOAL; i++) {
-      const y = startY - i * gapY;
-      logs.push({
-        x: rand(18, canvas.width - LOG_W - 18),
-        y,
-        w: LOG_W,
-        h: LOG_H,
-        dir: Math.random() > 0.5 ? 1 : -1,
-        speed: rand(1.0, 2.2),
-        tint: randi(0, 2), // for slight color variation
-      });
-    }
-
-    // Player starts near bottom; first target is logs[0]
-    player.x = canvas.width * 0.5;
-    player.y = canvas.height - 88;
-
-    // Birds (3) with simple A/B/C bob positions
-    birds = Array.from({ length: 3 }, (_, i) => ({
-      x: rand(30, canvas.width - 30),
-      y: rand(60, 170),
-      baseY: 0,
-      phase: randi(0, 3),  // 0=A,1=B,2=C
-      t: 0,
-      speed: rand(0.6, 1.1),
-    }));
-    birds.forEach(b => b.baseY = b.y);
-
-    updateHUD();
-    draw(); // paint initial frame
-  }
-
-  function updateHUD() {
+  function setHUD(){
     logsCountEl.textContent = String(world.landed);
     slipsCountEl.textContent = String(world.slips);
   }
 
-  // ------- INPUT (Tap / Click) -------
-  function onTap() {
+  function goToViewPage(){
+    gamePage.classList.remove("active");
+    viewPage.classList.add("active");
+  }
+  function goToGamePage(){
+    viewPage.classList.remove("active");
+    gamePage.classList.add("active");
+  }
+
+  // ===== SETUP =====
+  function resetGame(){
+    world.running = false;
+    world.state = "idle";
+    world.t = 0;
+    world.landed = 0;
+    world.slips = 0;
+    world.currentIndex = 0;
+    world.camY = 0;
+    world.camTargetY = 0;
+    world.shake = 0;
+
+    // Build logs upward. logs[0] is the first target above the start zone.
+    logs = [];
+    const baseY = canvas.height - 140; // first log near bottom
+    for (let i=0;i<GOAL;i++){
+      const y = baseY - i * LOG_GAP_Y;
+      logs.push({
+        x: rand(22, canvas.width - LOG_W - 22),
+        y,
+        w: LOG_W,
+        h: LOG_H,
+        dir: Math.random()>0.5 ? 1 : -1,
+        sp: rand(0.9, 1.8) + (i*0.03), // slight difficulty ramp
+      });
+    }
+
+    // Player starts standing on the "ground" slightly below first log
+    player.x = canvas.width * 0.5;
+    player.y = canvas.height - 88;
+    player.vy = 0;
+
+    // Birds (daytime) bob A/B/C like you asked
+    birds = Array.from({length: 4}, () => ({
+      x: rand(20, canvas.width-20),
+      y: rand(60, 170),
+      baseY: 0,
+      phase: randi(0,3),
+      t: 0,
+      sp: rand(0.6, 1.1),
+      drift: rand(0.08, 0.16)
+    }));
+    birds.forEach(b => b.baseY = b.y);
+
+    setHUD();
+    draw(); // initial frame
+  }
+
+  // ===== INPUT =====
+  function onTap(){
     if (!world.running) return;
+    if (world.state !== "playing") return;
     if (world.currentIndex >= GOAL) return;
 
     const target = logs[world.currentIndex];
 
-    // Overlap check in X
-    const pxL = player.x - player.w/2;
-    const pxR = player.x + player.w/2;
+    // Check overlap based on player's X (timing game)
+    const pxL = player.x - AVATAR_W/2 + 6;
+    const pxR = player.x + AVATAR_W/2 - 6;
     const lxL = target.x;
     const lxR = target.x + target.w;
 
     const overlap = (pxR > lxL) && (pxL < lxR);
 
-    if (overlap) {
-      // SUCCESS: snap player to log
-      player.y = target.y - player.h + 2;
+    if (overlap){
+      // SUCCESS: move player up onto the log
+      player.y = target.y - AVATAR_H + 6;
       world.landed++;
       world.currentIndex++;
-      world.flash = 10;
-      updateHUD();
+      setHUD();
 
-      if (world.landed >= GOAL) {
-        // Transition to view page
+      // Camera should follow upward progression
+      // Keep player around lower-mid of screen (like “hiking upwards”)
+      world.camTargetY = (canvas.height*0.55) - player.y;
+
+      if (world.landed >= GOAL){
+        world.state = "win";
+        world.running = false;
         setTimeout(() => {
-          world.running = false;
           goToViewPage();
-        }, 220);
+        }, 250);
       }
     } else {
-      // SLIP
+      // MISS -> FALL -> RESTART
       world.slips++;
-      world.shake = 8;
-      updateHUD();
-
-      // optional: small "fall" feeling (just a quick drop)
-      player.y = clamp(player.y + 14, 40, canvas.height - 50);
-
-      if (world.slips >= SLIP_LIMIT) {
-        // you can add a game-over screen if you ever want
-      }
+      setHUD();
+      world.state = "falling";
+      world.shake = 10;
+      player.vy = 6; // start falling velocity
     }
   }
 
-  canvas.addEventListener("pointerdown", (e) => {
+  canvas.addEventListener("pointerdown", (e)=>{
     e.preventDefault();
     onTap();
-  }, { passive: false });
+  }, {passive:false});
 
-  // ------- UPDATE LOOP -------
-  function update(dt) {
-    world.time += dt;
+  // ===== UPDATE LOOP =====
+  function update(dt){
+    world.t += dt;
 
-    // logs move left-right
-    for (const log of logs) {
-      log.x += log.dir * log.speed;
-      if (log.x <= 10) { log.x = 10; log.dir *= -1; }
-      if (log.x + log.w >= canvas.width - 10) { log.x = canvas.width - 10 - log.w; log.dir *= -1; }
+    // Logs move side-to-side
+    for (const log of logs){
+      log.x += log.dir * log.sp;
+      if (log.x <= 14){ log.x = 14; log.dir *= -1; }
+      if (log.x + log.w >= canvas.width - 14){ log.x = canvas.width - 14 - log.w; log.dir *= -1; }
     }
 
-    // birds bob between A/B/C positions + drift a tiny bit
-    for (const b of birds) {
-      b.t += dt * b.speed;
-      // switch phase occasionally for that “A->B->C” vibe
-      if (b.t >= 18) {
+    // Birds bob A/B/C and drift
+    for (const b of birds){
+      b.t += dt * b.sp;
+      if (b.t >= 18){
         b.t = 0;
         b.phase = (b.phase + 1) % 3;
       }
-      const offsets = [-4, 0, 3];
+      const offsets = [-5, 0, 4];
       b.y = b.baseY + offsets[b.phase];
-
-      // tiny lateral drift (wrap)
-      b.x += 0.12 * b.speed;
-      if (b.x > canvas.width + 10) b.x = -10;
+      b.x += b.drift * dt;
+      if (b.x > canvas.width + 18) b.x = -18;
     }
 
-    if (world.flash > 0) world.flash -= 1;
+    // Falling state
+    if (world.state === "falling"){
+      player.y += player.vy;
+      player.vy += 0.55; // gravity feel
+
+      // If falls below screen -> restart
+      if (player.y > canvas.height + 80){
+        // restart immediately (you said fall = restart)
+        hardRestart();
+      }
+    }
+
+    // Camera easing
+    world.camY += (world.camTargetY - world.camY) * 0.08;
+
     if (world.shake > 0) world.shake -= 1;
   }
 
-  // ------- DRAW (PIXEL ART) -------
-  function drawBackground() {
-    // Pixel “forest” vibe (2D arcade, not soft)
-    // Sky gradient blocks
-    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    g.addColorStop(0, "#08242a");
-    g.addColorStop(0.55, "#061b20");
-    g.addColorStop(1, "#041015");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function hardRestart(){
+    // Reset run state but keep slip count (or reset slip too? you asked restart game; keeping slips is still fine visually)
+    // If you want slips reset to 0 on restart, uncomment next line:
+    // world.slips = 0;
 
-    // Vertical “trees” columns
-    for (let x = 0; x < canvas.width; x += 18) {
-      const w = 18;
-      const shade = (x/18) % 2 === 0 ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.03)";
-      ctx.fillStyle = shade;
-      ctx.fillRect(x, 0, w, canvas.height);
+    world.running = true;
+    world.state = "playing";
+    world.currentIndex = 0;
+    world.landed = 0;
+    world.camY = 0;
+    world.camTargetY = 0;
+    setHUD();
+
+    // Re-randomize log positions for a true restart feel
+    const baseY = canvas.height - 140;
+    for (let i=0;i<GOAL;i++){
+      logs[i].x = rand(22, canvas.width - LOG_W - 22);
+      logs[i].y = baseY - i * LOG_GAP_Y;
+      logs[i].dir = Math.random()>0.5 ? 1 : -1;
+      logs[i].sp  = rand(0.9, 1.8) + (i*0.03);
     }
 
-    // Dark canopy blocks near top
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    for (let i=0;i<12;i++){
-      const bx = i * 32;
-      ctx.fillRect(bx, 60 + (i%2)*8, 34, 26);
-    }
-
-    // Hanging vines (pixel strings)
-    ctx.fillStyle = "rgba(121, 214, 148, 0.18)";
-    for (let i=0;i<10;i++){
-      const vx = randi(0, canvas.width);
-      const len = randi(60, 170);
-      for (let y=0;y<len;y+=6){
-        ctx.fillRect(vx, y, 2, 4);
-      }
-    }
+    player.x = canvas.width * 0.5;
+    player.y = canvas.height - 88;
+    player.vy = 0;
   }
 
-  function drawBird(b) {
-    // tiny pixel bird (like a V)
+  // ===== DRAWING =====
+  function drawDayForestBackground(){
+    // Day sky gradient (matches your Image 2 vibe)
+    const g = ctx.createLinearGradient(0,0,0,canvas.height);
+    g.addColorStop(0, "#c8f0ff");
+    g.addColorStop(0.55, "#b7f1d1");
+    g.addColorStop(1, "#75c79a");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // Distant canopy blobs
+    ctx.fillStyle = "rgba(66, 156, 120, 0.26)";
+    for (let i=0;i<9;i++){
+      ctx.beginPath();
+      ctx.ellipse(i*55 + 25, 135 + (i%2)*10, 50, 26, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // Distant vertical trunks
+    ctx.fillStyle = "rgba(32, 92, 76, 0.22)";
+    for (let x=10; x<canvas.width; x+=48){
+      ctx.fillRect(x, 120, 20, canvas.height-120);
+    }
+
+    // Mid bushes layer
+    ctx.fillStyle = "rgba(55, 155, 105, 0.40)";
+    for (let i=0;i<10;i++){
+      ctx.beginPath();
+      ctx.ellipse(i*44 + 20, 260 + (i%2)*8, 46, 24, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // Foreground trees (2 big trunks like reference)
+    drawTree(40, 160, 95, 320);
+    drawTree(canvas.width - 135, 155, 95, 330);
+
+    // Ground strip (not visible much, but helps)
+    ctx.fillStyle = "rgba(64, 112, 80, 0.50)";
+    ctx.fillRect(0, canvas.height-50, canvas.width, 50);
+  }
+
+  function drawTree(x, y, w, h){
+    // trunk
+    ctx.fillStyle = "rgba(149, 101, 72, 0.95)";
+    ctx.fillRect(x + w*0.35, y + 80, w*0.28, h - 80);
+
+    // branch left
+    ctx.fillRect(x + w*0.18, y + 125, w*0.22, 18);
+    // branch right
+    ctx.fillRect(x + w*0.58, y + 140, w*0.20, 18);
+
+    // canopy
+    ctx.fillStyle = "rgba(74, 168, 100, 0.95)";
+    ctx.beginPath(); ctx.ellipse(x + w*0.5, y + 70, w*0.55, 46, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + w*0.30, y + 85, w*0.45, 40, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + w*0.70, y + 90, w*0.42, 38, 0, 0, Math.PI*2); ctx.fill();
+  }
+
+  function drawBird(b){
+    // small flying bird "V"
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
     const x = Math.round(b.x);
     const y = Math.round(b.y);
-    ctx.fillStyle = "rgba(234,246,255,0.75)";
     ctx.fillRect(x, y, 2, 2);
-    ctx.fillRect(x-3, y+1, 2, 2);
-    ctx.fillRect(x+3, y+1, 2, 2);
+    ctx.fillRect(x-4, y+2, 2, 2);
+    ctx.fillRect(x+4, y+2, 2, 2);
   }
 
-  function drawLogs() {
-    for (const log of logs) {
-      // simple pixel log plank with a darker underside
-      const base = log.tint === 0 ? "#a56a3a" : (log.tint === 1 ? "#9b5f34" : "#b1723e");
-      ctx.fillStyle = base;
-      ctx.fillRect(Math.round(log.x), Math.round(log.y), log.w, log.h);
+  function drawLog(log){
+    // wood plank (shorter)
+    ctx.fillStyle = "#a76636";
+    ctx.fillRect(log.x, log.y, log.w, log.h);
 
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.fillRect(Math.round(log.x), Math.round(log.y + log.h - 4), log.w, 4);
+    // underside shadow
+    ctx.fillStyle = "rgba(0,0,0,0.22)";
+    ctx.fillRect(log.x, log.y + log.h - 4, log.w, 4);
 
-      // light grain lines
-      ctx.fillStyle = "rgba(255,255,255,0.10)";
-      ctx.fillRect(Math.round(log.x + 10), Math.round(log.y + 5), log.w - 20, 1);
-      ctx.fillRect(Math.round(log.x + 14), Math.round(log.y + 9), log.w - 28, 1);
-    }
+    // subtle grain lines
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fillRect(log.x + 10, log.y + 5, log.w - 20, 1);
+    ctx.fillRect(log.x + 14, log.y + 9, log.w - 28, 1);
   }
 
-  function drawPlayer() {
-    const px = Math.round(player.x - player.w/2);
-    const py = Math.round(player.y);
+  function drawAvatar(){
+    // "Chinatown style" chunky avatar (clean, not tiny pixel)
+    const x = player.x - AVATAR_W/2;
+    const y = player.y;
 
     // shadow
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    ctx.fillRect(px + 2, py + player.h + 4, player.w - 4, 3);
+    ctx.fillStyle = "rgba(0,0,0,0.20)";
+    ctx.fillRect(x + 8, y + AVATAR_H + 8, AVATAR_W - 16, 5);
 
-    // hair / head
-    ctx.fillStyle = player.colorHair;
-    ctx.fillRect(px + 2, py, player.w - 4, 8);
+    // hair
+    ctx.fillStyle = player.hair;
+    ctx.fillRect(x + 8, y + 4, AVATAR_W - 16, 18);
 
-    ctx.fillStyle = player.colorTop;
-    ctx.fillRect(px + 4, py + 6, player.w - 8, 10);
+    // face
+    ctx.fillStyle = player.skin;
+    ctx.fillRect(x + 10, y + 18, AVATAR_W - 20, 22);
 
     // glasses
-    ctx.fillStyle = "rgba(0,0,0,0.75)";
-    ctx.fillRect(px + 4, py + 9, 5, 2);
-    ctx.fillRect(px + player.w - 9, py + 9, 5, 2);
-    ctx.fillRect(px + 9, py + 9, 2, 1);
+    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillRect(x + 12, y + 26, 10, 4);
+    ctx.fillRect(x + AVATAR_W - 22, y + 26, 10, 4);
+    ctx.fillRect(x + (AVATAR_W/2) - 2, y + 27, 4, 2);
 
-    // body
-    ctx.fillStyle = player.colorBody;
-    ctx.fillRect(px + 2, py + 16, player.w - 4, 10);
+    // shirt
+    ctx.fillStyle = player.shirt;
+    ctx.fillRect(x + 8, y + 40, AVATAR_W - 16, 22);
 
-    // legs
-    ctx.fillStyle = "#0f1113";
-    ctx.fillRect(px + 4, py + 26, 5, 8);
-    ctx.fillRect(px + player.w - 9, py + 26, 5, 8);
+    // pants
+    ctx.fillStyle = player.pants;
+    ctx.fillRect(x + 12, y + 62, 12, 18);
+    ctx.fillRect(x + AVATAR_W - 24, y + 62, 12, 18);
+
+    // shoes
+    ctx.fillStyle = player.shoe;
+    ctx.fillRect(x + 12, y + 78, 12, 4);
+    ctx.fillRect(x + AVATAR_W - 24, y + 78, 12, 4);
   }
 
-  function drawTopBanner() {
-    // subtle “target” indicator for next log
-    if (world.currentIndex < GOAL) {
-      const t = logs[world.currentIndex];
-      ctx.fillStyle = "rgba(159,240,200,0.25)";
-      ctx.fillRect(Math.round(t.x), Math.round(t.y - 6), t.w, 3);
-    }
-
-    if (world.flash > 0) {
-      ctx.fillStyle = "rgba(159,240,200,0.10)";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-    }
-  }
-
-  function draw() {
-    // small shake on slip
-    const shakeX = world.shake > 0 ? (Math.random() * 4 - 2) : 0;
-    const shakeY = world.shake > 0 ? (Math.random() * 4 - 2) : 0;
+  function draw(){
+    const shakeX = world.shake > 0 ? (Math.random()*6 - 3) : 0;
+    const shakeY = world.shake > 0 ? (Math.random()*6 - 3) : 0;
 
     ctx.save();
     ctx.translate(shakeX, shakeY);
 
-    drawBackground();
+    // Background (no camera)
+    drawDayForestBackground();
     birds.forEach(drawBird);
-    drawLogs();
-    drawPlayer();
-    drawTopBanner();
 
+    // Apply camera to logs + avatar (so we actually climb upwards)
+    ctx.save();
+    ctx.translate(0, world.camY);
+
+    // Logs
+    for (const log of logs) drawLog(log);
+
+    // Highlight next target log subtly
+    if (world.currentIndex < GOAL){
+      const t = logs[world.currentIndex];
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      ctx.fillRect(t.x, t.y - 6, t.w, 3);
+    }
+
+    // Avatar
+    drawAvatar();
+
+    ctx.restore();
     ctx.restore();
   }
 
-  // ------- RAF LOOP -------
+  // ===== GAME LOOP =====
   let last = 0;
-  function loop(ts) {
+  function loop(ts){
     if (!last) last = ts;
-    const dt = Math.min(33, ts - last); // cap dt
+    const dt = Math.min(33, ts - last);
     last = ts;
 
-    if (world.running) {
+    if (world.running){
       update(dt);
     }
     draw();
-
     requestAnimationFrame(loop);
   }
 
-  // ------- VIEW PAGE SCENE -------
+  // ===== START / RESET =====
+  startBtn.addEventListener("click", ()=>{
+    if (world.running) return;
+    world.running = true;
+    world.state = "playing";
+    startBtn.textContent = "Running…";
+    startBtn.disabled = true;
+    startBtn.style.opacity = "0.7";
+  });
+
+  resetBtn.addEventListener("click", ()=>{
+    startBtn.textContent = "Start";
+    startBtn.disabled = false;
+    startBtn.style.opacity = "1";
+    resetGame();
+  });
+
+  replayBtn.addEventListener("click", ()=>{
+    goToGamePage();
+    startBtn.textContent = "Start";
+    startBtn.disabled = false;
+    startBtn.style.opacity = "1";
+    resetGame();
+  });
+
+  nextBtn.addEventListener("click", ()=>{
+    // Hook to your next location page
+    // window.location.href = "next.html";
+    alert("Hook this to your next adventure page.");
+  });
+
+  // ===== VIEW PAGE (Dcop-like nice scene) =====
   const view = {
-    t: 0,
     clouds: [
-      { x: -80, y: 60, s: 0.6, sp: 0.18 },
-      { x: 90, y: 95, s: 0.8, sp: 0.12 },
-      { x: 220, y: 70, s: 0.7, sp: 0.14 }
-    ]
+      { x: -120, y: 70,  s: 1.0, sp: 0.18 },
+      { x:  40,  y: 115, s: 0.8, sp: 0.12 },
+      { x:  220, y: 85,  s: 0.9, sp: 0.14 }
+    ],
+    petals: Array.from({length: 24}, () => ({
+      x: rand(0, viewCanvas.width),
+      y: rand(-30, viewCanvas.height),
+      r: rand(4,7),
+      sp: rand(0.08, 0.20),
+      drift: rand(-0.06, 0.06),
+      a: rand(0.10, 0.22)
+    }))
   };
 
-  function drawViewScene(dt) {
-    view.t += dt;
-
-    const W = viewCanvas.width, H = viewCanvas.height;
-
-    // simple arcade sunset sky (similar to your dcop vibe)
-    const g = vctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "#76c8ff");
-    g.addColorStop(0.45, "#ffd28c");
-    g.addColorStop(1, "#12424b");
-    vctx.fillStyle = g;
-    vctx.fillRect(0,0,W,H);
-
-    // sun
-    vctx.fillStyle = "#ffd35a";
-    vctx.fillRect(280, 40, 48, 48);
-
-    // clouds (pixel blobs) moving
-    for (const c of view.clouds) {
-      c.x += c.sp * dt;
-      if (c.x > W + 80) c.x = -90;
-
-      drawPixelCloud(vctx, c.x, c.y, c.s);
-    }
-
-    // grass patch
-    vctx.fillStyle = "#2b7a43";
-    vctx.fillRect(0, H - 110, W, 110);
-    vctx.fillStyle = "rgba(0,0,0,0.20)";
-    vctx.fillRect(0, H - 110, W, 6);
-
-    // distant “view” blocks (simple skyline / canopy)
-    vctx.fillStyle = "rgba(0,0,0,0.25)";
-    for (let i=0;i<8;i++){
-      vctx.fillRect(i*52 + 4, H - 165 - (i%2)*8, 44, 40);
-    }
-
-    // sitting character (agy96) looking at view
-    drawSittingPixelPerson(vctx, 150, H - 140);
+  function drawCloud(c, x, y, s){
+    c.save();
+    c.globalAlpha = 0.92;
+    c.fillStyle = "white";
+    c.beginPath();
+    c.ellipse(x + 40*s, y + 20*s, 40*s, 18*s, 0, 0, Math.PI*2);
+    c.ellipse(x + 70*s, y + 18*s, 34*s, 16*s, 0, 0, Math.PI*2);
+    c.ellipse(x + 18*s, y + 22*s, 26*s, 14*s, 0, 0, Math.PI*2);
+    c.fill();
+    c.restore();
   }
 
-  function drawPixelCloud(c, x, y, s) {
-    const px = Math.round(x), py = Math.round(y);
-    c.fillStyle = "rgba(255,255,255,0.85)";
-    const w = Math.round(90*s), h = Math.round(26*s);
-    c.fillRect(px, py, w, h);
-    c.fillRect(px + Math.round(12*s), py - Math.round(10*s), Math.round(32*s), Math.round(16*s));
-    c.fillRect(px + Math.round(34*s), py - Math.round(14*s), Math.round(40*s), Math.round(20*s));
-    c.fillRect(px + Math.round(56*s), py - Math.round(8*s), Math.round(28*s), Math.round(14*s));
-  }
+  function drawSittingAvatar(c, x, y){
+    // same chunky style, but sitting
+    // x,y = anchor near grass
+    const w = 54, h = 72;
 
-  function drawSittingPixelPerson(c, x, y) {
-    // x,y = top-left-ish anchor
-    const px = Math.round(x), py = Math.round(y);
+    // head + hair
+    c.fillStyle = player.hair;
+    c.fillRect(x + 10, y + 6, w - 20, 16);
 
-    // hair/head
-    c.fillStyle = "#161616";
-    c.fillRect(px + 10, py, 28, 10);
+    c.fillStyle = player.skin;
+    c.fillRect(x + 12, y + 20, w - 24, 20);
 
-    c.fillStyle = "#f3d6c3";
-    c.fillRect(px + 12, py + 8, 24, 14);
+    // shirt
+    c.fillStyle = player.shirt;
+    c.fillRect(x + 10, y + 40, w - 20, 18);
 
-    // body
-    c.fillStyle = "#d74a4a";
-    c.fillRect(px + 10, py + 22, 28, 14);
+    // legs folded
+    c.fillStyle = player.pants;
+    c.fillRect(x + 12, y + 58, 16, 10);
+    c.fillRect(x + 26, y + 62, 20, 10);
 
-    // legs (sitting)
-    c.fillStyle = "#0f1113";
-    c.fillRect(px + 10, py + 36, 14, 8);
-    c.fillRect(px + 24, py + 40, 16, 8);
-
-    // small white shoe line
-    c.fillStyle = "#eaf6ff";
-    c.fillRect(px + 24, py + 46, 16, 2);
+    c.fillStyle = "white";
+    c.fillRect(x + 26, y + 72, 20, 3);
   }
 
   let viewLast = 0;
@@ -662,55 +711,60 @@
     const dt = Math.min(33, ts - viewLast);
     viewLast = ts;
 
-    if (viewPage.classList.contains("active")) {
-      drawViewScene(dt);
+    if (!viewPage.classList.contains("active")){
+      requestAnimationFrame(viewLoop);
+      return;
     }
+
+    const W = viewCanvas.width, H = viewCanvas.height;
+
+    // Dcop-like sky gradient
+    const g = vctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, "#7fd6ff");
+    g.addColorStop(0.55, "#dff6ff");
+    g.addColorStop(1, "#7ddf9c");
+    vctx.fillStyle = g;
+    vctx.fillRect(0,0,W,H);
+
+    // Sun
+    vctx.fillStyle = "#ffd35a";
+    vctx.beginPath();
+    vctx.arc(W-70, 70, 36, 0, Math.PI*2);
+    vctx.fill();
+
+    // Clouds
+    for (const cl of view.clouds){
+      cl.x += cl.sp * dt * 4;
+      if (cl.x > W + 140) cl.x = -160;
+      drawCloud(vctx, cl.x, cl.y, cl.s);
+    }
+
+    // Petals (like dcop vibe)
+    for (const p of view.petals){
+      p.y += p.sp * dt * 6;
+      p.x += p.drift * dt * 6;
+      if (p.y > H + 20){ p.y = -20; p.x = rand(0,W); }
+      vctx.fillStyle = `rgba(255, 160, 180, ${p.a})`;
+      vctx.beginPath();
+      vctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      vctx.fill();
+    }
+
+    // Grass
+    vctx.fillStyle = "#43c36a";
+    vctx.fillRect(0, H-140, W, 140);
+
+    // Horizon line
+    vctx.fillStyle = "rgba(0,0,0,0.08)";
+    vctx.fillRect(0, H-140, W, 4);
+
+    // Sitting avatar looking at view
+    drawSittingAvatar(vctx, 140, H-170);
+
     requestAnimationFrame(viewLoop);
   }
 
-  function goToViewPage() {
-    gamePage.classList.remove("active");
-    viewPage.classList.add("active");
-  }
-
-  function goToGamePage() {
-    viewPage.classList.remove("active");
-    gamePage.classList.add("active");
-  }
-
-  // ------- BUTTONS -------
-  startBtn.addEventListener("click", () => {
-    if (!world.running) {
-      world.running = true;
-      startBtn.textContent = "Running…";
-      startBtn.disabled = true;
-      startBtn.style.opacity = "0.7";
-    }
-  });
-
-  resetBtn.addEventListener("click", () => {
-    startBtn.textContent = "Start";
-    startBtn.disabled = false;
-    startBtn.style.opacity = "1";
-    resetGame();
-  });
-
-  replayBtn.addEventListener("click", () => {
-    goToGamePage();
-    startBtn.textContent = "Start";
-    startBtn.disabled = false;
-    startBtn.style.opacity = "1";
-    resetGame();
-  });
-
-  nextBtn.addEventListener("click", () => {
-    // Hook this to your overall flow (next location / page)
-    // For now: just reload or redirect.
-    // window.location.href = "next.html";
-    alert("Hook this button to your next adventure page.");
-  });
-
-  // ------- INIT -------
+  // ===== INIT =====
   resetGame();
   requestAnimationFrame(loop);
   requestAnimationFrame(viewLoop);
