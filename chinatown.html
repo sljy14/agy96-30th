@@ -101,13 +101,14 @@
       linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06));
   }
 
+  /* subtle lantern glow dots */
   .stage:before{
     content:"";
     position:absolute; inset:0;
     background:
       radial-gradient(10px 10px at 18% 16%, rgba(255,180,80,0.18), transparent 60%),
       radial-gradient(10px 10px at 82% 14%, rgba(255,80,120,0.16), transparent 60%),
-      radial-gradient(12px 12px at ค้ 62% 22%, rgba(255,180,80,0.12), transparent 60%),
+      radial-gradient(12px 12px at 62% 22%, rgba(255,180,80,0.12), transparent 60%),
       radial-gradient(10px 10px at 40% 12%, rgba(255,80,120,0.12), transparent 60%);
     pointer-events:none;
     opacity:0.85;
@@ -221,8 +222,8 @@
 /* =========================
    SETTINGS YOU CAN EDIT
 ========================= */
-const MAP_FILE = "./map.html";     // your map file
-const NEXT_PROMPT_INDEX = 1;       // 1 = MacRitchie
+const MAP_FILE = "./map.html";
+const NEXT_PROMPT_INDEX = 1;  // 1 = MacRitchie
 const WIN_TARGET = 10;
 
 /* =========================
@@ -253,18 +254,16 @@ const fullBtn = document.getElementById("fullBtn");
 let running = true;
 let score = 0;
 let bombHits = 0;
-
 let shake = 0;
 
 const W = canvas.width;
 const H = canvas.height;
 
-/* Player (small, like your Image 1) */
+/* Player (keep small like your good gameplay size) */
 const player = {
   x: W/2,
   y: H - 50,
   tx: W/2,
-  // hitbox tuned for small sprite
   w: 22,
   h: 40
 };
@@ -310,11 +309,9 @@ function rectHit(ax,ay,aw,ah, bx,by,bw,bh){
 function bg(){
   ctx.clearRect(0,0,W,H);
 
-  // ground
   ctx.fillStyle = "rgba(0,0,0,0.10)";
   ctx.fillRect(0, H-70, W, 70);
 
-  // lantern string
   ctx.globalAlpha = 0.9;
   ctx.fillStyle = "rgba(255,255,255,0.14)";
   ctx.fillRect(0, 24, W, 2);
@@ -348,40 +345,47 @@ function drawLantern(x,y,s){
 }
 
 /* =========================
-   AVATAR (match main-page vibe)
-   - glasses have bridge []-[]
-   - small sprite for gameplay
+   AVATARS
 ========================= */
-function drawAgySprite(g, x, y, scale, withPlate){
-  // x,y is bottom-center
+
+/* Gameplay sprite:
+   - keep small
+   - glasses become --[]-[]-- (arms + bridge)
+   - move glasses slightly UP so they sit right
+*/
+function drawAgyGameplay(g, x, y, scale=1.0){
   g.save();
   g.translate(x, y);
   g.scale(scale, scale);
 
-  // Hair block (main page vibe: tall + rounded-ish)
+  // Hair silhouette (keep your current vibe)
   g.fillStyle="#000";
-  g.fillRect(-12, -40, 24, 40);   // main hair
-  g.fillRect(-14, -34, 28, 28);   // wider mid hair for silhouette
+  g.fillRect(-12, -40, 24, 40);
+  g.fillRect(-14, -34, 28, 28);
 
   // Face
   g.fillStyle="#f1c7a6";
   g.fillRect(-8, -32, 16, 18);
 
-    // ✅ Glasses (smaller, proportional): []-[] with bridge
-  g.fillStyle = "#000";
-
-  const gy = -24;          // glasses top (relative to sprite)
+  // Glasses: --[]-[]--
+  g.fillStyle="#000";
+  const gy = -27;          // moved UP (was too low)
   const lensW = 8;
   const lensH = 7;
+  const thick = 2;
   const leftX = -10;
   const rightX = 2;
-  const thick = 2;
+  const hairEdgeL = -14;
+  const hairEdgeR = 14;
+
+  // left arm (the "--" on left)
+  g.fillRect(hairEdgeL, gy+3, (leftX - hairEdgeL), 2);
 
   // left lens frame
-  g.fillRect(leftX, gy, lensW, thick);                 // top
-  g.fillRect(leftX, gy, thick, lensH);                 // left
-  g.fillRect(leftX, gy + lensH - thick, lensW, thick); // bottom
-  g.fillRect(leftX + lensW - thick, gy, thick, lensH); // right
+  g.fillRect(leftX, gy, lensW, thick);
+  g.fillRect(leftX, gy, thick, lensH);
+  g.fillRect(leftX, gy + lensH - thick, lensW, thick);
+  g.fillRect(leftX + lensW - thick, gy, thick, lensH);
 
   // right lens frame
   g.fillRect(rightX, gy, lensW, thick);
@@ -389,9 +393,11 @@ function drawAgySprite(g, x, y, scale, withPlate){
   g.fillRect(rightX, gy + lensH - thick, lensW, thick);
   g.fillRect(rightX + lensW - thick, gy, thick, lensH);
 
-  // bridge
+  // bridge (the "-" between lenses)
   g.fillRect(-2, gy + 3, 4, 2);
 
+  // right arm (the "--" on right)
+  g.fillRect(rightX + lensW, gy+3, (hairEdgeR - (rightX + lensW)), 2);
 
   // Shirt
   g.fillStyle="#c1272d";
@@ -402,6 +408,12 @@ function drawAgySprite(g, x, y, scale, withPlate){
   g.fillRect(-16, -14, 4, 14);
   g.fillRect(12,  -14, 4, 14);
 
+  // Plate (held)
+  g.fillStyle="rgba(255,255,255,0.92)";
+  g.fillRect(-8, -2, 16, 5);
+  g.fillStyle="rgba(0,0,0,0.08)";
+  g.fillRect(-6, -1, 12, 2);
+
   // Pants
   g.fillStyle="#0e0e18";
   g.fillRect(-12, 2, 24, 12);
@@ -410,15 +422,14 @@ function drawAgySprite(g, x, y, scale, withPlate){
   g.fillStyle="#fff";
   g.fillRect(-10, 14, 20, 4);
 
-  // Plate (gameplay only)
-  if(withPlate){
-    g.fillStyle="rgba(255,255,255,0.92)";
-    g.fillRect(-8, -2, 16, 5);
-    g.fillStyle="rgba(0,0,0,0.08)";
-    g.fillRect(-6, -1, 12, 2);
-  }
+  g.restore();
+}
 
-  function drawAgyEatingOldLook(g, cx, cy){
+/* Eating (Congrats) avatar:
+   - restore your original eating look (the one you liked)
+   - ONLY update glasses to --[]-[]-- + bridge
+*/
+function drawAgyEatingOldLook(g, cx, cy){
   // hair
   g.fillStyle="#000";
   g.fillRect(cx-20, cy-70, 40, 60);
@@ -427,15 +438,19 @@ function drawAgySprite(g, x, y, scale, withPlate){
   g.fillStyle="#f1c7a6";
   g.fillRect(cx-14, cy-56, 28, 28);
 
-  // ✅ glasses with bridge (same style as map: []-[] with a bridge)
+  // glasses: --[]-[]--
   g.fillStyle="#000";
-
   const gy = cy - 50;
   const lensW = 12;
   const lensH = 9;
+  const thick = 2;
   const leftX = cx - 18;
   const rightX = cx + 6;
-  const thick = 2;
+  const hairEdgeL = cx - 20;
+  const hairEdgeR = cx + 20;
+
+  // left arm
+  g.fillRect(hairEdgeL, gy+4, (leftX - hairEdgeL), 2);
 
   // left lens
   g.fillRect(leftX, gy, lensW, thick);
@@ -452,12 +467,27 @@ function drawAgySprite(g, x, y, scale, withPlate){
   // bridge
   g.fillRect(cx-2, gy + 4, 4, 2);
 
+  // right arm
+  g.fillRect(rightX + lensW, gy+4, (hairEdgeR - (rightX + lensW)), 2);
+
   // shirt
   g.fillStyle="#c1272d";
   g.fillRect(cx-18, cy-28, 36, 22);
+
+  // arm towards fork
+  g.fillStyle="#f1c7a6";
+  g.fillRect(cx+18, cy-18, 10, 10);
 }
 
-
+/* plain label (no pill) */
+function drawTextLabel(g, text, x, y){
+  g.save();
+  g.font = "900 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  g.textAlign = "center";
+  g.fillStyle = "rgba(0,0,0,0.35)";
+  g.fillText(text, x+2, y+2);
+  g.fillStyle = "#fff";
+  g.fillText(text, x, y);
   g.restore();
 }
 
@@ -592,8 +622,8 @@ function step(){
   bg();
   for(const d of drops) drawDrop(d);
 
-  // small avatar (scale tuned)
-  drawAgySprite(ctx, player.x, player.y, 1.0, true);
+  // gameplay avatar (small, correct glasses)
+  drawAgyGameplay(ctx, player.x, player.y, 1.0);
 
   ctx.restore();
 
@@ -609,8 +639,6 @@ function win(){
 
   gameWrap.classList.add("hide");
   gameHud.classList.add("hide");
-
-  // hide the top title/subtitle/hint during win screen
   titleBlock.classList.add("hide");
 
   winWrap.classList.add("show");
@@ -619,23 +647,10 @@ function win(){
 
 /* =========================
    EATING SCENE
-   - only fix glasses bridge
-   - add "agy96" as plain text (no pill)
 ========================= */
 const eatCanvas = document.getElementById("eat");
 const eatCtx = eatCanvas.getContext("2d");
 let eatTick = 0;
-
-function drawTextLabel(g, text, x, y){
-  g.save();
-  g.font = "900 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  g.textAlign = "center";
-  g.fillStyle = "rgba(0,0,0,0.35)";
-  g.fillText(text, x+2, y+2);
-  g.fillStyle = "#fff";
-  g.fillText(text, x, y);
-  g.restore();
-}
 
 function drawEating(){
   eatTick++;
@@ -654,6 +669,7 @@ function drawEating(){
   eatCtx.fillStyle="rgba(0,0,0,0.10)";
   eatCtx.fillRect(W2/2-52, H2-72, 104, 6);
 
+  // food dots
   for(let i=0;i<10;i++){
     eatCtx.fillStyle = i%2? "#ff5b5b":"#57b15f";
     eatCtx.fillRect(W2/2-45 + (i*9), H2-74 + (i%3), 4, 4);
@@ -665,9 +681,8 @@ function drawEating(){
   // label (no pill)
   drawTextLabel(eatCtx, "agy96", cx, baseY-72);
 
-    // ✅ avatar (restore the old eating look; only glasses updated)
+  // restored eating avatar (ONLY glasses updated)
   drawAgyEatingOldLook(eatCtx, cx, baseY);
-
 
   // fork animation
   const bob = Math.sin(eatTick*0.18) * 6;
