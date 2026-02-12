@@ -769,6 +769,26 @@
   goToMapAndWaterloo();
 });
 
+  function goToMapAndWaterloo(){
+
+  // Hide MacRitchie page
+  viewPage.classList.remove("active");
+  gamePage.classList.remove("active");
+
+  // Show your map page
+  const mapPage = document.getElementById("mapPage");
+  if(mapPage){
+    mapPage.classList.add("active");
+  }
+
+  // Trigger Waterloo prompt
+  const waterlooPrompt = document.getElementById("waterlooPrompt");
+  if(waterlooPrompt){
+    waterlooPrompt.classList.add("active");
+  }
+}
+
+
   // ===== INIT =====
   resetGame();
   requestAnimationFrame(loop);
