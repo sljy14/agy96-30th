@@ -62,14 +62,11 @@
     align-items:center;
     justify-content:space-between;
     margin:6px 0 10px;
-    gap:10px;
   }
 
   .pill{
-    flex:1;
     display:inline-flex;
     align-items:center;
-    justify-content:center;
     gap:8px;
     padding:8px 12px;
     border-radius:999px;
@@ -79,7 +76,6 @@
     box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     font-weight:1000;
     font-size:12px;
-    white-space:nowrap;
   }
 
   .stageCard{
@@ -123,6 +119,7 @@
     image-rendering:pixelated;
   }
 
+  /* Win scene */
   .winWrap{
     width:min(var(--maxw), 94vw);
     display:none;
@@ -219,8 +216,8 @@
 /* =========================
    SETTINGS YOU CAN EDIT
 ========================= */
-const MAP_FILE = "./map.html";          // change if your map file name differs
-const NEXT_PROMPT_INDEX = 1;            // 0=Chinatown, 1=MacRitchie, 2=Waterloo, 3=Stadium
+const MAP_FILE = "./map.html";
+const NEXT_PROMPT_INDEX = 1; // next = MacRitchie
 const WIN_TARGET = 10;
 
 /* =========================
@@ -257,12 +254,12 @@ let shake = 0;
 const W = canvas.width;
 const H = canvas.height;
 
-/* Player */
+/* Player (keep collision box small, but draw avatar nicely) */
 const player = {
   x: W/2,
   y: H - 54,
-  w: 30,
-  h: 54,
+  w: 26,
+  h: 44,
   tx: W/2
 };
 
@@ -284,7 +281,7 @@ function rand(min,max){ return Math.random()*(max-min)+min; }
 function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
 function spawn(){
-  const isBomb = Math.random() < 0.20; // 20% bombs
+  const isBomb = Math.random() < 0.20;
   const pick = isBomb ? TYPES.find(x=>x.name==="bomb") : TYPES[Math.floor(rand(0,6))];
 
   drops.push({
@@ -303,14 +300,14 @@ function rectHit(ax,ay,aw,ah, bx,by,bw,bh){
 }
 
 /* =========================
-   BACKGROUND (game)
+   BACKGROUND
 ========================= */
 function bg(){
   ctx.clearRect(0,0,W,H);
 
-  // ground tint
+  // ground
   ctx.fillStyle = "rgba(0,0,0,0.10)";
-  ctx.fillRect(0, H-76, W, 76);
+  ctx.fillRect(0, H-70, W, 70);
 
   // lantern string
   ctx.globalAlpha = 0.9;
@@ -330,18 +327,14 @@ function drawLantern(x,y,s){
   ctx.scale(s,s);
   ctx.fillStyle="rgba(255,255,255,0.18)";
   ctx.fillRect(-1,-12,2,12);
-
   ctx.fillStyle="#d22b2b";
   ctx.fillRect(-10,-2,20,18);
-
   ctx.fillStyle="#b01f1f";
   ctx.fillRect(-12,1,4,12);
   ctx.fillRect(8,1,4,12);
-
   ctx.fillStyle="#f2c94c";
   ctx.fillRect(-6,4,12,2);
   ctx.fillRect(-6,9,12,2);
-
   ctx.fillStyle="#d1b15a";
   ctx.fillRect(-2,16,4,10);
   ctx.fillStyle="#d22b2b";
@@ -350,149 +343,68 @@ function drawLantern(x,y,s){
 }
 
 /* =========================
-   agy96 AVATAR (map-style, consistent)
-   - used in gameplay + win scene
+   AGY AVATAR (map-style)
+   - Gameplay: smaller, plate held
 ========================= */
-/**
- * Draw agy96 in a map-style pixel look.
- * x,y are the "ground" point (feet baseline), and scale controls size.
- * opts:
- *  - holdingPlate: boolean
- *  - label: boolean (draw "agy96" above head, no pill)
- *  - labelOffset: number (px)
- *  - forkBob: number (used in eating scene)
- */
-function drawAgy(ctx2, x, y, scale, opts={}){
-  const holdingPlate = !!opts.holdingPlate;
-  const label = !!opts.label;
-  const labelOffset = (opts.labelOffset ?? 0);
-  const forkBob = (opts.forkBob ?? 0);
+function drawAgyGameplay(cx, by){
+  // cx = center x, by = baseline y (feet)
+  // Scale DOWN so it matches your original gameplay size
+  const s = 0.78; // <<< tweak if you want even smaller (0.72) or bigger (0.82)
 
-  ctx2.save();
-  ctx2.imageSmoothingEnabled = false;
+  ctx.save();
+  ctx.translate(cx, by);
+  ctx.scale(s,s);
 
-  // all sizes based on a unit
-  const u = 2 * scale; // pixel unit
-
-  // Body layout (relative)
-  // We'll build from top to bottom in blocks to mimic your map avatar proportions.
-  const hairW = 32*u, hairH = 44*u;
-  const faceW = 22*u, faceH = 24*u;
-
-  const shirtW = 30*u, shirtH = 18*u;
-  const pantsW = 32*u, pantsH = 12*u;
-  const shoesW = 28*u, shoesH = 6*u;
-
-  // Place bottom (feet) at y
-  const shoesY = y - shoesH;
-  const pantsY = shoesY - pantsH;
-  const shirtY = pantsY - shirtH;
-  const faceY  = shirtY - faceH - 8*u;
-  const hairY  = faceY - 10*u;
-
-  // Center align everything on x
-  const hairX = x - hairW/2;
-  const faceX = x - faceW/2;
-  const shirtX = x - shirtW/2;
-  const pantsX = x - pantsW/2;
-  const shoesX = x - shoesW/2;
-
-  // Label (NO pill)
-  if(label){
-    ctx2.save();
-    ctx2.font = `${Math.round(12*scale)}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
-    ctx2.font = `900 ${Math.round(12*scale)}px system-ui,-apple-system,Segoe UI,Roboto,Arial`;
-    ctx2.fillStyle = "#fff";
-    ctx2.textAlign = "center";
-    ctx2.textBaseline = "middle";
-    ctx2.shadowColor = "rgba(0,0,0,0.55)";
-    ctx2.shadowBlur = 10;
-    ctx2.shadowOffsetY = 2;
-    ctx2.fillText("agy96", x, hairY - 10*u + labelOffset);
-    ctx2.restore();
-  }
-
-  // Hair block (map-like)
-  ctx2.fillStyle = "#000";
-  roundRectFill(ctx2, hairX, hairY, hairW, hairH, 6*u);
-
-  // Face
-  ctx2.fillStyle = "#f1c7a6";
-  ctx2.fillRect(faceX, faceY, faceW, faceH);
-
-  // Glasses (centered)
-  // Based on map avatar: 2 lenses + bridge
-  const gY = faceY + 9*u;
-  const lensW = 8*u, lensH = 7*u;
-  const gap = 4*u;
-  const leftLensX = x - gap/2 - lensW;
-  const rightLensX = x + gap/2;
-
-  ctx2.strokeStyle = "#000";
-  ctx2.lineWidth = Math.max(2, 2*scale);
-  ctx2.strokeRect(leftLensX, gY, lensW, lensH);
-  ctx2.strokeRect(rightLensX, gY, lensW, lensH);
-  ctx2.fillStyle = "#000";
-  ctx2.fillRect(x - 2*u, gY + 3*u, 4*u, 2*u);
-
-  // Shirt
-  ctx2.fillStyle = "#c1272d";
-  ctx2.fillRect(shirtX, shirtY, shirtW, shirtH);
-
-  // Arms (map-style simple blocks)
-  ctx2.fillStyle = "#f1c7a6";
-  // left arm
-  ctx2.fillRect(shirtX - 6*u, shirtY + 2*u, 6*u, 14*u);
-  // right arm
-  ctx2.fillRect(shirtX + shirtW, shirtY + 2*u, 6*u, 14*u);
-
-  // Plate in gameplay (held at chest level)
-  if(holdingPlate){
-    ctx2.fillStyle = "rgba(255,255,255,0.92)";
-    ctx2.fillRect(x - 10*u, shirtY + 10*u, 20*u, 5*u);
-    ctx2.fillStyle = "rgba(0,0,0,0.10)";
-    ctx2.fillRect(x - 8*u, shirtY + 11*u, 16*u, 2*u);
-  }
+  // Body plan (in "pixel units")
+  // We'll draw relative to (0,0) which is feet baseline.
+  // Shoes
+  ctx.fillStyle="#fff";
+  ctx.fillRect(-14, -6, 28, 6);
 
   // Pants
-  ctx2.fillStyle = "#0e0e18";
-  ctx2.fillRect(pantsX, pantsY, pantsW, pantsH);
+  ctx.fillStyle="#0e0e18";
+  ctx.fillRect(-16, -26, 32, 20);
 
-  // Shoes
-  ctx2.fillStyle = "#fff";
-  ctx2.fillRect(shoesX, shoesY, shoesW, shoesH);
+  // Shirt
+  ctx.fillStyle="#c1272d";
+  ctx.fillRect(-16, -48, 32, 24);
 
-  // Fork for eating scene (optional)
-  if(opts.fork){
-    const fx = x + 20*u;
-    const fy = shirtY + 6*u + forkBob;
-    ctx2.fillStyle="#d1b15a";
-    ctx2.fillRect(fx, fy, 3*u, 14*u);
-    ctx2.fillStyle="#fff";
-    ctx2.fillRect(fx - 1*u, fy - 5*u, 5*u, 5*u);
+  // Arms (simple blocks)
+  ctx.fillStyle="#f1c7a6";
+  ctx.fillRect(-22, -46, 6, 20);
+  ctx.fillRect(16,  -46, 6, 20);
 
-    // arm towards fork
-    ctx2.fillStyle="#f1c7a6";
-    ctx2.fillRect(shirtX + shirtW, shirtY + 6*u, 8*u, 8*u);
-  }
+  // Hair (block like map avatar)
+  ctx.fillStyle="#000";
+  ctx.fillRect(-22, -106, 44, 70);   // outer hair
+  ctx.fillRect(-18, -96, 36, 72);    // inner mass
 
-  ctx2.restore();
-}
+  // Face
+  ctx.fillStyle="#f1c7a6";
+  ctx.fillRect(-12, -90, 24, 28);
 
-function roundRectFill(c, x, y, w, h, r){
-  const rr = Math.min(r, w/2, h/2);
-  c.beginPath();
-  c.moveTo(x+rr, y);
-  c.arcTo(x+w, y, x+w, y+h, rr);
-  c.arcTo(x+w, y+h, x, y+h, rr);
-  c.arcTo(x, y+h, x, y, rr);
-  c.arcTo(x, y, x+w, y, rr);
-  c.closePath();
-  c.fill();
+  // Glasses (clean + aligned)
+  // left lens
+  ctx.lineWidth = 3;
+  ctx.strokeStyle="#000";
+  ctx.strokeRect(-16, -82, 14, 10);
+  // right lens
+  ctx.strokeRect(2, -82, 14, 10);
+  // bridge
+  ctx.fillStyle="#000";
+  ctx.fillRect(-2, -78, 4, 3);
+
+  // Plate (held)
+  ctx.fillStyle="rgba(255,255,255,0.92)";
+  ctx.fillRect(-10, -30, 20, 6);
+  ctx.fillStyle="rgba(0,0,0,0.08)";
+  ctx.fillRect(-8, -29, 16, 2);
+
+  ctx.restore();
 }
 
 /* =========================
-   falling icons
+   DROPS
 ========================= */
 function drawDrop(d){
   ctx.save();
@@ -500,16 +412,11 @@ function drawDrop(d){
   ctx.rotate(d.rot);
 
   if(d.kind === "bomb"){
-    ctx.fillStyle="#222";
-    ctx.fillRect(-12,-10,24,20);
-    ctx.fillStyle="#111";
-    ctx.fillRect(-10,-8,20,16);
-    ctx.fillStyle="#888";
-    ctx.fillRect(-4,-16,8,6);
-    ctx.fillStyle="#f2c94c";
-    ctx.fillRect(4,-16,6,3);
-    ctx.fillStyle="#ff5b5b";
-    ctx.fillRect(10,-17,3,3);
+    ctx.fillStyle="#222"; ctx.fillRect(-12,-10,24,20);
+    ctx.fillStyle="#111"; ctx.fillRect(-10,-8,20,16);
+    ctx.fillStyle="#888"; ctx.fillRect(-4,-16,8,6);
+    ctx.fillStyle="#f2c94c"; ctx.fillRect(4,-16,6,3);
+    ctx.fillStyle="#ff5b5b"; ctx.fillRect(10,-17,3,3);
   } else {
     if(d.name==="cabbage"){
       ctx.fillStyle="#5ecb6a"; ctx.fillRect(-12,-12,24,24);
@@ -550,23 +457,24 @@ function drawDrop(d){
       ctx.fillStyle="#43a754"; ctx.fillRect(10,-10,4,6);
     }
   }
+
   ctx.restore();
 }
 
 /* =========================
-   INPUT: Tap to move
+   INPUT
 ========================= */
-function onTap(clientX, clientY){
+function onTap(clientX){
   tryPlayBgm();
   const rect = canvas.getBoundingClientRect();
   const x = (clientX - rect.left) * (canvas.width / rect.width);
-  player.tx = clamp(x, 24, W-24);
+  player.tx = clamp(x, 20, W-20);
 }
 
-canvas.addEventListener("mousedown", (e)=> onTap(e.clientX, e.clientY));
+canvas.addEventListener("mousedown", (e)=> onTap(e.clientX));
 canvas.addEventListener("touchstart", (e)=>{
-  const tt = e.touches[0];
-  onTap(tt.clientX, tt.clientY);
+  const t0 = e.touches[0];
+  onTap(t0.clientX);
 }, {passive:true});
 
 /* =========================
@@ -621,12 +529,10 @@ function step(){
   }
 
   bg();
-
   for(const d of drops) drawDrop(d);
 
-  // ✅ gameplay agy: map-style avatar + plate, correct size
-  // "scale" tuned so she matches your current gameplay size vibe
-  drawAgy(ctx, player.x, player.y + 10, 1.0, { holdingPlate:true, label:false });
+  // Draw smaller map-style agy
+  drawAgyGameplay(player.x, player.y);
 
   ctx.restore();
 
@@ -646,11 +552,25 @@ function win(){
 }
 
 /* =========================
-   EATING SCENE CANVAS
+   EATING SCENE (keep your look)
+   Fix: glasses alignment + plain text label (no pill)
 ========================= */
 const eatCanvas = document.getElementById("eat");
 const eatCtx = eatCanvas.getContext("2d");
 let eatTick = 0;
+
+function drawLabelNoPill(ctx2, text, x, y){
+  ctx2.save();
+  ctx2.font = "900 16px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  ctx2.textAlign = "center";
+  ctx2.textBaseline = "middle";
+  // subtle shadow so it reads on dark bg
+  ctx2.fillStyle = "rgba(0,0,0,0.35)";
+  ctx2.fillText(text, x+1, y+2);
+  ctx2.fillStyle = "#ffffff";
+  ctx2.fillText(text, x, y);
+  ctx2.restore();
+}
 
 function drawEating(){
   eatTick++;
@@ -669,20 +589,51 @@ function drawEating(){
   eatCtx.fillStyle="rgba(0,0,0,0.10)";
   eatCtx.fillRect(W2/2-52, H2-72, 104, 6);
 
-  // food dots
+  // simple food dots
   for(let i=0;i<10;i++){
     eatCtx.fillStyle = i%2? "#ff5b5b":"#57b15f";
     eatCtx.fillRect(W2/2-45 + (i*9), H2-74 + (i%3), 4, 4);
   }
 
+  // sitting agy (keep your look)
   const cx = W2/2;
-  const baselineY = H2 - 66;
+  const cy = H2-84;
 
-  // bobbing fork
+  // label above head (NO pill)
+  drawLabelNoPill(eatCtx, "agy96", cx, cy-92);
+
+  // hair
+  eatCtx.fillStyle="#000";
+  eatCtx.fillRect(cx-20, cy-70, 40, 60);
+
+  // face
+  eatCtx.fillStyle="#f1c7a6";
+  eatCtx.fillRect(cx-14, cy-56, 28, 28);
+
+  // glasses (FIXED alignment)
+  eatCtx.lineWidth=3;
+  eatCtx.strokeStyle="#000";
+  // lift slightly + consistent spacing
+  const gy = cy-49;
+  eatCtx.strokeRect(cx-18, gy, 14, 10);
+  eatCtx.strokeRect(cx+4,  gy, 14, 10);
+  eatCtx.fillStyle="#000";
+  eatCtx.fillRect(cx-2, gy+4, 4, 3);
+
+  // shirt
+  eatCtx.fillStyle="#c1272d";
+  eatCtx.fillRect(cx-18, cy-28, 36, 22);
+
+  // fork animation (moves up/down)
   const bob = Math.sin(eatTick*0.18) * 6;
+  eatCtx.fillStyle="#d1b15a";
+  eatCtx.fillRect(cx+28, cy-22 + bob, 4, 18);
+  eatCtx.fillStyle="#fff";
+  eatCtx.fillRect(cx+26, cy-28 + bob, 8, 6);
 
-  // ✅ eating agy: same map-style avatar + NO pill label
-  drawAgy(eatCtx, cx, baselineY, 1.0, { label:true, labelOffset:0, fork:true, forkBob:bob });
+  // arm (towards fork)
+  eatCtx.fillStyle="#f1c7a6";
+  eatCtx.fillRect(cx+18, cy-18, 10, 10);
 
   if(winWrap.classList.contains("show")){
     requestAnimationFrame(drawEating);
@@ -694,7 +645,7 @@ function startEatingScene(){
 }
 
 /* =========================
-   BUTTON: back to map (MacRitchie prompt)
+   BUTTON: back to map (MacRitchie next)
 ========================= */
 fullBtn.addEventListener("click", ()=>{
   localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
