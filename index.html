@@ -6,6 +6,12 @@
 <title>agy96 Amazing Race</title>
 
 <style>
+@media (max-height: 700px){
+  .pixel{
+    transform:scale(0.9);
+  }
+}
+  
   html,body{
     margin:0;height:100%;
     /* More contrast so black hair shows */
@@ -54,7 +60,7 @@
     width:140px;
     height:220px;
     position:relative;
-    margin: 10px 0 26px;
+    margin: 10px 0 50px;   /* more bottom space */
     image-rendering:pixelated;
     filter: drop-shadow(0 10px 0 rgba(0,0,0,0.22));
   }
@@ -117,10 +123,12 @@
   top:118px;
   left:50%;
   transform:translateX(-50%);
-  width:82px;   /* slightly wider */
-  height:70px;  /* longer */
+  width:96px;     /* wider than arms */
+  height:70px;
   background:#c1272d;
+  border-radius:4px;
 }
+
 
 
   .arm{
