@@ -691,19 +691,17 @@
   }
 
   function drawNameTag(c, text, x, y){
-    ctx.save();
-
-ctx.textAlign = "center";
-ctx.font = "12px Arial";          // ← remove bold
-ctx.fillStyle = "#f5f5f5";        // softer white
-ctx.shadowColor = "rgba(0,0,0,0.6)";
-ctx.shadowBlur = 4;               // subtle glow
-ctx.shadowOffsetX = 0;
-ctx.shadowOffsetY = 0;
-
-ctx.fillText("agy96", x, y - 70); // slightly closer to head
-
-ctx.restore();
+  c.save();
+  c.textAlign = "center";
+  c.font = "12px Arial";                 // not bold
+  c.fillStyle = "#f5f5f5";               // soft white
+  c.shadowColor = "rgba(0,0,0,0.6)";
+  c.shadowBlur = 4;
+  c.shadowOffsetX = 0;
+  c.shadowOffsetY = 0;
+  c.fillText(text, x, y);                // use provided args
+  c.restore();
+}
 
 
   let viewLast = 0;
@@ -761,7 +759,7 @@ ctx.restore();
 
     const ax = W/2;
     const ay = H-78; // feet baseline
-    drawNameTag(vctx, "agy96", ax, ay-90);
+    drawNameTag(vctx, "agy96", ax, ay-150);
     drawAgyBackView(ax, ay);
 
     requestAnimationFrame(viewLoop);
