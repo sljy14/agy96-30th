@@ -23,7 +23,7 @@
       min-height:100svh;
       display:flex;
       justify-content:center;
-      padding: 10px 12px 14px; /* tighter so no scroll */
+      padding: 10px 12px 14px;
     }
     .card{
       width:min(560px, 100%);
@@ -37,7 +37,7 @@
     .page.active{ display:block; }
 
     .header{
-      padding: 16px 16px 10px; /* tighter */
+      padding: 16px 16px 10px;
       text-align:center;
     }
     h1{
@@ -59,7 +59,7 @@
       display:flex;
       gap: 10px;
       justify-content: space-between;
-      padding: 0 14px 10px; /* tighter */
+      padding: 0 14px 10px;
     }
     .pill{
       flex:1;
@@ -80,7 +80,7 @@
       font-weight: 700;
     }
 
-    .stage{ padding: 8px 12px 10px; } /* tighter */
+    .stage{ padding: 8px 12px 10px; }
     .frame{
       border-radius: 20px;
       background: rgba(0,0,0,0.16);
@@ -171,12 +171,11 @@
 
       <div class="stage">
         <div class="frame">
-          <!-- shorter canvas height so the page fits without scrolling -->
           <canvas id="game" width="390" height="520" aria-label="MacRitchie hike game"></canvas>
         </div>
       </div>
 
-      <div class="hint">Tap to jump — no buttons needed 🙂</div>
+      <div class="hint">Tap to jump — she will stick to the log she landed on 🙂</div>
     </section>
 
     <!-- VIEW PAGE -->
@@ -199,6 +198,9 @@
   </div>
 </div>
 
+<!-- BGM (will start on first user tap; then loops forever across pages) -->
+<audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
+
 <script>
 (() => {
   // ===== DOM =====
@@ -208,6 +210,7 @@
   const slipsCountEl = document.getElementById("slipsCount");
   const replayBtn = document.getElementById("replayBtn");
   const nextBtn = document.getElementById("nextBtn");
+  const bgm = document.getElementById("bgm");
 
   // ===== CANVAS =====
   const canvas = document.getElementById("game");
@@ -218,31 +221,31 @@
   const vctx = viewCanvas.getContext("2d");
   vctx.imageSmoothingEnabled = true;
 
-  // ===== YOUR EXISTING CHINATOWN GLASSES HELPER (fallback safe) =====
+  // ===== GLASSES HELPER =====
   function drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen){
     ctx.fillStyle = "#000";
-    // left lens frame
     ctx.fillRect(leftX, gy, lensW, thick);
     ctx.fillRect(leftX, gy + lensH - thick, lensW, thick);
     ctx.fillRect(leftX, gy, thick, lensH);
     ctx.fillRect(leftX + lensW - thick, gy, thick, lensH);
 
-    // right lens
     const rightX = leftX + lensW + gap;
     ctx.fillRect(rightX, gy, lensW, thick);
     ctx.fillRect(rightX, gy + lensH - thick, lensW, thick);
     ctx.fillRect(rightX, gy, thick, lensH);
     ctx.fillRect(rightX + lensW - thick, gy, thick, lensH);
 
-    // bridge
     ctx.fillRect(leftX + lensW, gy + Math.floor(lensH/2) - 1, gap, 2);
 
-    // arms (short)
     ctx.fillRect(leftX - armLen, gy + 2, armLen, 2);
     ctx.fillRect(rightX + lensW, gy + 2, armLen, 2);
   }
 
-  // ===== CHINATOWN AVATAR — EXACT (used in gameplay) =====
+  // ===== CHINATOWN AVATAR — EXACT BUT (NO PLATE) =====
+  // IMPORTANT: y is the FEET BASELINE
+  // Shoe bottom is at y+27 (because shoes at y+22 height 5)
+  const SHOE_BOTTOM_OFFSET = 27;
+
   function drawAgyGameplay(px, py){
     const x = px, y = py;
 
@@ -274,11 +277,7 @@
     ctx.fillRect(x-22, y-8, 6, 10);
     ctx.fillRect(x+16, y-8, 6, 10);
 
-    // plate
-    ctx.fillStyle="rgba(255,255,255,0.92)";
-    ctx.fillRect(x-10, y-2, 20, 6);
-    ctx.fillStyle="rgba(0,0,0,0.08)";
-    ctx.fillRect(x-8, y-1, 16, 2);
+    // (plate removed)
 
     // pants + shoes
     ctx.fillStyle="#0e0e18";
@@ -288,47 +287,44 @@
     ctx.fillRect(x-14, y+22, 28, 5);
   }
 
-  // ===== VIEW AVATAR — SAME SHAPE BUT NO GLASSES (standing) =====
-  function drawAgyNoGlasses(px, py){
-    const x = px, y = py;
+  // ===== VIEW AVATAR — BACK VIEW: NO HEAD, ONLY HAIR RECT =====
+  function drawAgyBackView(vx, vy){
+    const x = vx, y = vy;
 
-    ctx.fillStyle="#000";
-    ctx.fillRect(x-18, y-60, 36, 60);
+    // hair only (rectangle blob). No face/head.
+    vctx.fillStyle="#000";
+    vctx.fillRect(x-18, y-60, 36, 60);
 
-    ctx.fillStyle="#f1c7a6";
-    ctx.fillRect(x-12, y-44, 24, 28);
+    // shirt
+    vctx.fillStyle="#c1272d";
+    vctx.fillRect(x-16, y-16, 32, 22);
 
-    ctx.fillStyle="#c1272d";
-    ctx.fillRect(x-16, y-16, 32, 22);
+    // sleeves
+    vctx.fillRect(x-22, y-16, 6, 8);
+    vctx.fillRect(x+16, y-16, 6, 8);
 
-    ctx.fillRect(x-22, y-16, 6, 8);
-    ctx.fillRect(x+16, y-16, 6, 8);
+    // arms
+    vctx.fillStyle="#f1c7a6";
+    vctx.fillRect(x-22, y-8, 6, 10);
+    vctx.fillRect(x+16, y-8, 6, 10);
 
-    ctx.fillStyle="#f1c7a6";
-    ctx.fillRect(x-22, y-8, 6, 10);
-    ctx.fillRect(x+16, y-8, 6, 10);
+    // pants + shoes
+    vctx.fillStyle="#0e0e18";
+    vctx.fillRect(x-16, y+6, 32, 16);
 
-    ctx.fillStyle="rgba(255,255,255,0.92)";
-    ctx.fillRect(x-10, y-2, 20, 6);
-    ctx.fillStyle="rgba(0,0,0,0.08)";
-    ctx.fillRect(x-8, y-1, 16, 2);
-
-    ctx.fillStyle="#0e0e18";
-    ctx.fillRect(x-16, y+6, 32, 16);
-
-    ctx.fillStyle="#fff";
-    ctx.fillRect(x-14, y+22, 28, 5);
+    vctx.fillStyle="#fff";
+    vctx.fillRect(x-14, y+22, 28, 5);
   }
 
   // ===== GAME CONFIG =====
   const GOAL = 10;
-  const LOG_W = 88;   // shorter logs (per your request)
+  const LOG_W = 88;
   const LOG_H = 14;
   const LOG_GAP_Y = 66;
 
   const world = {
-    running: true,      // auto start
-    state: "playing",   // playing | falling | win
+    running: true,
+    state: "playing", // playing | falling | win
     landed: 0,
     slips: 0,
     currentIndex: 0,
@@ -339,14 +335,14 @@
 
   const player = {
     x: canvas.width * 0.5,
-    y: canvas.height - 70,
-    vy: 0
+    y: canvas.height - 70, // FEET baseline
+    vy: 0,
+    ridingLogIndex: -1 // if >=0: stick to that log's center
   };
 
   let logs = [];
   let birds = [];
 
-  const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
   const rand = (a,b)=>a + Math.random()*(b-a);
 
   function setHUD(){
@@ -363,6 +359,11 @@
     world.camTargetY = 0;
     world.shake = 0;
 
+    player.x = canvas.width * 0.5;
+    player.y = canvas.height - 70;
+    player.vy = 0;
+    player.ridingLogIndex = -1;
+
     logs = [];
     const baseY = canvas.height - 140;
     for (let i=0;i<GOAL;i++){
@@ -376,10 +377,6 @@
         sp: rand(0.9, 1.7) + i*0.03
       });
     }
-
-    player.x = canvas.width * 0.5;
-    player.y = canvas.height - 70;
-    player.vy = 0;
 
     birds = Array.from({length: 4}, () => ({
       x: rand(20, canvas.width-20),
@@ -395,15 +392,31 @@
     setHUD();
   }
 
-  // ===== INPUT (tap = jump attempt) =====
+  // ===== BGM: start on first interaction (iOS friendly) =====
+  let bgmStarted = false;
+  async function ensureBgm(){
+    if (bgmStarted) return;
+    bgmStarted = true;
+    try{
+      bgm.volume = 0.7;
+      await bgm.play();
+    }catch(e){
+      // if it fails, we'll try again on next tap
+      bgmStarted = false;
+    }
+  }
+
+  // ===== INPUT =====
   function onTap(){
+    ensureBgm();
+
     if (!world.running) return;
     if (world.state !== "playing") return;
     if (world.currentIndex >= GOAL) return;
 
     const target = logs[world.currentIndex];
 
-    // Same timing logic as before: overlap check
+    // Overlap test using avatar footprint width (hair width ~36, use 36-ish)
     const pxL = player.x - 18;
     const pxR = player.x + 18;
     const lxL = target.x;
@@ -412,17 +425,21 @@
     const overlap = (pxR > lxL) && (pxL < lxR);
 
     if (overlap){
-      // place avatar "feet" on log: we draw avatar using y as its "feet baseline"
-      const newFeetY = target.y + 58; // tuned so avatar sits on log visually
-      player.y = newFeetY;
+      // LAND: make shoe bottom align to log top EXACTLY
+      // shoe bottom = player.y + 27
+      // so player.y = logTop - 27
+      player.y = target.y - SHOE_BOTTOM_OFFSET;
+
+      // stick to this log so she moves with it
+      player.ridingLogIndex = world.currentIndex;
 
       world.landed++;
       world.currentIndex++;
       setHUD();
 
       // camera follows upward
-      const playerWorldYTop = player.y - 80; // approx top
-      world.camTargetY = (canvas.height*0.58) - playerWorldYTop;
+      const approxTop = player.y - 80;
+      world.camTargetY = (canvas.height*0.58) - approxTop;
 
       if (world.landed >= GOAL){
         world.state = "win";
@@ -439,6 +456,7 @@
       world.state = "falling";
       world.shake = 10;
       player.vy = 6;
+      player.ridingLogIndex = -1;
     }
   }
 
@@ -450,13 +468,25 @@
   // ===== GAME UPDATE =====
   function update(dt){
     // logs move
-    for (const log of logs){
+    for (let i=0;i<logs.length;i++){
+      const log = logs[i];
       log.x += log.dir * log.sp;
       if (log.x <= 14){ log.x = 14; log.dir *= -1; }
       if (log.x + log.w >= canvas.width - 14){ log.x = canvas.width - 14 - log.w; log.dir *= -1; }
     }
 
-    // birds bob A/B/C and drift
+    // if riding a log, follow its center x every frame
+    if (player.ridingLogIndex >= 0){
+      const idx = player.ridingLogIndex;
+      // safety guard
+      if (logs[idx]){
+        player.x = logs[idx].x + logs[idx].w/2;
+        // keep y locked too (log is horizontal, no y movement)
+        player.y = logs[idx].y - SHOE_BOTTOM_OFFSET;
+      }
+    }
+
+    // birds bob + drift
     for (const b of birds){
       b.t += dt * b.sp;
       if (b.t >= 18){
@@ -473,7 +503,6 @@
       player.y += player.vy;
       player.vy += 0.55;
       if (player.y > canvas.height + 90){
-        // full restart (as requested)
         resetGame();
       }
     }
@@ -491,7 +520,6 @@
     ctx.fillStyle = g;
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // soft distant canopy
     ctx.fillStyle = "rgba(66, 156, 120, 0.22)";
     for (let i=0;i<9;i++){
       ctx.beginPath();
@@ -499,13 +527,11 @@
       ctx.fill();
     }
 
-    // distant trunks
     ctx.fillStyle = "rgba(32, 92, 76, 0.20)";
     for (let x=10; x<canvas.width; x+=48){
       ctx.fillRect(x, 120, 20, canvas.height-120);
     }
 
-    // mid bushes
     ctx.fillStyle = "rgba(55, 155, 105, 0.34)";
     for (let i=0;i<10;i++){
       ctx.beginPath();
@@ -513,11 +539,9 @@
       ctx.fill();
     }
 
-    // 2 foreground trees
     drawTree(38, 165, 95, 320);
     drawTree(canvas.width - 133, 160, 95, 330);
 
-    // ground strip
     ctx.fillStyle = "rgba(64, 112, 80, 0.46)";
     ctx.fillRect(0, canvas.height-54, canvas.width, 54);
   }
@@ -563,20 +587,18 @@
     drawDayForestBackground();
     birds.forEach(drawBird);
 
-    // camera layer (logs + avatar)
     ctx.save();
     ctx.translate(0, world.camY);
 
     for (const log of logs) drawLog(log);
 
-    // highlight next log
     if (world.currentIndex < GOAL){
       const t = logs[world.currentIndex];
       ctx.fillStyle = "rgba(255,255,255,0.18)";
       ctx.fillRect(t.x, t.y - 6, t.w, 3);
     }
 
-    // draw agy EXACT style (feet baseline at player.y)
+    // gameplay avatar (feet baseline)
     drawAgyGameplay(player.x, player.y);
 
     ctx.restore();
@@ -595,10 +617,10 @@
     requestAnimationFrame(loop);
   }
 
-  // ===== VIEW SCENE (dcop-like, slower clouds, more details) =====
+  // ===== VIEW SCENE (unchanged except back-view avatar) =====
   const view = {
     clouds: [
-      { x: -160, y: 78,  s: 1.05, sp: 0.09 }, // slowed ~50%
+      { x: -160, y: 78,  s: 1.05, sp: 0.09 },
       { x:  40,  y: 118, s: 0.85, sp: 0.06 },
       { x:  240, y: 92,  s: 0.95, sp: 0.07 }
     ],
@@ -617,7 +639,6 @@
     c.globalAlpha = 0.92;
     c.fillStyle = "#ffffff";
     c.beginPath();
-    // puffier than ovals
     c.ellipse(x + 30*s, y + 18*s, 28*s, 16*s, 0, 0, Math.PI*2);
     c.ellipse(x + 55*s, y + 14*s, 34*s, 18*s, 0, 0, Math.PI*2);
     c.ellipse(x + 82*s, y + 18*s, 28*s, 16*s, 0, 0, Math.PI*2);
@@ -627,7 +648,6 @@
   }
 
   function drawSunWithRays(c, cx, cy, r){
-    // rays
     c.save();
     c.strokeStyle = "rgba(255, 211, 90, 0.55)";
     c.lineWidth = 3;
@@ -644,7 +664,6 @@
     }
     c.restore();
 
-    // sun
     c.fillStyle = "#ffd35a";
     c.beginPath();
     c.arc(cx, cy, r, 0, Math.PI*2);
@@ -693,7 +712,6 @@
 
     const W = viewCanvas.width, H = viewCanvas.height;
 
-    // nice gradient sky (dcop-like)
     const g = vctx.createLinearGradient(0,0,0,H);
     g.addColorStop(0, "#7fd6ff");
     g.addColorStop(0.55, "#dff6ff");
@@ -701,17 +719,14 @@
     vctx.fillStyle = g;
     vctx.fillRect(0,0,W,H);
 
-    // sun + rays
     drawSunWithRays(vctx, W-74, 78, 34);
 
-    // clouds (slower)
     for (const cl of view.clouds){
-      cl.x += cl.sp * dt * 4; // already slowed
+      cl.x += cl.sp * dt * 4;
       if (cl.x > W + 190) cl.x = -220;
       drawPrettyCloud(vctx, cl.x, cl.y, cl.s);
     }
 
-    // petals (same vibe)
     for (const p of view.petals){
       p.y += p.sp * dt * 6;
       p.x += p.drift * dt * 6;
@@ -722,62 +737,25 @@
       vctx.fill();
     }
 
-    // grass
     vctx.fillStyle = "#43c36a";
     vctx.fillRect(0, H-150, W, 150);
     vctx.fillStyle = "rgba(0,0,0,0.06)";
     vctx.fillRect(0, H-150, W, 4);
 
-    // side bushes + flowers
     drawBush(vctx, -20, H-210, 160, 90, "rgba(46, 160, 92, 0.92)");
     drawBush(vctx, W-140, H-210, 170, 90, "rgba(46, 160, 92, 0.92)");
     drawBush(vctx, -10, H-185, 140, 75, "rgba(40, 140, 82, 0.92)");
     drawBush(vctx, W-135, H-185, 150, 75, "rgba(40, 140, 82, 0.92)");
 
-    // flowers sprinkled near bottom edges
     for (let i=0;i<6;i++){
       drawFlower(vctx, 26 + i*18, H-40 - (i%2)*8);
       drawFlower(vctx, W-26 - i*18, H-42 - (i%2)*10);
     }
 
-    // avatar (standing, no glasses) + label
     const ax = W/2;
     const ay = H-78; // feet baseline
     drawNameTag(vctx, "agy96", ax, ay-90);
-    // draw using view canvas context (not ctx)
-    vctx.save();
-    // replicate no-glasses avatar using vctx (same geometry)
-    (function drawAgyNoGlassesView(px, py){
-      const x = px, y = py;
-
-      vctx.fillStyle="#000";
-      vctx.fillRect(x-18, y-60, 36, 60);
-
-      vctx.fillStyle="#f1c7a6";
-      vctx.fillRect(x-12, y-44, 24, 28);
-
-      vctx.fillStyle="#c1272d";
-      vctx.fillRect(x-16, y-16, 32, 22);
-
-      vctx.fillRect(x-22, y-16, 6, 8);
-      vctx.fillRect(x+16, y-16, 6, 8);
-
-      vctx.fillStyle="#f1c7a6";
-      vctx.fillRect(x-22, y-8, 6, 10);
-      vctx.fillRect(x+16, y-8, 6, 10);
-
-      vctx.fillStyle="rgba(255,255,255,0.92)";
-      vctx.fillRect(x-10, y-2, 20, 6);
-      vctx.fillStyle="rgba(0,0,0,0.08)";
-      vctx.fillRect(x-8, y-1, 16, 2);
-
-      vctx.fillStyle="#0e0e18";
-      vctx.fillRect(x-16, y+6, 32, 16);
-
-      vctx.fillStyle="#fff";
-      vctx.fillRect(x-14, y+22, 28, 5);
-    })(ax, ay);
-    vctx.restore();
+    drawAgyBackView(ax, ay);
 
     requestAnimationFrame(viewLoop);
   }
@@ -790,7 +768,6 @@
   });
 
   nextBtn.addEventListener("click", ()=>{
-    // hook to next page
     alert("Hook this to your next adventure page.");
   });
 
