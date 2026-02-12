@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Tampines Maze</title>
+<title>First Stop: Tampines</title>
 
 <style>
   html,body{
@@ -59,6 +59,7 @@
   .hint{
     font-size:12px;
     opacity:0.9;
+    line-height:1.2;
   }
   .badge{
     font-weight:900;
@@ -70,11 +71,11 @@
     white-space:nowrap;
   }
 
-  /* ===== Maze canvas area ===== */
+  /* ===== Maze stage ===== */
   .stage{
     position:relative;
     width:100%;
-    aspect-ratio: 3 / 4; /* nice phone ratio */
+    aspect-ratio: 3 / 4;
     border-radius:14px;
     overflow:hidden;
     background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.28));
@@ -88,17 +89,70 @@
     image-rendering:pixelated;
   }
 
-  /* avatar label overlay */
-  .nameLabel{
+  /* Floating name tag above avatar */
+  .miniAgyTag{
     position:absolute;
-    top:10px;
-    left:10px;
+    transform: translate(-50%, -50%);
     font-weight:900;
     font-size:12px;
     padding:6px 10px;
     border-radius:999px;
     border:1px solid rgba(255,255,255,0.15);
     background:rgba(0,0,0,0.28);
+    pointer-events:none;
+  }
+
+  /* Mini avatar wrapper */
+  .miniAgy{
+    position:absolute;
+    transform: translate(-50%, -50%) scale(0.45);
+    transform-origin: top left;
+    pointer-events:none;
+  }
+
+  /* ===== agy96 avatar (same as your main page style) ===== */
+  .pixel{ width:140px; height:220px; position:relative; margin:0; filter:none; }
+
+  .hair{
+    position:absolute; width:92px; height:130px; background:#000;
+    top:0; left:50%; transform:translateX(-50%); border-radius:10px;
+  }
+  .face{
+    position:absolute; width:60px; height:72px; background:#f1c7a6;
+    top:34px; left:50%; transform:translateX(-50%); border-radius:2px;
+  }
+  .glasses{
+    position:absolute; top:60px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:0;
+  }
+  .glasses .side{ width:12px; height:4px; background:#000; }
+  .glasses .lens{ width:24px; height:18px; border:4px solid #000; box-sizing:border-box; }
+  .glasses .bridge{ width:10px; height:4px; background:#000; }
+
+  /* red tee */
+  .body{
+    position:absolute; top:118px; left:50%; transform:translateX(-50%);
+    width:80px; height:60px; background:#c1272d;
+  }
+  .sleeve{
+    position:absolute; top:118px; width:24px; height:30px; background:#c1272d;
+  }
+  .sleeve.left{ left:28px; }
+  .sleeve.right{ right:28px; }
+
+  .arm{
+    position:absolute; top:148px; width:20px; height:48px; background:#f1c7a6;
+  }
+  .arm.left{ left:30px; }
+  .arm.right{ right:30px; }
+
+  .pants{
+    position:absolute; top:188px; left:50%; transform:translateX(-50%);
+    width:82px; height:46px; background:#0e0e18;
+  }
+  .shoes{
+    position:absolute; top:232px; left:50%; transform:translateX(-50%);
+    width:74px; height:12px; background:#fff;
   }
 
   /* Controls */
@@ -158,7 +212,6 @@
   }
   .next:active{ transform:scale(0.98); }
 
-  /* Small screens safety */
   @media (max-height: 720px){
     h1{ font-size:24px; }
     .gameCard{ padding:12px; }
@@ -177,9 +230,35 @@
       <div class="badge" id="steps">0 moves</div>
     </div>
 
-    <div class="stage">
-      <div class="nameLabel">agy96</div>
+    <div class="stage" id="stage">
       <canvas id="cv" width="240" height="320"></canvas>
+
+      <div class="miniAgyTag" id="miniTag">agy96</div>
+
+      <div class="miniAgy" id="miniAgy">
+        <div class="pixel">
+          <div class="hair"></div>
+          <div class="face"></div>
+
+          <div class="glasses">
+            <div class="side"></div>
+            <div class="lens"></div>
+            <div class="bridge"></div>
+            <div class="lens"></div>
+            <div class="side"></div>
+          </div>
+
+          <div class="body"></div>
+          <div class="sleeve left"></div>
+          <div class="sleeve right"></div>
+
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+
+          <div class="pants"></div>
+          <div class="shoes"></div>
+        </div>
+      </div>
     </div>
 
     <div class="controls">
@@ -202,100 +281,141 @@
 
 <script>
 /* =========================
-   BGM logic (works after first tap on mobile)
+   BGM (will play after first user tap on mobile)
 ========================= */
 const bgm = document.getElementById("bgm");
 bgm.volume = 0.5;
-
 function tryPlayBgm(){
-  bgm.play().then(()=> {
-    localStorage.setItem("bgmPlaying", "true");
-  }).catch(()=>{});
+  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
 }
-if (localStorage.getItem("bgmPlaying")==="true") {
-  tryPlayBgm();
-} else {
-  // will start on first button tap
-}
+if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
 /* =========================
-   Maze game (simple tile maze)
-   - player auto-walks down every tick
-   - user can move left/right
+   Maze that "makes sense" with your mechanic:
+   - auto-walk DOWN
+   - player steers LEFT/RIGHT
+   - path is guaranteed solvable WITHOUT needing to go up
 ========================= */
-
 const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
 
-const TILE = 16;              // keep it pixel-y
-const COLS = 15;              // 240/16
-const ROWS = 20;              // 320/16
+const TILE = 16;
+const COLS = 15;  // 240/16
+const ROWS = 20;  // 320/16
 
 // 1 = wall/hedge, 0 = path
-// This maze is “inspired by” your image: thick outer hedge + internal corridors.
-// Exit is bottom-right opening.
-const maze = [
-  "111111111111111",
-  "100000000000001",
-  "101111011111101",
-  "101000010000101",
-  "101011110110101",
-  "101010000010101",
-  "101010111010101",
-  "101010101010101",
-  "101000101000101",
-  "101111101111101",
-  "100000001000001",
-  "111111101011111",
-  "100000101010001",
-  "101110101011101",
-  "101000100000101",
-  "101011111110101",
-  "101000000010101",
-  "101111111010101",
-  "100000000000001",
-  "111111111111101" // exit at (13,19) because last char is 1, but we open (13,19) below
-].map(r => r.split("").map(n => +n));
+const maze = Array.from({length: ROWS}, ()=> Array(COLS).fill(1));
 
-// Open an exit tile (path) near bottom-right
-const EXIT = { x: 13, y: 19 };
-maze[EXIT.y][EXIT.x] = 0;
+function carve(x,y){
+  if (x<=0 || x>=COLS-1 || y<=0 || y>=ROWS-1) return;
+  maze[y][x]=0;
+}
 
-// Player starts near top middle
+// Build a guaranteed downward-only main path + some side branches
+function buildMaze(){
+  // Start
+  let x = 1, y = 1;
+  carve(x,y);
+
+  // Main path to bottom (down + sideways only)
+  while (y < ROWS-2){
+    // always go down at least 1
+    const downSteps = 1 + Math.floor(Math.random()*2); // 1-2
+    for(let i=0;i<downSteps && y<ROWS-2;i++){
+      y += 1;
+      carve(x,y);
+    }
+
+    // random sideways corridor
+    const dir = Math.random()<0.5 ? -1 : 1;
+    const sideLen = Math.floor(Math.random()*4); // 0-3
+    for(let i=0;i<sideLen;i++){
+      const nx = x + dir;
+      if (nx<=1 || nx>=COLS-2) break;
+      x = nx;
+      carve(x,y);
+    }
+  }
+
+  // Exit near wherever we ended
+  EXIT.x = x;
+  EXIT.y = ROWS-1;
+  // open bottom row exit and the cell above it
+  maze[ROWS-1][x] = 0;
+  maze[ROWS-2][x] = 0;
+
+  // Add some downward-only branches
+  for(let b=0;b<10;b++){
+    const by = 2 + Math.floor(Math.random()*(ROWS-5));
+    const bx = 1 + Math.floor(Math.random()*(COLS-2));
+    if (maze[by][bx]!==0) continue;
+
+    // branch sideways then down
+    const bdir = Math.random()<0.5 ? -1 : 1;
+    let tx = bx, ty = by;
+
+    const sideways = 1 + Math.floor(Math.random()*4);
+    for(let i=0;i<sideways;i++){
+      const nx = tx + bdir;
+      if (nx<=1 || nx>=COLS-2) break;
+      tx = nx;
+      carve(tx,ty);
+    }
+
+    const down = 1 + Math.floor(Math.random()*5);
+    for(let i=0;i<down && ty<ROWS-2;i++){
+      ty += 1;
+      carve(tx,ty);
+    }
+  }
+
+  // Ensure borders are walls (except exit we opened)
+  for(let xx=0;xx<COLS;xx++){
+    maze[0][xx]=1;
+    maze[ROWS-1][xx]= (xx===EXIT.x ? 0 : 1);
+  }
+  for(let yy=0;yy<ROWS;yy++){
+    maze[yy][0]=1;
+    maze[yy][COLS-1]=1;
+  }
+}
+
+// Exit position (filled after build)
+const EXIT = { x: 13, y: ROWS-1 };
+buildMaze();
+
+// Player start
 let p = { x: 1, y: 1 };
 let moves = 0;
 let won = false;
 
 const stepsEl = document.getElementById("steps");
 const overlay = document.getElementById("overlay");
+const stage = document.getElementById("stage");
+const mini = document.getElementById("miniAgy");
+const miniTag = document.getElementById("miniTag");
 
-function inBounds(x,y){
-  return x>=0 && y>=0 && x<COLS && y<ROWS;
-}
-function isWall(x,y){
-  return !inBounds(x,y) || maze[y][x] === 1;
-}
+function inBounds(x,y){ return x>=0 && y>=0 && x<COLS && y<ROWS; }
+function isWall(x,y){ return !inBounds(x,y) || maze[y][x]===1; }
+
+function setMoves(){ stepsEl.textContent = `${moves} moves`; }
 
 function draw(){
-  // background grass
   ctx.clearRect(0,0,cv.width,cv.height);
 
-  // subtle grass pixels
+  // grass base
   ctx.fillStyle = "#2f8f3b";
   ctx.fillRect(0,0,cv.width,cv.height);
 
-  // draw walls (hedges)
+  // walls / hedges
   for(let y=0;y<ROWS;y++){
     for(let x=0;x<COLS;x++){
       if(maze[y][x]===1){
-        // hedge tile
         ctx.fillStyle = "#1f6a2b";
         ctx.fillRect(x*TILE,y*TILE,TILE,TILE);
-        // top highlight
         ctx.fillStyle = "rgba(255,255,255,0.06)";
         ctx.fillRect(x*TILE,y*TILE,TILE,3);
       } else {
-        // path sparkle
         if ((x+y)%7===0){
           ctx.fillStyle = "rgba(255,255,255,0.08)";
           ctx.fillRect(x*TILE+6,y*TILE+6,2,2);
@@ -304,12 +424,9 @@ function draw(){
     }
   }
 
-  // exit marker (map emoji)
+  // exit emoji
   ctx.font = "14px system-ui";
   ctx.fillText("🗺️", EXIT.x*TILE+1, EXIT.y*TILE+14);
-
-  // draw player (mini agy96)
-  drawAgy(p.x*TILE, p.y*TILE);
 
   // vignette
   const g = ctx.createLinearGradient(0,0,0,cv.height);
@@ -319,38 +436,33 @@ function draw(){
   ctx.fillRect(0,0,cv.width,cv.height);
 }
 
-function drawAgy(px, py){
-  // simple pixel avatar inside 1 tile footprint-ish (we use 1x2 tiles area)
-  // head
-  ctx.fillStyle="#000";                // hair block
-  ctx.fillRect(px+2,py+0,12,14);
-  ctx.fillStyle="#f1c7a6";             // face
-  ctx.fillRect(px+4,py+4,8,8);
+function positionMini(){
+  const rect = stage.getBoundingClientRect();
+  const canvasW = cv.width, canvasH = cv.height;
 
-  // glasses
-  ctx.fillStyle="#000";
-  ctx.fillRect(px+4,py+7,3,2);
-  ctx.fillRect(px+9,py+7,3,2);
-  ctx.fillRect(px+7,py+8,2,1);
+  const scaleX = rect.width / canvasW;
+  const scaleY = rect.height / canvasH;
 
-  // body (red tee)
-  ctx.fillStyle="#c1272d";
-  ctx.fillRect(px+4,py+13,8,9);
+  // center on tile
+  const px = (p.x*TILE + TILE/2) * scaleX;
+  const py = (p.y*TILE + TILE/2) * scaleY;
 
-  // pants
-  ctx.fillStyle="#0e0e18";
-  ctx.fillRect(px+4,py+22,8,8);
+  mini.style.left = px + "px";
+  mini.style.top  = py + "px";
 
-  // shoes
-  ctx.fillStyle="#fff";
-  ctx.fillRect(px+4,py+30,8,2);
+  // tag above
+  miniTag.style.left = px + "px";
+  miniTag.style.top  = (py - 36) + "px";
 }
 
-function setMoves(){
-  stepsEl.textContent = `${moves} moves`;
+function checkWin(){
+  if (p.x===EXIT.x && p.y===EXIT.y){
+    won = true;
+    overlay.classList.add("show");
+  }
 }
 
-// move left/right via buttons
+// move left/right
 function tryMove(dx){
   if (won) return;
   const nx = p.x + dx;
@@ -360,6 +472,7 @@ function tryMove(dx){
     moves++;
     setMoves();
     draw();
+    positionMini();
     checkWin();
   }
 }
@@ -374,33 +487,26 @@ function autoForward(){
     moves++;
     setMoves();
     draw();
+    positionMini();
     checkWin();
-  } else {
-    // if blocked, player waits — user must steer
   }
+  // if blocked, user must steer
 }
 
-function checkWin(){
-  if (p.x === EXIT.x && p.y === EXIT.y){
-    won = true;
-    overlay.classList.add("show");
-  }
-}
-
-// Controls: touch + click
+// Controls
 document.getElementById("leftBtn").addEventListener("click", () => { tryPlayBgm(); tryMove(-1); });
 document.getElementById("rightBtn").addEventListener("click", () => { tryPlayBgm(); tryMove(1); });
 
-// Keyboard support (desktop)
 window.addEventListener("keydown", (e)=>{
-  if (e.key === "ArrowLeft") tryMove(-1);
-  if (e.key === "ArrowRight") tryMove(1);
+  if (e.key==="ArrowLeft") tryMove(-1);
+  if (e.key==="ArrowRight") tryMove(1);
 });
 
-// Game loop
+// Start
 draw();
 setMoves();
-const tick = setInterval(autoForward, 380);
+positionMini();
+setInterval(autoForward, 360);
 
 // Next
 document.getElementById("nextBtn").addEventListener("click", ()=>{
