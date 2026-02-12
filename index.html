@@ -6,189 +6,188 @@
 <title>agy96 Amazing Race</title>
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  background:linear-gradient(160deg,#141428,#0b0b12);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:white;
-}
+  html,body{
+    margin:0;height:100%;
+    /* NEW background: cooler teal/purple so black hair stands out */
+    background:
+      radial-gradient(900px 520px at 50% 25%, rgba(120,255,235,0.10), transparent 60%),
+      radial-gradient(900px 520px at 50% 75%, rgba(160,120,255,0.10), transparent 60%),
+      linear-gradient(160deg,#0b1b24,#0b0b14);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:#fff;
+  }
 
-#wrap{
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:20px;
-}
+  #wrap{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:22px;
+  }
 
-h1{
-  font-size:28px;
-  margin-bottom:8px;
-  font-weight:900;
-}
+  h1{
+    font-size:34px;
+    margin:0 0 10px;
+    font-weight:1000;
+    letter-spacing:-0.5px;
+  }
 
-.sub{
-  opacity:0.85;
-  font-size:14px;
-  margin-bottom:30px;
-}
+  .sub{
+    opacity:0.88;
+    font-size:16px;
+    margin-bottom:26px;
+  }
 
-.nameTag{
-  margin-bottom:10px;
-  padding:6px 14px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.08);
-  font-weight:800;
-  font-size:13px;
-}
+  /* NEW: plain label (no enclosure) */
+  .nameLabel{
+    font-weight:900;
+    opacity:0.95;
+    margin-bottom:10px;
+    letter-spacing:0.4px;
+  }
 
-/* ===== PIXEL CHARACTER ===== */
+  /* ===== PIXEL CHARACTER BUILT FROM “CELLS” ===== */
+  /* We build a 12x20 grid. Each cell is a square pixel. */
+  .pixelGrid{
+    --p: 12px;                  /* pixel size */
+    width: calc(var(--p) * 12);
+    height: calc(var(--p) * 20);
+    display:grid;
+    grid-template-columns: repeat(12, var(--p));
+    grid-template-rows: repeat(20, var(--p));
+    gap:0;
+    margin: 6px 0 26px;
+    image-rendering:pixelated;
+    filter: drop-shadow(0 10px 0 rgba(0,0,0,0.22));
+  }
 
-.pixel{
-  width:120px;
-  height:200px;
-  position:relative;
-  margin-bottom:30px;
-  image-rendering:pixelated;
-}
+  .cell{ width:var(--p); height:var(--p); }
 
-/* hair (long black) */
-.hair{
-  position:absolute;
-  top:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:80px;
-  height:80px;
-  background:#000;
-  border-radius:10px;
-}
+  /* colors */
+  .hair{ background:#000; }
+  .skin{ background:#f1c7a6; }
+  .top{ background:#c1272d; }          /* red top */
+  .pants{ background:#0c0c18; }
+  .shoe{ background:#fff; }
+  .glass{ background:#000; }           /* glasses black */
 
-/* face */
-.face{
-  position:absolute;
-  top:25px;
-  left:50%;
-  transform:translateX(-50%);
-  width:60px;
-  height:60px;
-  background:#f1c7a6;
-}
-
-/* glasses */
-.glasses{
-  position:absolute;
-  top:48px;
-  left:50%;
-  transform:translateX(-50%);
-  width:70px;
-  height:20px;
-  display:flex;
-  justify-content:space-between;
-}
-.glasses div{
-  width:26px;
-  height:20px;
-  border:3px solid black;
-  box-sizing:border-box;
-}
-
-/* body */
-.body{
-  position:absolute;
-  top:85px;
-  left:50%;
-  transform:translateX(-50%);
-  width:70px;
-  height:50px;
-  background:#c1272d; /* red off shoulder */
-}
-
-/* arms */
-.arm{
-  position:absolute;
-  top:85px;
-  width:18px;
-  height:60px;
-  background:#f1c7a6;
-}
-.arm.left{ left:18px; }
-.arm.right{ right:18px; }
-
-/* legs */
-.leg{
-  position:absolute;
-  top:135px;
-  width:24px;
-  height:60px;
-  background:#0e0e18;
-}
-.leg.left{ left:40px; }
-.leg.right{ right:40px; }
-
-/* shoes */
-.shoe{
-  position:absolute;
-  top:185px;
-  width:24px;
-  height:12px;
-  background:white;
-}
-.shoe.left{ left:40px; }
-.shoe.right{ right:40px; }
-
-/* button */
-button{
-  padding:14px 28px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.2);
-  background:rgba(255,255,255,0.1);
-  color:white;
-  font-weight:900;
-  font-size:16px;
-}
-
-button:active{
-  transform:scale(0.97);
-}
+  /* button */
+  button{
+    padding:16px 34px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.10);
+    color:#fff;
+    font-weight:1000;
+    font-size:18px;
+    letter-spacing:0.6px;
+  }
+  button:active{ transform:scale(0.98); }
 </style>
 </head>
 
 <body>
 <div id="wrap">
+  <h1>Welcome to agy96 amazing race! 🏁</h1>
+  <div class="sub">do you have what it takes to complete this mission?</div>
 
-<h1>Welcome to agy96 amazing race! 🏁</h1>
-<div class="sub">do you have what it takes to complete this mission?</div>
+  <div class="nameLabel">agy96</div>
 
-<div class="nameTag">agy96</div>
+  <!-- Pixel character grid -->
+  <div class="pixelGrid" id="grid" aria-label="pixel character"></div>
 
-<div class="pixel">
-  <div class="hair"></div>
-  <div class="face"></div>
-
-  <div class="glasses">
-    <div></div>
-    <div></div>
-  </div>
-
-  <div class="body"></div>
-
-  <div class="arm left"></div>
-  <div class="arm right"></div>
-
-  <div class="leg left"></div>
-  <div class="leg right"></div>
-
-  <div class="shoe left"></div>
-  <div class="shoe right"></div>
+  <button onclick="location.href='./tampines.html'">LFG!!!</button>
 </div>
 
-<button onclick="location.href='./tampines.html'">LFG!!!</button>
+<script>
+  /*
+    We’ll render a 12x20 pixel “sprite” by placing colored cells.
 
-</div>
+    Goals:
+    - Long black hair visible
+    - Off-shoulder top: skin at shoulders, red across chest, small red “straps” on arms
+    - Glasses: --[]--[]-- vibe (two frames + bridge)
+  */
+
+  const W = 12, H = 20;
+  const grid = document.getElementById("grid");
+
+  // Helper to set a cell color class at (x,y), 1-indexed for readability
+  function put(x,y,cls){
+    const idx = (y-1)*W + (x-1);
+    map[idx] = cls;
+  }
+
+  // Start with transparent/empty cells
+  const map = new Array(W*H).fill("");
+
+  // ===== HAIR (long) =====
+  // big hair cap + sides down to shoulder
+  for(let y=1;y<=6;y++){
+    for(let x=3;x<=10;x++) put(x,y,"hair");
+  }
+  // sides longer
+  for(let y=7;y<=11;y++){
+    put(3,y,"hair"); put(4,y,"hair");
+    put(9,y,"hair"); put(10,y,"hair");
+  }
+
+  // ===== FACE =====
+  for(let y=4;y<=8;y++){
+    for(let x=5;x<=8;x++) put(x,y,"skin");
+  }
+
+  // ===== GLASSES: --[]--[]-- =====
+  // left frame
+  for(let x=4;x<=6;x++){ put(x,6,"glass"); put(x,8,"glass"); }
+  put(4,7,"glass"); put(6,7,"glass");
+  // right frame
+  for(let x=7;x<=9;x++){ put(x,6,"glass"); put(x,8,"glass"); }
+  put(7,7,"glass"); put(9,7,"glass");
+  // bridge "--" between
+  put(6,7,"glass"); put(7,7,"glass"); // overlaps to form the bridge cleanly
+
+  // ===== NECK / SHOULDERS (skin) =====
+  put(6,9,"skin"); put(7,9,"skin");
+  // shoulders visible (off-shoulder look)
+  put(5,10,"skin"); put(8,10,"skin");
+
+  // ===== OFF-SHOULDER TOP (red) =====
+  // chest band
+  for(let x=5;x<=8;x++) put(x,11,"top");
+  for(let x=5;x<=8;x++) put(x,12,"top");
+  for(let x=5;x<=8;x++) put(x,13,"top");
+
+  // add tiny red “strap” on each upper arm (your idea)
+  put(4,11,"top"); put(9,11,"top");
+
+  // ===== ARMS (skin) =====
+  for(let y=12;y<=15;y++){
+    put(4,y,"skin");
+    put(9,y,"skin");
+  }
+
+  // ===== PANTS (black) =====
+  for(let y=14;y<=18;y++){
+    put(6,y,"pants"); put(7,y,"pants");
+  }
+  // legs wider
+  for(let y=15;y<=18;y++){
+    put(5,y,"pants"); put(8,y,"pants");
+  }
+
+  // ===== SHOES (white) =====
+  put(5,19,"shoe"); put(6,19,"shoe");
+  put(7,19,"shoe"); put(8,19,"shoe");
+
+  // Render cells
+  for(let i=0;i<W*H;i++){
+    const d = document.createElement("div");
+    d.className = "cell " + (map[i] || "");
+    grid.appendChild(d);
+  }
+</script>
 </body>
 </html>
