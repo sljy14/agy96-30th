@@ -367,21 +367,31 @@ function drawAgySprite(g, x, y, scale, withPlate){
   g.fillStyle="#f1c7a6";
   g.fillRect(-8, -32, 16, 18);
 
-  // Glasses: []-[]
-  g.fillStyle="#000";
-  // left lens outline
-  g.fillRect(-12, -26, 10, 2); // top
-  g.fillRect(-12, -26, 2, 10); // left
-  g.fillRect(-12, -16, 10, 2); // bottom
-  g.fillRect(-4,  -26, 2, 12); // right
-  // right lens outline
-  g.fillRect(2,  -26, 10, 2);
-  g.fillRect(2,  -26, 2, 10);
-  g.fillRect(2,  -16, 10, 2);
-  g.fillRect(10, -26, 2, 12);
+    // ✅ Glasses (smaller, proportional): []-[] with bridge
+  g.fillStyle = "#000";
+
+  const gy = -24;          // glasses top (relative to sprite)
+  const lensW = 8;
+  const lensH = 7;
+  const leftX = -10;
+  const rightX = 2;
+  const thick = 2;
+
+  // left lens frame
+  g.fillRect(leftX, gy, lensW, thick);                 // top
+  g.fillRect(leftX, gy, thick, lensH);                 // left
+  g.fillRect(leftX, gy + lensH - thick, lensW, thick); // bottom
+  g.fillRect(leftX + lensW - thick, gy, thick, lensH); // right
+
+  // right lens frame
+  g.fillRect(rightX, gy, lensW, thick);
+  g.fillRect(rightX, gy, thick, lensH);
+  g.fillRect(rightX, gy + lensH - thick, lensW, thick);
+  g.fillRect(rightX + lensW - thick, gy, thick, lensH);
 
   // bridge
-  g.fillRect(-2, -22, 4, 2);
+  g.fillRect(-2, gy + 3, 4, 2);
+
 
   // Shirt
   g.fillStyle="#c1272d";
@@ -407,6 +417,46 @@ function drawAgySprite(g, x, y, scale, withPlate){
     g.fillStyle="rgba(0,0,0,0.08)";
     g.fillRect(-6, -1, 12, 2);
   }
+
+  function drawAgyEatingOldLook(g, cx, cy){
+  // hair
+  g.fillStyle="#000";
+  g.fillRect(cx-20, cy-70, 40, 60);
+
+  // face
+  g.fillStyle="#f1c7a6";
+  g.fillRect(cx-14, cy-56, 28, 28);
+
+  // ✅ glasses with bridge (same style as map: []-[] with a bridge)
+  g.fillStyle="#000";
+
+  const gy = cy - 50;
+  const lensW = 12;
+  const lensH = 9;
+  const leftX = cx - 18;
+  const rightX = cx + 6;
+  const thick = 2;
+
+  // left lens
+  g.fillRect(leftX, gy, lensW, thick);
+  g.fillRect(leftX, gy, thick, lensH);
+  g.fillRect(leftX, gy + lensH - thick, lensW, thick);
+  g.fillRect(leftX + lensW - thick, gy, thick, lensH);
+
+  // right lens
+  g.fillRect(rightX, gy, lensW, thick);
+  g.fillRect(rightX, gy, thick, lensH);
+  g.fillRect(rightX, gy + lensH - thick, lensW, thick);
+  g.fillRect(rightX + lensW - thick, gy, thick, lensH);
+
+  // bridge
+  g.fillRect(cx-2, gy + 4, 4, 2);
+
+  // shirt
+  g.fillStyle="#c1272d";
+  g.fillRect(cx-18, cy-28, 36, 22);
+}
+
 
   g.restore();
 }
@@ -615,8 +665,9 @@ function drawEating(){
   // label (no pill)
   drawTextLabel(eatCtx, "agy96", cx, baseY-72);
 
-  // avatar (small, consistent glasses bridge)
-  drawAgySprite(eatCtx, cx, baseY, 1.25, false);
+    // ✅ avatar (restore the old eating look; only glasses updated)
+  drawAgyEatingOldLook(eatCtx, cx, baseY);
+
 
   // fork animation
   const bob = Math.sin(eatTick*0.18) * 6;
