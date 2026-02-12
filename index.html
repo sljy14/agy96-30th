@@ -8,11 +8,11 @@
 <style>
   html,body{
     margin:0;height:100%;
-    /* NEW background: cooler teal/purple so black hair stands out */
+    /* More contrast so black hair shows */
     background:
-      radial-gradient(900px 520px at 50% 25%, rgba(120,255,235,0.10), transparent 60%),
-      radial-gradient(900px 520px at 50% 75%, rgba(160,120,255,0.10), transparent 60%),
-      linear-gradient(160deg,#0b1b24,#0b0b14);
+      radial-gradient(900px 520px at 50% 25%, rgba(120,255,235,0.14), transparent 62%),
+      radial-gradient(900px 520px at 50% 75%, rgba(160,120,255,0.12), transparent 62%),
+      linear-gradient(160deg,#06202a,#070714);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
     color:#fff;
   }
@@ -37,43 +37,133 @@
   .sub{
     opacity:0.88;
     font-size:16px;
-    margin-bottom:26px;
+    margin-bottom:18px;
   }
 
-  /* NEW: plain label (no enclosure) */
+  /* plain label */
   .nameLabel{
     font-weight:900;
     opacity:0.95;
-    margin-bottom:10px;
+    margin: 8px 0 10px;
     letter-spacing:0.4px;
+    font-size:20px;
   }
 
-  /* ===== PIXEL CHARACTER BUILT FROM “CELLS” ===== */
-  /* We build a 12x20 grid. Each cell is a square pixel. */
-  .pixelGrid{
-    --p: 12px;                  /* pixel size */
-    width: calc(var(--p) * 12);
-    height: calc(var(--p) * 20);
-    display:grid;
-    grid-template-columns: repeat(12, var(--p));
-    grid-template-rows: repeat(20, var(--p));
-    gap:0;
-    margin: 6px 0 26px;
+  /* ===== PIXEL CHARACTER (block parts, easy to tweak) ===== */
+  .pixel{
+    width:140px;
+    height:220px;
+    position:relative;
+    margin: 10px 0 26px;
     image-rendering:pixelated;
     filter: drop-shadow(0 10px 0 rgba(0,0,0,0.22));
   }
 
-  .cell{ width:var(--p); height:var(--p); }
+  /* Long hair */
+  .hair{
+    position:absolute;
+    width:92px;
+    height:130px;
+    background:#000;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    border-radius:10px;
+  }
 
-  /* colors */
-  .hair{ background:#000; }
-  .skin{ background:#f1c7a6; }
-  .top{ background:#c1272d; }          /* red top */
-  .pants{ background:#0c0c18; }
-  .shoe{ background:#fff; }
-  .glass{ background:#000; }           /* glasses black */
+  /* Face sits INSIDE hair (prevents “mask” look) */
+  .face{
+    position:absolute;
+    width:60px;
+    height:72px;
+    background:#f1c7a6;
+    top:34px;
+    left:50%;
+    transform:translateX(-50%);
+    border-radius:2px;
+  }
 
-  /* button */
+  /* Glasses: --[]--[]-- */
+  .glasses{
+    position:absolute;
+    top:60px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:0;
+  }
+  .glasses .side{
+    width:12px;
+    height:4px;
+    background:#000;
+  }
+  .glasses .lens{
+    width:24px;
+    height:18px;
+    border:4px solid #000;
+    box-sizing:border-box;
+    background:transparent;
+  }
+  .glasses .bridge{
+    width:10px;
+    height:4px;
+    background:#000;
+  }
+
+  /* Off-shoulder top */
+  .body{
+    position:absolute;
+    top:118px;
+    left:50%;
+    transform:translateX(-50%);
+    width:74px;
+    height:58px;
+    background:#c1272d;
+  }
+
+  .arm{
+    position:absolute;
+    top:118px;
+    width:20px;
+    height:74px;
+    background:#f1c7a6;
+  }
+  .arm.left{ left:30px; }
+  .arm.right{ right:30px; }
+
+  /* Red “straps” on upper arms */
+  .strap{
+    position:absolute;
+    top:118px;
+    width:20px;
+    height:14px;
+    background:#c1272d;
+  }
+  .strap.left{ left:30px; }
+  .strap.right{ right:30px; }
+
+  /* Pants + shoes */
+  .pants{
+    position:absolute;
+    top:176px;
+    left:50%;
+    transform:translateX(-50%);
+    width:74px;
+    height:40px;
+    background:#0e0e18;
+  }
+
+  .shoes{
+    position:absolute;
+    top:214px;
+    left:50%;
+    transform:translateX(-50%);
+    width:74px;
+    height:12px;
+    background:#fff;
+  }
+
   button{
     padding:16px 34px;
     border-radius:18px;
@@ -95,98 +185,54 @@
 
   <div class="nameLabel">agy96</div>
 
-  <!-- Pixel character grid -->
-  <div class="pixelGrid" id="grid" aria-label="pixel character"></div>
+  <div class="pixel">
+    <div class="hair"></div>
+    <div class="face"></div>
 
-  <button onclick="location.href='./tampines.html'">LFG!!!</button>
+    <div class="glasses">
+      <div class="side"></div>
+      <div class="lens"></div>
+      <div class="bridge"></div>
+      <div class="lens"></div>
+      <div class="side"></div>
+    </div>
+
+    <div class="body"></div>
+    <div class="strap left"></div>
+    <div class="strap right"></div>
+
+    <div class="arm left"></div>
+    <div class="arm right"></div>
+
+    <div class="pants"></div>
+    <div class="shoes"></div>
+  </div>
+
+  <button id="goBtn">LFG!!!</button>
 </div>
 
+<!-- BGM -->
+<audio id="bgm" src="./arcade.mp3" loop></audio>
+
 <script>
-  /*
-    We’ll render a 12x20 pixel “sprite” by placing colored cells.
+  // Start button (also counts as "user interaction" so audio can play on mobile)
+  document.getElementById("goBtn").addEventListener("click", () => {
+    const bgm = document.getElementById("bgm");
+    bgm.volume = 0.5;
 
-    Goals:
-    - Long black hair visible
-    - Off-shoulder top: skin at shoulders, red across chest, small red “straps” on arms
-    - Glasses: --[]--[]-- vibe (two frames + bridge)
-  */
+    // try play (allowed because click is a user gesture)
+    bgm.play().then(() => {
+      localStorage.setItem("bgmPlaying", "true");
+    }).catch(()=>{});
 
-  const W = 12, H = 20;
-  const grid = document.getElementById("grid");
+    location.href = "./tampines.html";
+  });
 
-  // Helper to set a cell color class at (x,y), 1-indexed for readability
-  function put(x,y,cls){
-    const idx = (y-1)*W + (x-1);
-    map[idx] = cls;
-  }
-
-  // Start with transparent/empty cells
-  const map = new Array(W*H).fill("");
-
-  // ===== HAIR (long) =====
-  // big hair cap + sides down to shoulder
-  for(let y=1;y<=6;y++){
-    for(let x=3;x<=10;x++) put(x,y,"hair");
-  }
-  // sides longer
-  for(let y=7;y<=11;y++){
-    put(3,y,"hair"); put(4,y,"hair");
-    put(9,y,"hair"); put(10,y,"hair");
-  }
-
-  // ===== FACE =====
-  for(let y=4;y<=8;y++){
-    for(let x=5;x<=8;x++) put(x,y,"skin");
-  }
-
-  // ===== GLASSES: --[]--[]-- =====
-  // left frame
-  for(let x=4;x<=6;x++){ put(x,6,"glass"); put(x,8,"glass"); }
-  put(4,7,"glass"); put(6,7,"glass");
-  // right frame
-  for(let x=7;x<=9;x++){ put(x,6,"glass"); put(x,8,"glass"); }
-  put(7,7,"glass"); put(9,7,"glass");
-  // bridge "--" between
-  put(6,7,"glass"); put(7,7,"glass"); // overlaps to form the bridge cleanly
-
-  // ===== NECK / SHOULDERS (skin) =====
-  put(6,9,"skin"); put(7,9,"skin");
-  // shoulders visible (off-shoulder look)
-  put(5,10,"skin"); put(8,10,"skin");
-
-  // ===== OFF-SHOULDER TOP (red) =====
-  // chest band
-  for(let x=5;x<=8;x++) put(x,11,"top");
-  for(let x=5;x<=8;x++) put(x,12,"top");
-  for(let x=5;x<=8;x++) put(x,13,"top");
-
-  // add tiny red “strap” on each upper arm (your idea)
-  put(4,11,"top"); put(9,11,"top");
-
-  // ===== ARMS (skin) =====
-  for(let y=12;y<=15;y++){
-    put(4,y,"skin");
-    put(9,y,"skin");
-  }
-
-  // ===== PANTS (black) =====
-  for(let y=14;y<=18;y++){
-    put(6,y,"pants"); put(7,y,"pants");
-  }
-  // legs wider
-  for(let y=15;y<=18;y++){
-    put(5,y,"pants"); put(8,y,"pants");
-  }
-
-  // ===== SHOES (white) =====
-  put(5,19,"shoe"); put(6,19,"shoe");
-  put(7,19,"shoe"); put(8,19,"shoe");
-
-  // Render cells
-  for(let i=0;i<W*H;i++){
-    const d = document.createElement("div");
-    d.className = "cell " + (map[i] || "");
-    grid.appendChild(d);
+  // If user returns back to index.html and bgm was playing, try resume
+  const bgm = document.getElementById("bgm");
+  if (localStorage.getItem("bgmPlaying") === "true") {
+    bgm.volume = 0.5;
+    bgm.play().catch(()=>{});
   }
 </script>
 </body>
