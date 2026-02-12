@@ -381,28 +381,26 @@ function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
 function drawAgyGameplay(px, py){
   const x = px, y = py;
 
-  // hair (clean old-good silhouette)
+  // hair (simple rectangular blob like you want)
   ctx.fillStyle="#000";
-  ctx.fillRect(x-16, y-58, 32, 58);   // main hair
-  ctx.fillRect(x-18, y-52, 36, 44);   // slight width mid-body
-  ctx.fillRect(x-16, y-58, 32, 6);    // top cap
+  ctx.fillRect(x-18, y-60, 36, 60);
 
   // face
   ctx.fillStyle="#f1c7a6";
   ctx.fillRect(x-12, y-44, 24, 28);
 
-  // glasses (slightly higher + slightly smaller so arms fit nicely)
-  const gy = y - 38;                  // higher than your current y-37
+  // glasses (nudge right + shorter temple arms so it stays on the face)
+  const gy = y - 38;
   const lensW = 11, lensH = 9;
-  const thick = 2, gap = 5, armLen = 7;
-  const leftX = x - 16;
+  const thick = 2, gap = 5, armLen = 4;   // <-- armLen reduced
+  const leftX = x - 14;                   // <-- moved right (was x-16)
   drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
 
   // shirt
   ctx.fillStyle="#c1272d";
   ctx.fillRect(x-16, y-16, 32, 22);
 
-  // sleeves (avoid “sleeveless” look)
+  // sleeves (so it’s not sleeveless)
   ctx.fillRect(x-22, y-16, 6, 8);
   ctx.fillRect(x+16, y-16, 6, 8);
 
@@ -411,17 +409,16 @@ function drawAgyGameplay(px, py){
   ctx.fillRect(x-22, y-8, 6, 10);
   ctx.fillRect(x+16, y-8, 6, 10);
 
-  // plate (held)
+  // plate
   ctx.fillStyle="rgba(255,255,255,0.92)";
   ctx.fillRect(x-10, y-2, 20, 6);
   ctx.fillStyle="rgba(0,0,0,0.08)";
   ctx.fillRect(x-8, y-1, 16, 2);
 
-  // pants
+  // pants + shoes
   ctx.fillStyle="#0e0e18";
   ctx.fillRect(x-16, y+6, 32, 16);
 
-  // shoes
   ctx.fillStyle="#fff";
   ctx.fillRect(x-14, y+22, 28, 5);
 }
@@ -591,7 +588,7 @@ let eatTick = 0;
 
 function drawTextLabel(g, text, x, y){
   g.save();
-  g.font = "900 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  g.font = "900 14px system-ui, -apple-system, Segoe UI, Roboto, Arial"; // smaller
   g.textAlign = "center";
   g.fillStyle = "rgba(0,0,0,0.35)";
   g.fillText(text, x+2, y+2);
@@ -599,6 +596,7 @@ function drawTextLabel(g, text, x, y){
   g.fillText(text, x, y);
   g.restore();
 }
+
 
 function drawAgyEating(g, cx, cy){
   // hair (old look)
@@ -652,7 +650,7 @@ function drawEating(){
   const cy = H2-84;
 
   // label (no pill)
-  drawTextLabel(eatCtx, "agy96", cx, cy-72);
+  drawTextLabel(eatCtx, "agy96", cx, cy-92);
 
   // avatar (restored)
   drawAgyEating(eatCtx, cx, cy);
