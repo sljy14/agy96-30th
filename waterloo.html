@@ -6,21 +6,17 @@
   <title>Waterloo Ballet Studio</title>
   <style>
     :root{
-      --cardBg1: rgba(20, 8, 28, 0.74);
-      --cardBg2: rgba(12, 6, 18, 0.72);
+      --cardBg1: rgba(20, 10, 26, 0.70);
+      --cardBg2: rgba(10, 6, 18, 0.72);
       --border: rgba(255,255,255,0.12);
-      --text: #f4f2ff;
-      --muted: rgba(244,242,255,0.78);
-      --pill: rgba(255,255,255,0.06);
+      --text: #f7f2ff;
+      --muted: rgba(247,242,255,0.78);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background:
-        radial-gradient(900px 520px at 50% 18%, rgba(230,170,255,0.16), transparent 62%),
-        radial-gradient(900px 520px at 50% 78%, rgba(150,255,220,0.10), transparent 62%),
-        linear-gradient(160deg,#14091f,#060613);
+      background: radial-gradient(1200px 600px at 50% -10%, #2c1640, #06040a);
       color: var(--text);
     }
     .wrap{
@@ -37,6 +33,7 @@
       box-shadow: 0 30px 80px rgba(0,0,0,0.55);
       overflow:hidden;
     }
+
     .header{
       padding: 16px 16px 10px;
       text-align:center;
@@ -71,58 +68,28 @@
       gap:10px;
       border-radius: 999px;
       padding: 10px 10px;
-      background: var(--pill);
+      background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.2px;
       min-width: 0;
-      white-space: nowrap;
     }
-    .pill small{ color: var(--muted); font-weight: 700; }
+    .pill small{ color: var(--muted); font-weight: 800; }
 
-    .stage{ padding: 8px 12px 8px; }
+    .stage{ padding: 8px 12px 12px; }
     .frame{
       border-radius: 20px;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.10);
       padding: 10px;
-      position: relative;
     }
     canvas{
       width:100%;
       height:auto;
       display:block;
       border-radius: 16px;
-      background: #f3ecff;
+      background: #f6ecff;
       touch-action: manipulation;
-    }
-
-    /* Side buttons */
-    .sideBtn{
-      position:absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 76px;
-      height: 76px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.22);
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(8px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.18);
-    }
-    .sideBtn:active{ transform: translateY(-50%) scale(0.98); }
-    .sideBtn.left{ left: 16px; }
-    .sideBtn.right{ right: 16px; }
-    .sideBtn span{
-      font-size: 42px;
-      line-height: 1;
-      color: rgba(15,15,30,0.76);
-      font-weight: 900;
     }
 
     .hint{
@@ -133,52 +100,55 @@
       line-height: 1.35;
     }
 
-    /* Win overlay */
-    .overlay{
+    /* Modal */
+    .modal{
       position: fixed;
       inset: 0;
       display:none;
       align-items:center;
       justify-content:center;
       padding: 18px;
-      background: rgba(0,0,0,0.50);
-      z-index: 20;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      z-index: 50;
     }
-    .overlay.show{ display:flex; }
-    .modal{
-      width:min(520px, 96vw);
+    .modal.show{ display:flex; }
+    .modalCard{
+      width:min(520px, 94vw);
       border-radius: 22px;
-      background: rgba(18, 10, 26, 0.92);
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 30px 90px rgba(0,0,0,0.65);
-      padding: 16px 16px 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+      padding: 18px 16px 16px;
       text-align:center;
     }
-    .modal h2{
-      margin: 6px 0 8px;
-      font-size: 20px;
+    .modalCard h2{
+      margin: 6px 0 6px;
+      font-size: 18px;
+      font-weight: 950;
       letter-spacing: -0.01em;
     }
-    .modal p{
+    .modalCard p{
       margin: 0 0 12px;
       color: var(--muted);
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.35;
     }
     .btn{
       appearance:none;
       border: 0;
       border-radius: 999px;
       padding: 14px 16px;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing: 0.2px;
-      background: linear-gradient(180deg, rgba(159,240,200,0.22), rgba(159,240,200,0.12));
+      background: linear-gradient(180deg, rgba(255,170,220,0.22), rgba(255,170,220,0.12));
       color: var(--text);
-      border: 1px solid rgba(159,240,200,0.28);
+      border: 1px solid rgba(255,170,220,0.28);
       cursor:pointer;
       width: 100%;
       max-width: 360px;
     }
+    .btn:active{ transform: translateY(1px); }
   </style>
 </head>
 
@@ -191,576 +161,553 @@
     </div>
 
     <div class="hud">
-      <div class="pill"><span>🧭</span><span>Progress:&nbsp;<strong id="prog">0</strong>&nbsp;<small>/ 10</small></span></div>
-      <div class="pill"><span>⏱️</span><span>Time:&nbsp;<strong id="tleft">1.30</strong>&nbsp;<small>s</small></span></div>
-      <div class="pill"><span>⚖️</span><span id="status">Balance: steady</span></div>
+      <div class="pill"><span>🎯</span><span>Correct:&nbsp;<strong id="score">0</strong>&nbsp;<small>/ 10</small></span></div>
+      <div class="pill"><span>⏱️</span><span>Time:&nbsp;<strong id="time">2.0</strong><small>s</small></span></div>
     </div>
 
     <div class="stage">
       <div class="frame">
-        <canvas id="game" width="390" height="520" aria-label="Waterloo ballet game"></canvas>
-
-        <div class="sideBtn left" id="leftBtn" role="button" aria-label="Left">
-          <span>‹</span>
-        </div>
-        <div class="sideBtn right" id="rightBtn" role="button" aria-label="Right">
-          <span>›</span>
-        </div>
+        <canvas id="cv" width="390" height="560" aria-label="Waterloo ballet game"></canvas>
       </div>
     </div>
 
-    <div class="hint">Get <b>10 correct taps</b>. Tap the correct side when the cue appears above her head.</div>
+    <div class="hint">Each cue must be tapped within <strong>2.0s</strong>. Wrong side or no tap = fall + instant restart.</div>
   </div>
 </div>
 
-<!-- Win overlay -->
-<div class="overlay" id="overlay">
-  <div class="modal">
+<div class="modal" id="winModal" role="dialog" aria-modal="true">
+  <div class="modalCard">
     <h2>Congratulations! You balanced with grace under pressure. 🙆‍♀️</h2>
-    <p>Take a bow. Then head to your next mission.</p>
-    <button class="btn" id="nextBtn">On to my next mission!</button>
+    <p>Ready for your next mission?</p>
+    <button id="nextBtn" class="btn">On to my next mission!</button>
   </div>
 </div>
 
-<!-- BGM -->
+<!-- BGM (continues across pages; starts on first tap) -->
 <audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
 
 <script>
 (() => {
-  // ====== CONFIG ======
-  const MAP_URL = "./map.html"; // <-- change if your map file is named differently
-  const GOAL = 10;
-
-  // time per cue: starts easier, gets tighter
-  function timeLimitFor(nDone){
-    if (nDone <= 2) return 1.30;
-    if (nDone <= 6) return 1.15;
-    return 1.00;
-  }
-
-  // tilt magnitudes
-  const TILT_MAX = 0.55;      // radians (~31.5°)
-  const TILT_DANGER = 0.40;   // show "danger" at ~23°
-  const TILT_SPEED = 0.0085;  // how fast she tips each ms (tuned for phone)
-
-  // ====== DOM ======
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  const cv = document.getElementById("cv");
+  const ctx = cv.getContext("2d");
   ctx.imageSmoothingEnabled = true;
 
-  const progEl = document.getElementById("prog");
-  const tleftEl = document.getElementById("tleft");
-  const statusEl = document.getElementById("status");
+  const scoreEl = document.getElementById("score");
+  const timeEl  = document.getElementById("time");
+  const winModal = document.getElementById("winModal");
+  const nextBtn  = document.getElementById("nextBtn");
 
-  const leftBtn = document.getElementById("leftBtn");
-  const rightBtn = document.getElementById("rightBtn");
-
-  const overlay = document.getElementById("overlay");
-  const nextBtn = document.getElementById("nextBtn");
-
+  // ===== BGM =====
   const bgm = document.getElementById("bgm");
-
-  // ====== BGM ======
+  bgm.volume = 0.6;
   let bgmStarted = false;
   async function ensureBgm(){
     if (bgmStarted) return;
     bgmStarted = true;
     try{
-      bgm.volume = 0.7;
       await bgm.play();
       localStorage.setItem("bgmPlaying","true");
     }catch(e){
       bgmStarted = false;
     }
   }
-  // auto attempt if user already enabled in earlier scenes
   if (localStorage.getItem("bgmPlaying")==="true"){
     ensureBgm();
   }
 
-  // ====== STATE ======
-  const s = {
-    running: true,
-    done: 0,
-    cue: null,             // "L" or "R" (what the user must press)
-    tiltDir: 0,            // +1 tilt right, -1 tilt left
-    tilt: 0,               // current tilt
-    timeLeft: 1.30,
-    limit: 1.30,
-    cueFlash: 0,           // for re-appearing cue
-    failFlash: 0,          // for fall
-    confetti: [],
-    confettiOn: false
+  // ===== GAME SETTINGS =====
+  const GOAL = 10;
+  const PER_CUE_MS = 2000;          // ✅ 2.0s per cue
+  const CUE_PAUSE_MS = 320;         // small breathing gap between cues
+
+  // Cue direction: +1 = user must tap RIGHT, -1 = user must tap LEFT
+  // Avatar tilts OPPOSITE of cue: tiltAngleTarget = -cueDir * tiltMax
+  const tiltMax = 0.42;             // radians (~24°) dramatic but readable
+  const tiltDanger = 0.50;          // beyond this -> we consider "too far" visually (we still fail on timeout/wrong tap)
+
+  // ===== UI HIT AREAS =====
+  const btn = {
+    w: 92, h: 92,
+    gapToCenter: 128
   };
 
-  // ====== HELPERS ======
-  const rand = (a,b)=>a + Math.random()*(b-a);
+  // ===== STATE =====
+  const S = {
+    state: "playing",   // playing | falling | win
+    score: 0,
+    cueDir: 1,
+    cueStart: 0,
+    cueDeadline: 0,
+    cuePulse: 0,        // 0..1 flash each cue
+    tilt: 0,
+    tiltTarget: 0,
+    fallY: 0,
+    fallVy: 0,
+    confetti: []
+  };
 
   function setHUD(){
-    progEl.textContent = String(s.done);
-    tleftEl.textContent = s.timeLeft.toFixed(2);
-    const abs = Math.abs(s.tilt);
-    if (abs >= TILT_DANGER) statusEl.textContent = "Balance: danger";
-    else if (abs >= 0.22) statusEl.textContent = "Balance: wobble";
-    else statusEl.textContent = "Balance: steady";
+    scoreEl.textContent = String(S.score);
+    const msLeft = Math.max(0, S.cueDeadline - performance.now());
+    timeEl.textContent = (msLeft/1000).toFixed(1);
   }
 
-  function pickCue(){
-    // cue is what user must press; tilt is opposite
-    const next = Math.random() < 0.5 ? "L" : "R";
-    s.cue = next;
-    s.tiltDir = (next === "L") ? +1 : -1; // cue L => she is falling RIGHT (need left to save)?? no:
-    // You specified: when she tilts LEFT, cue shows RIGHT, and user taps RIGHT.
-    // So cue indicates the SAVE direction; tilt is opposite cue.
-    // That means: cue "L" => tilt RIGHT (+), cue "R" => tilt LEFT (-). This matches above.
-    s.limit = timeLimitFor(s.done);
-    s.timeLeft = s.limit;
-    s.cueFlash = 220; // ms flash
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function startCue(forceDir){
+    S.cueDir = (typeof forceDir === "number") ? forceDir : (Math.random()<0.5 ? -1 : 1);
+    S.cueStart = performance.now();
+    S.cueDeadline = S.cueStart + PER_CUE_MS;
+    S.cuePulse = 1; // ✅ re-flash even if same direction
+    S.tiltTarget = -S.cueDir * tiltMax;
+  }
+
+  function resetGame(){
+    S.state = "playing";
+    S.score = 0;
+    S.tilt = 0;
+    S.tiltTarget = 0;
+    S.fallY = 0;
+    S.fallVy = 0;
+    S.confetti = [];
+    startCue();
     setHUD();
   }
 
-  function hardReset(){
-    s.running = true;
-    s.done = 0;
-    s.tilt = 0;
-    s.failFlash = 0;
-    s.confetti = [];
-    s.confettiOn = false;
-    overlay.classList.remove("show");
-    pickCue();
-  }
-
-  function failAndRestart(){
-    // obvious fall: quick drop + blink, then immediate restart
-    s.failFlash = 220;
-    // exaggerate tilt to max for a "drop" feel
-    s.tilt = Math.sign(s.tiltDir || 1) * TILT_MAX;
-
-    // restart quickly (but still visible)
-    setTimeout(() => {
-      s.done = 0;
-      s.tilt = 0;
-      pickCue();
-    }, 260);
+  function failDrop(){
+    S.state = "falling";
+    S.fallY = 0;
+    S.fallVy = 10;
   }
 
   function win(){
-    s.running = false;
-    spawnConfettiExplosion();
-    overlay.classList.add("show");
-  }
-
-  function spawnConfettiExplosion(){
-    s.confettiOn = true;
-    s.confetti = Array.from({length: 160}, () => ({
-      x: canvas.width/2 + rand(-20,20),
-      y: canvas.height/2 + rand(-10,20),
-      vx: rand(-2.6,2.6),
-      vy: rand(-3.8,-0.8),
-      g: rand(0.08,0.14),
-      r: rand(2,5),
-      a: rand(0.75,1.0),
-      rot: rand(0, Math.PI*2),
-      vr: rand(-0.25,0.25)
+    S.state = "win";
+    // chaotic confetti overload 💥
+    S.confetti = Array.from({length: 220}, () => ({
+      x: rand(0, cv.width),
+      y: rand(-cv.height, 0),
+      vx: rand(-1.6, 1.6),
+      vy: rand(2.4, 6.6),
+      r: rand(2, 6),
+      a: rand(0.35, 0.9)
     }));
+    setTimeout(() => { winModal.classList.add("show"); }, 220);
   }
 
-  // ====== INPUT ======
-  function handlePress(side){
-    ensureBgm();
-    if (!s.running) return;
+  // ===== INPUT =====
+  function hitTestButton(px, py, side){
+    const cx = cv.width/2;
+    const cy = cv.height*0.56;
 
-    const correct = (side === s.cue);
-    if (!correct){
-      failAndRestart();
+    const bx = (side === "left") ? (cx - btn.gapToCenter - btn.w/2) : (cx + btn.gapToCenter - btn.w/2);
+    const by = cy - btn.h/2;
+
+    return (px >= bx && px <= bx+btn.w && py >= by && py <= by+btn.h);
+  }
+
+  function onPress(dir){ // dir: -1 left, +1 right
+    ensureBgm();
+    if (S.state !== "playing") return;
+
+    // must tap correct side before deadline
+    if (dir !== S.cueDir){
+      failDrop();
       return;
     }
 
-    // correct: upright immediately + next cue
-    s.done++;
-    s.tilt = 0;
+    // correct
+    S.score++;
+    setHUD();
 
-    if (s.done >= GOAL){
+    // snap back upright before next cue
+    S.tiltTarget = 0;
+
+    if (S.score >= GOAL){
       win();
       return;
     }
 
-    // even if same cue repeats, we "flash" again via cueFlash
-    pickCue();
+    const nextDir = (Math.random()<0.5 ? -1 : 1);
+    setTimeout(() => {
+      // ensure we are still in playing (not failed during timeout)
+      if (S.state === "playing"){
+        startCue(nextDir);
+      }
+    }, CUE_PAUSE_MS);
   }
 
-  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handlePress("L"); }, {passive:false});
-  rightBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handlePress("R"); }, {passive:false});
-
-  // also allow tapping canvas sides
-  canvas.addEventListener("pointerdown", (e)=>{
+  cv.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
     ensureBgm();
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    handlePress(x < canvas.width/2 ? "L" : "R");
-  }, {passive:true});
 
-  nextBtn.addEventListener("click", ()=>{
-    // set map to STADIUM prompt next
-    // map prompts order: chinatown -> macritchie -> waterloo -> stadium
-    // We are now done with waterloo, so index should be 3
-    localStorage.setItem("mapPromptIndex", "3");
-    location.href = MAP_URL;
-  });
+    const rect = cv.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (cv.width / rect.width);
+    const py = (e.clientY - rect.top)  * (cv.height / rect.height);
 
-  // ====== DRAW: BALLET STUDIO BG ======
-  function drawStudio(){
-    const W = canvas.width, H = canvas.height;
+    if (hitTestButton(px, py, "left"))  onPress(-1);
+    else if (hitTestButton(px, py, "right")) onPress(+1);
+  }, {passive:false});
 
-    // soft lavender wall
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "#fbf6ff");
-    g.addColorStop(0.55, "#f3e9ff");
-    g.addColorStop(1, "#efe0ff");
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    // mirror wall panel
-    ctx.fillStyle = "rgba(255,255,255,0.60)";
-    ctx.fillRect(0, 70, W, 250);
-    // mirror sheen
-    ctx.fillStyle = "rgba(190, 230, 255, 0.22)";
-    ctx.beginPath();
-    ctx.moveTo(W*0.58, 70);
-    ctx.lineTo(W*0.90, 70);
-    ctx.lineTo(W*0.72, 320);
-    ctx.lineTo(W*0.40, 320);
-    ctx.closePath();
-    ctx.fill();
-
-    // mirror frame lines
-    ctx.strokeStyle = "rgba(120,80,150,0.18)";
-    ctx.lineWidth = 2;
-    for (let i=0;i<4;i++){
-      const x = 40 + i*(W-80)/3;
-      ctx.beginPath();
-      ctx.moveTo(x, 80);
-      ctx.lineTo(x, 310);
-      ctx.stroke();
-    }
-
-    // ceiling lights (soft blocks)
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    for (let i=0;i<4;i++){
-      const x = 50 + i*90;
-      ctx.fillRect(x, 90, 56, 10);
-      ctx.fillStyle = "rgba(255,255,255,0.35)";
-      ctx.fillRect(x, 104, 56, 3);
-      ctx.fillStyle = "rgba(255,255,255,0.75)";
-    }
-
-    // barre
-    ctx.fillStyle = "rgba(160,110,80,0.52)";
-    ctx.fillRect(24, 330, W-48, 12);
-    ctx.fillStyle = "rgba(110,80,70,0.26)";
-    for (let i=0;i<5;i++){
-      const x = 38 + i*(W-76)/4;
-      ctx.fillRect(x, 342, 6, 54);
-    }
-
-    // floor
-    ctx.fillStyle = "#e5c18b";
-    ctx.fillRect(0, 370, W, H-370);
-
-    // floor planks
-    ctx.strokeStyle = "rgba(120,80,60,0.18)";
-    ctx.lineWidth = 1;
-    for (let x=14; x<W; x+=26){
-      ctx.beginPath();
-      ctx.moveTo(x, 372);
-      ctx.lineTo(x, H);
-      ctx.stroke();
-    }
-
-    // spotlight
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.beginPath();
-    ctx.ellipse(W/2, 410, 150, 190, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // vignette
-    const vg = ctx.createRadialGradient(W/2,H/2, 120, W/2,H/2, 360);
-    vg.addColorStop(0, "rgba(0,0,0,0.00)");
-    vg.addColorStop(1, "rgba(0,0,0,0.10)");
-    ctx.fillStyle = vg;
-    ctx.fillRect(0,0,W,H);
-  }
-
-  // ====== AVATAR (piqué pose) ======
-  function drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen){
-    ctx.fillStyle = "#000";
-    // left lens
-    ctx.fillRect(leftX, gy, lensW, thick);
-    ctx.fillRect(leftX, gy + lensH - thick, lensW, thick);
-    ctx.fillRect(leftX, gy, thick, lensH);
-    ctx.fillRect(leftX + lensW - thick, gy, thick, lensH);
-
-    const rightX = leftX + lensW + gap;
-    // right lens
-    ctx.fillRect(rightX, gy, lensW, thick);
-    ctx.fillRect(rightX, gy + lensH - thick, lensW, thick);
-    ctx.fillRect(rightX, gy, thick, lensH);
-    ctx.fillRect(rightX + lensW - thick, gy, thick, lensH);
-
-    // bridge
-    ctx.fillRect(leftX + lensW, gy + Math.floor(lensH/2) - 1, gap, 2);
-
-    // arms
-    ctx.fillRect(leftX - armLen, gy + 2, armLen, 2);
-    ctx.fillRect(rightX + lensW, gy + 2, armLen, 2);
-  }
-
-  function drawAgyBallet(px, py, tilt){
-    // px,py = hips center baseline area (not feet). We'll anchor around torso.
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.rotate(tilt);
-
-    // hair (same feel as Chinatown)
-    ctx.fillStyle="#000";
-    ctx.fillRect(-18, -108, 36, 60);
-
-    // face
-    ctx.fillStyle="#f1c7a6";
-    ctx.fillRect(-12, -92, 24, 28);
-
-    // glasses
-    const gy = -86;
-    drawGlasses(ctx, -14, gy, 11, 9, 2, 5, 4);
-
-    // sleeveless light-blue top
-    ctx.fillStyle="#8fd0ff";
-    ctx.fillRect(-16, -64, 32, 28);
-
-    // arms rounded (more "ballet" than two strokes)
-    ctx.fillStyle="rgba(241,199,166,1)";
-    // left arm (rounded)
-    ctx.fillRect(-24, -52, 8, 10);
-    ctx.fillRect(-28, -44, 8, 8);
-    ctx.fillRect(-24, -38, 8, 6);
-    // right arm
-    ctx.fillRect(16, -52, 8, 10);
-    ctx.fillRect(20, -44, 8, 8);
-    ctx.fillRect(16, -38, 8, 6);
-
-    // tutu (pink)
-    ctx.fillStyle="#ff9fcb";
-    ctx.fillRect(-26, -36, 52, 16);
-    ctx.fillStyle="rgba(255,255,255,0.18)";
-    ctx.fillRect(-22, -32, 44, 2);
-
-    // legs (fixed): standing leg + bent outward 90° touching
-    // Standing leg (straight down)
-    ctx.fillStyle="#f1c7a6";
-    ctx.fillRect(-6, -20, 12, 58);
-
-    // Pointe shoe (standing)
-    ctx.fillStyle="#fff";
-    ctx.fillRect(-10, 38, 20, 6);
-
-    // Bent leg: thigh out to the right, shin down, foot touching standing leg
-    // thigh (horizontal)
-    ctx.fillStyle="#f1c7a6";
-    ctx.fillRect(6, 6, 20, 8);
-    // shin (vertical down near standing leg)
-    ctx.fillRect(18, 14, 8, 20);
-    // foot touches standing leg
-    ctx.fillStyle="#fff";
-    ctx.fillRect(8, 30, 18, 6);
-
-    // shadow on floor (not rotated with her)
-    ctx.restore();
-
-    // floor shadow (draw after, unrotated)
-    ctx.save();
-    ctx.fillStyle="rgba(0,0,0,0.14)";
-    ctx.beginPath();
-    ctx.ellipse(px, py + 88, 44, 10, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // cue bubble above head
-  function drawCue(){
-    const W = canvas.width;
-    const cx = W/2;
-    const cy = 190;
-
-    // flash pulse each cue
-    const a = s.cueFlash > 0 ? 1 : 0.85;
-
-    ctx.save();
-    ctx.globalAlpha = a;
-    ctx.fillStyle = "rgba(255,255,255,0.70)";
-    ctx.strokeStyle = "rgba(170,120,200,0.45)";
-    ctx.lineWidth = 2;
-    const w = 90, h = 54;
-    const x = cx - w/2, y = cy - h/2;
-    roundRect(ctx, x, y, w, h, 12);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(0,0,0,0.58)";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "28px Arial";
-    const emoji = (s.cue === "L") ? "👈" : "👉";
-    ctx.fillText(emoji, cx, cy + 2);
-    ctx.restore();
-  }
-
-  function roundRect(c, x,y,w,h,r){
+  // ===== DRAW HELPERS =====
+  function roundRect(c, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
     c.beginPath();
-    c.moveTo(x+r, y);
-    c.arcTo(x+w, y, x+w, y+h, r);
-    c.arcTo(x+w, y+h, x, y+h, r);
-    c.arcTo(x, y+h, x, y, r);
-    c.arcTo(x, y, x+w, y, r);
+    c.moveTo(x+rr, y);
+    c.arcTo(x+w, y, x+w, y+h, rr);
+    c.arcTo(x+w, y+h, x, y+h, rr);
+    c.arcTo(x, y+h, x, y, rr);
+    c.arcTo(x, y, x+w, y, rr);
     c.closePath();
   }
 
-  // ====== CONFETTI DRAW ======
-  function drawConfetti(){
-    if (!s.confettiOn) return;
-    for (const p of s.confetti){
-      ctx.save();
-      ctx.globalAlpha = p.a;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      // random bright-ish colors
-      const colors = ["#ff6aa9","#ffd35a","#7fd6ff","#7ddf9c","#c28bff","#ffffff"];
-      ctx.fillStyle = colors[(p.x|0 + p.y|0) % colors.length];
-      ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
-      ctx.restore();
+  function drawStudioBackground(){
+    const W = cv.width, H = cv.height;
+
+    // soft lavender + pink wall
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, "#f6eaff");
+    g.addColorStop(0.55, "#f8e7f0");
+    g.addColorStop(1, "#f2d7ff");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    // mirror wall panels
+    ctx.fillStyle = "rgba(255,255,255,0.50)";
+    ctx.globalAlpha = 0.55;
+    for (let i=0;i<4;i++){
+      const x = 36 + i*(W-72)/4;
+      ctx.fillRect(x, 120, (W-72)/4 - 8, 250);
+      ctx.fillStyle = "rgba(220,210,235,0.40)";
+      ctx.fillRect(x, 120, 2, 250);
+      ctx.fillStyle = "rgba(255,255,255,0.50)";
     }
+    ctx.globalAlpha = 1;
+
+    // overhead lights (subtle)
+    for (let i=0;i<4;i++){
+      const lx = 70 + i*(W-140)/3;
+      ctx.fillStyle = "rgba(255,255,255,0.70)";
+      roundRect(ctx, lx-26, 72, 52, 12, 6);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      roundRect(ctx, lx-30, 86, 60, 10, 6);
+      ctx.fill();
+    }
+
+    // ballet barre
+    const barY = 360;
+    ctx.fillStyle = "rgba(150, 100, 95, 0.65)";
+    ctx.fillRect(40, barY, W-80, 10);
+    ctx.fillStyle = "rgba(110, 80, 78, 0.35)";
+    ctx.fillRect(40, barY+8, W-80, 3);
+
+    // barre posts
+    ctx.fillStyle = "rgba(120, 95, 105, 0.35)";
+    for (let i=0;i<4;i++){
+      const px = 70 + i*(W-140)/3;
+      ctx.fillRect(px, barY, 6, 80);
+    }
+
+    // floor
+    const floorTop = 410;
+    const gf = ctx.createLinearGradient(0,floorTop,0,H);
+    gf.addColorStop(0, "#f1cfa8");
+    gf.addColorStop(1, "#d9a86f");
+    ctx.fillStyle = gf;
+    ctx.fillRect(0, floorTop, W, H-floorTop);
+
+    // floor planks
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    for (let x=18; x<W; x+=26){
+      ctx.fillRect(x, floorTop, 2, H-floorTop);
+    }
+
+    // spotlight cone
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(W*0.68, 0);
+    ctx.lineTo(W*0.96, 0);
+    ctx.lineTo(W*0.74, floorTop+80);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
-  function updateConfetti(dt){
-    if (!s.confettiOn) return;
-    for (const p of s.confetti){
+  function drawArrowButton(side){
+    const cx = cv.width/2;
+    const cy = cv.height*0.56;
+
+    const x = (side==="left") ? (cx - btn.gapToCenter - btn.w/2) : (cx + btn.gapToCenter - btn.w/2);
+    const y = cy - btn.h/2;
+
+    // frosted button
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "rgba(255,255,255,0.40)";
+    roundRect(ctx, x, y, btn.w, btn.h, 18);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.40)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, x, y, btn.w, btn.h, 18);
+    ctx.stroke();
+
+    // arrow
+    ctx.fillStyle = "rgba(30,25,40,0.75)";
+    ctx.font = "40px system-ui, -apple-system, Segoe UI, Roboto";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(side==="left" ? "‹" : "›", x + btn.w/2, y + btn.h/2 + 1);
+    ctx.restore();
+  }
+
+  // glasses helper (same vibe as your other scenes)
+  function drawGlasses(c, leftX, gy, lensW, lensH, thick, gap, armLen){
+    c.fillStyle = "#000";
+    c.fillRect(leftX, gy, lensW, thick);
+    c.fillRect(leftX, gy + lensH - thick, lensW, thick);
+    c.fillRect(leftX, gy, thick, lensH);
+    c.fillRect(leftX + lensW - thick, gy, thick, lensH);
+
+    const rightX = leftX + lensW + gap;
+    c.fillRect(rightX, gy, lensW, thick);
+    c.fillRect(rightX, gy + lensH - thick, lensW, thick);
+    c.fillRect(rightX, gy, thick, lensH);
+    c.fillRect(rightX + lensW - thick, gy, thick, lensH);
+
+    c.fillRect(leftX + lensW, gy + Math.floor(lensH/2) - 1, gap, 2);
+
+    c.fillRect(leftX - armLen, gy + 2, armLen, 2);
+    c.fillRect(rightX + lensW, gy + 2, armLen, 2);
+  }
+
+  function drawAgyBallet(x, y, tiltRad){
+    // y is "feet baseline" around floor line area
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tiltRad);
+
+    // hair
+    ctx.fillStyle="#000";
+    ctx.fillRect(-18, -92, 36, 60);
+
+    // face
+    ctx.fillStyle="#f1c7a6";
+    ctx.fillRect(-12, -76, 24, 28);
+
+    // glasses (clean + aligned)
+    const gy = -70;
+    const lensW = 11, lensH = 9;
+    const thick = 2, gap = 5, armLen = 4;
+    const leftX = -14;
+    drawGlasses(ctx, leftX, gy, lensW, lensH, thick, gap, armLen);
+
+    // sleeveless top (light blue)
+    ctx.fillStyle="#9bd1ff";
+    ctx.fillRect(-16, -48, 32, 24);
+
+    // tiny arm nubs
+    ctx.fillStyle="#f1c7a6";
+    ctx.fillRect(-20, -46, 4, 16);
+    ctx.fillRect(16, -46, 4, 16);
+
+    // tutu (pink) - simple block like your style
+    ctx.fillStyle="#ff8ccf";
+    ctx.fillRect(-24, -26, 48, 14);
+
+    // LEGS (your requested geometry)
+    // Standing LEFT leg (vertical)
+    ctx.fillStyle="#f1c7a6";
+    ctx.fillRect(-6, -12, 10, 54);
+
+    // Pointe shoe (standing)
+    ctx.fillStyle="#fff";
+    ctx.fillRect(-8, 40, 16, 6);
+
+    // Bent RIGHT leg: thigh out -> shin back toward standing leg
+    // thigh (horizontal out to right)
+    ctx.fillStyle="#f1c7a6";
+    ctx.fillRect(6, 8, 28, 8);
+
+    // shin: diagonal back inward (step-diagonal)
+    ctx.fillRect(30, 14, 8, 8);
+    ctx.fillRect(24, 20, 8, 8);
+    ctx.fillRect(18, 26, 8, 8);
+
+    // toe near standing leg
+    ctx.fillStyle="#fff";
+    ctx.fillRect(14, 32, 12, 6);
+
+    ctx.restore();
+  }
+
+  function drawCueBubble(){
+    const cx = cv.width/2;
+    const cy = cv.height*0.30;
+
+    // pulse: starts at 1 and eases down
+    const pulse = Math.max(0, Math.min(1, S.cuePulse));
+    const alpha = 0.55 + 0.35*pulse;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = "rgba(255,255,255,0.50)";
+    roundRect(ctx, cx-76, cy-26, 152, 52, 18);
+    ctx.fill();
+
+    ctx.globalAlpha = 0.35 + 0.35*pulse;
+    ctx.strokeStyle = "rgba(255, 120, 190, 0.55)";
+    ctx.lineWidth = 3;
+    roundRect(ctx, cx-76, cy-26, 152, 52, 18);
+    ctx.stroke();
+
+    // emoji cue: 👈 or 👉 (above head)
+    ctx.globalAlpha = 0.95;
+    ctx.font = "26px system-ui, -apple-system, Segoe UI, Roboto";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(30,25,40,0.85)";
+    ctx.fillText(S.cueDir === 1 ? "👉" : "👈", cx, cy+1);
+    ctx.restore();
+  }
+
+  function drawShadow(){
+    const cx = cv.width/2;
+    const sy = cv.height*0.78 + 16;
+    ctx.save();
+    ctx.globalAlpha = 0.20;
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.beginPath();
+    ctx.ellipse(cx, sy, 60, 16, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawProgressBar(){
+    const W = cv.width;
+    const x = 32, y = cv.height - 54;
+    const w = W - 64, h = 10;
+
+    // track
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = "rgba(0,0,0,0.60)";
+    roundRect(ctx, x, y, w, h, 999);
+    ctx.fill();
+    ctx.restore();
+
+    // fill
+    const p = S.score / GOAL;
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = "rgba(120, 255, 190, 0.75)";
+    roundRect(ctx, x, y, Math.max(10, w*p), h, 999);
+    ctx.fill();
+    ctx.restore();
+
+    // dot
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = "#ff74c7";
+    ctx.beginPath();
+    ctx.arc(x + w*p, y + h/2, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawConfetti(dt){
+    if (!S.confetti.length) return;
+    for (const p of S.confetti){
       p.x += p.vx * dt * 0.7;
       p.y += p.vy * dt * 0.7;
-      p.vy += p.g * dt;
-      p.rot += p.vr * dt * 0.06;
-      p.a *= 0.998; // fade slowly
+      if (p.y > cv.height + 20){
+        p.y = rand(-cv.height, -20);
+        p.x = rand(0, cv.width);
+      }
+      ctx.fillStyle = `rgba(255, 140, 210, ${p.a})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
     }
   }
 
-  // ====== GAME LOOP ======
+  // ===== UPDATE LOOP =====
   let last = 0;
   function loop(ts){
     if (!last) last = ts;
     const dt = Math.min(33, ts - last);
     last = ts;
 
-    // update
-    if (s.running){
-      // tilt increases over time in the tiltDir direction
-      s.tilt += s.tiltDir * TILT_SPEED * dt;
+    const now = performance.now();
 
-      // time countdown
-      s.timeLeft -= dt / 1000;
-
-      // cue flash decays
-      if (s.cueFlash > 0) s.cueFlash -= dt;
-
-      // fail if time runs out
-      if (s.timeLeft <= 0){
-        failAndRestart();
+    if (S.state === "playing"){
+      // timeout fail
+      if (now > S.cueDeadline){
+        failDrop();
       }
 
-      // fail if tilt exceeds max (safety)
-      if (Math.abs(s.tilt) >= TILT_MAX){
-        failAndRestart();
-      }
+      // cue pulse decay
+      S.cuePulse *= 0.92;
+
+      // tilt ease
+      S.tilt += (S.tiltTarget - S.tilt) * 0.12;
 
       setHUD();
-    } else {
-      // win state: confetti continues
-      updateConfetti(dt);
+    } else if (S.state === "falling"){
+      // make her tilt a bit more + drop down
+      S.tilt += (Math.sign(S.tiltTarget || 1) * (tiltDanger+0.35) - S.tilt) * 0.10;
+      S.fallVy += 1.25;
+      S.fallY  += S.fallVy;
+
+      if (S.fallY > 320){
+        // instant restart
+        resetGame();
+      }
+    } else if (S.state === "win"){
+      // keep confetti moving
+      setHUD();
     }
 
-    // draw
-    drawStudio();
+    // ===== DRAW =====
+    ctx.clearRect(0,0,cv.width,cv.height);
+    drawStudioBackground();
 
-    // cue
-    if (s.running){
-      drawCue();
-    }
+    // cue + buttons (only if not win modal)
+    drawCueBubble();
+    drawArrowButton("left");
+    drawArrowButton("right");
 
     // dancer
-    const cx = canvas.width/2;
-    const baseY = 300; // torso anchor
-    // obvious fall flash + drop feel
-    const dropY = (s.failFlash > 0) ? 16 : 0;
-    drawAgyBallet(cx, baseY + dropY, s.tilt);
+    const ax = cv.width/2;
+    const ay = cv.height*0.78; // baseline near floor
+    drawShadow();
 
-    // balance meter (bottom)
-    drawMeter();
+    const tilt = S.tilt;
+    const dropY = (S.state === "falling") ? S.fallY : 0;
+    drawAgyBallet(ax, ay + dropY, tilt);
 
-    // confetti if win
-    drawConfetti();
-    updateConfetti(dt);
+    // progress
+    drawProgressBar();
 
-    // fail flash overlay
-    if (s.failFlash > 0){
-      s.failFlash -= dt;
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      ctx.fillStyle = "#ff5a7a";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.restore();
-    }
+    // win confetti
+    drawConfetti(dt);
 
     requestAnimationFrame(loop);
   }
 
-  function drawMeter(){
-    const W = canvas.width, H = canvas.height;
-    const y = H - 54;
-    const x = 28;
-    const w = W - 56;
-    const h = 12;
+  // ===== WIN ACTION =====
+  nextBtn.addEventListener("click", () => {
+    // go back to map with STADIUM prompt
+    localStorage.setItem("mapPromptIndex", "3"); // prompts[3] = stadium in your map file
+    localStorage.setItem("bgmPlaying","true");
+    location.href = "./map.html"; // <-- change if your map file is named differently
+  });
 
-    // bar background
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.18)";
-    roundRect(ctx, x, y, w, h, 8);
-    ctx.fill();
+  // ===== INIT =====
+  resetGame();
+  requestAnimationFrame(loop);
 
-    // safe center
-    ctx.fillStyle = "rgba(100, 220, 160, 0.20)";
-    roundRect(ctx, x + w*0.35, y, w*0.30, h, 8);
-    ctx.fill();
-
-    // knob position based on tilt
-    const tNorm = (s.tilt / TILT_MAX); // -1..1
-    const knobX = x + (w/2) + tNorm*(w*0.46);
-
-    ctx.fillStyle = "#ff8fb0";
-    ctx.beginPath();
-    ctx.arc(knobX, y + h/2, 8, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  // ====== INIT ======
-  function boot(){
-    pickCue();
-    setHUD();
-    requestAnimationFrame(loop);
-  }
-
-  // start bgm on any first interaction
-  document.addEventListener("pointerdown", ensureBgm, {once:false});
-
-  boot();
 })();
 </script>
 </body>
