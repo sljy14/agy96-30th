@@ -262,6 +262,7 @@
     </div>
   </div>
 
+ 
   <audio id="bgm" src="./loop.mp3" preload="auto" loop></audio>
   <script src="./js/bgm.js"></script>
 
@@ -286,9 +287,9 @@
     const modalDownload = document.getElementById("modalDownload");
     const modalRetry = document.getElementById("modalRetry");
 
-    // Rooftop has its own BGM flow: loop.mp3 first, then bday.mp3 at mini surprise
+    // Rooftop has its own BGM flow: lofi.mp3 first, then bday.mp3 at mini surprise
     if (window.BGM) {
-      window.BGM.switchTo("./loop.mp3", true, true);
+      window.BGM.switchTo("./lofi.mp3", true, true);
     }
 
     const SHARE_TEXT = "here’s my 30th rooftop reflection 🥹";
