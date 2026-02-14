@@ -332,6 +332,10 @@ function drawAgySprite(px, py){
 function checkWin(){
   if (p.x===EXIT.x && p.y===EXIT.y){
     won = true;
+
+    // lock next destination to Chinatown
+    localStorage.setItem("mapPromptIndex", "0");
+
     overlay.classList.add("show");
   }
 }
@@ -375,7 +379,19 @@ setMoves();
 setInterval(autoForward, 360);
 
 document.getElementById("nextBtn").addEventListener("click", ()=>{
-  location.href = "./map.html";
+  // Tampines is the start → next prompt must be Chinatown (index 0)
+  localStorage.setItem("mapPromptIndex", "0");
+
+  // optional safety: if you previously used done_* flags, nuke them
+  localStorage.removeItem("done_chinatown");
+  localStorage.removeItem("done_macritchie");
+  localStorage.removeItem("done_waterloo");
+  localStorage.removeItem("done_stadium");
+
+  // Safari cache-bust
+  location.href = "./map.html?t=" + Date.now();
+});
+
 });
 </script>
 </body>
