@@ -227,6 +227,29 @@
       h: 120
     };
 
+    // ---------- Crowd (prebuilt, slow animate) ----------
+const crowd = buildCrowd(54); // number of people across
+
+function buildCrowd(n){
+  const people = [];
+  for (let i=0;i<n;i++){
+    people.push({
+      // position along stands
+      x: (i/(n-1)) * (canvas.width - 40) + 20,
+      // simple style variety
+      shirt: ["#2f6fff","#c43737","#ffd400","#ffffff","#111111","#7a4cff"][i % 6],
+      skin:  ["#f1c9a8","#eab48f","#d79a73"][i % 3],
+      hair:  ["#111111","#222222","#0a0a0a"][i % 3],
+      // unique slow phase so they don't sync
+      phase: (i * 0.45) % (Math.PI * 2),
+      // some are "cheerers"
+      cheer: (i % 5 === 0)
+    });
+  }
+  return people;
+}
+
+
     // -------------------------
     // Input
     // -------------------------
@@ -314,13 +337,8 @@
       ctx.fillStyle = "#2b3f63";
       ctx.fillRect(0, 94, canvas.width, 30);
 
-      // Crowd dots
-      for (let i=0;i<48;i++){
-        const x = (i/48) * canvas.width + rand(-6, 6);
-        const y = 68 + rand(-4, 8);
-        ctx.fillStyle = ["#111", "#fff", "#2b2b2b", "#0f0f0f"][i%4];
-        ctx.fillRect(x, y, 10, 10);
-      }
+      
+drawCrowd(performance.now());
 
       // Field green bands
       ctx.fillStyle = "#2fdc2a";
@@ -388,6 +406,48 @@
       ctx.arc(x, yTop+6, 90, 0, Math.PI*2);
       ctx.fill();
     }
+
+    function drawCrowd(t){
+  // Slow “cheer” cycle: changes every ~3 seconds
+  const beat = Math.sin(t/3000);
+
+  for (const p of crowd){
+    const baseY = 72; // sits within the tan band
+    const wobble = Math.sin(t/1800 + p.phase) * 1.2; // slow
+    const y = baseY + wobble;
+
+    // head
+    ctx.fillStyle = p.skin;
+    ctx.fillRect(p.x - 3, y - 6, 6, 6);
+
+    // hair cap
+    ctx.fillStyle = p.hair;
+    ctx.fillRect(p.x - 3, y - 6, 6, 2);
+
+    // body (shirt)
+    ctx.fillStyle = p.shirt;
+    ctx.fillRect(p.x - 4, y, 8, 7);
+
+    // legs (tiny)
+    ctx.fillStyle = "#111";
+    ctx.fillRect(p.x - 3, y + 7, 2, 3);
+    ctx.fillRect(p.x + 1, y + 7, 2, 3);
+
+    // arms: only some cheer, and only on beat peaks -> looks like waves
+    const cheeringNow = p.cheer && beat > 0.55;
+    ctx.fillStyle = p.skin;
+    if (cheeringNow){
+      // arms up
+      ctx.fillRect(p.x - 6, y - 1, 2, 6);
+      ctx.fillRect(p.x + 4, y - 1, 2, 6);
+    } else {
+      // arms down
+      ctx.fillRect(p.x - 6, y + 1, 2, 6);
+      ctx.fillRect(p.x + 4, y + 1, 2, 6);
+    }
+  }
+}
+
 
     // -------------------------
     // Obstacles (barricades)
@@ -465,12 +525,18 @@
     }
 
     function drawHair(c){
-      c.fillStyle = "#0a0a0a";
-      // Main hair block
-      c.fillRect(-18, -52, 36, 34);
-      // Slight bottom extension
-      c.fillRect(-18, -18, 36, 7);
-    }
+  c.fillStyle = "#0a0a0a";
+
+  // Wider main block (+2px each side)
+  c.fillRect(-20, -52, 40, 34);
+
+  // Side thickness columns (makes silhouette less skinny)
+  c.fillRect(-22, -48, 4, 30);
+  c.fillRect(18,  -48, 4, 30);
+
+  // Slight bottom extension
+  c.fillRect(-20, -18, 40, 7);
+}
 
     function drawFace(c){
       // Face
@@ -540,7 +606,11 @@
       player.isJumping = false;
 
       // Show overlay text + button (like your Image 3)
-      winOverlay.classList.add("show");
+      winOverlay.classList.remove("show");
+setTimeout(() => {
+  winOverlay.classList.add("show");
+}, 5000);
+
     }
 
     function drawWinScene(dt){
