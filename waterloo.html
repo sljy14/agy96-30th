@@ -422,24 +422,58 @@
   }
 
   function drawHeadFace(c){
-    // keep proportions consistent (no weird hair/glasses)
-    const x = -18, y = -60;
+  // Move head DOWN closer to torso by ~8px (was y=-60)
+  const x = -18, y = -52;
 
-    // hair
-    c.fillStyle = "#000";
-    c.fillRect(x, y, 36, 60);
+  // hair
+  c.fillStyle = "#000";
+  c.fillRect(x, y, 36, 60);
 
-    // face
-    c.fillStyle = "#f1c7a6";
-    c.fillRect(x + 6, y + 16, 24, 28);
+  // face
+  c.fillStyle = "#f1c7a6";
+  c.fillRect(x + 6, y + 16, 24, 28);
 
-    // glasses
-    const gy = y + 22;
-    const lensW = 11, lensH = 9;
-    const thick = 2, gap = 5, armLen = 4;
-    const leftX = x + 4;
-    drawGlasses(c, leftX, gy, lensW, lensH, thick, gap, armLen);
-  }
+  // glasses (same as before, just shifted with y)
+  const gy = y + 22;
+  const lensW = 11, lensH = 9;
+  const thick = 2, gap = 5, armLen = 4;
+  const leftX = x + 4;
+  drawGlasses(c, leftX, gy, lensW, lensH, thick, gap, armLen);
+}
+
+function drawLegsBetter(c){
+  // Hip anchor (under tutu)
+  const hipX = 0;
+  const hipY = 44; // slightly higher so legs originate under tutu better
+
+  // ===== standing leg (left) =====
+  c.fillStyle = "#f1c7a6";
+  // long straight leg
+  c.fillRect(hipX - 7, hipY, 14, 62);
+
+  // pointe shoe
+  c.fillStyle = "#fff";
+  c.fillRect(hipX - 10, hipY + 58, 20, 9);
+
+  // ===== bent leg (right) : thigh OUT then shin BACK IN =====
+  // thigh should start near tutu (not from standing knee)
+  c.fillStyle = "#f1c7a6";
+  // horizontal thigh coming out from hip
+  c.fillRect(hipX + 2, hipY + 10, 30, 10);
+
+  // shin: angle back toward standing leg
+  c.save();
+  // knee point at end of thigh
+  c.translate(hipX + 30, hipY + 18);
+  c.rotate(-1.05); // stronger angle inward
+  c.fillRect(0, 0, 10, 34);
+  c.restore();
+
+  // foot (white shoe) closer to standing leg
+  c.fillStyle = "#fff";
+  c.fillRect(hipX + 1, hipY + 46, 18, 9);
+}
+
 
   function drawArmsUpArc(c){
     // Arms UP (fifth position vibe) — two smooth arcs above shoulders
@@ -458,36 +492,6 @@
     c.moveTo(18, 10);
     c.quadraticCurveTo(30, -18, 6, -34);
     c.stroke();
-  }
-
-  function drawLegsBetter(c){
-    // Hip anchor (under tutu)
-    const hipX = 0;
-    const hipY = 46;
-
-    // standing leg (left) straight down
-    c.fillStyle = "#f1c7a6";
-    c.fillRect(hipX - 7, hipY, 14, 56);
-
-    // pointe shoe
-    c.fillStyle = "#fff";
-    c.fillRect(hipX - 9, hipY + 52, 18, 9);
-
-    // bent leg (right): thigh starts under tutu, then shin angles back towards standing leg
-    // thigh (horizontal, near tutu — NOT from standing knee)
-    c.fillStyle = "#f1c7a6";
-    c.fillRect(hipX + 4, hipY + 6, 28, 10);
-
-    // shin (angled in): do it with a tiny rotation so it looks like it comes from the thigh
-    c.save();
-    c.translate(hipX + 28, hipY + 16);   // knee point
-    c.rotate(-0.9);                      // angle towards standing leg
-    c.fillRect(0, 0, 10, 30);
-    c.restore();
-
-    // foot (small white shoe) placed near standing leg
-    c.fillStyle = "#fff";
-    c.fillRect(hipX + 2, hipY + 42, 18, 9);
   }
 
   function drawDancer(c, tiltRad, jumpOffset){
