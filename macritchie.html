@@ -389,7 +389,9 @@
     setHUD();
   }
 
-  
+  function ensureBgm(){
+    if (window.tryPlayBgm) window.tryPlayBgm();
+  }
 
   // ===== INPUT =====
   function onTap(){
