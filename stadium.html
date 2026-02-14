@@ -742,8 +742,13 @@
   // (helps if rooftop ever routes back to map)
   localStorage.setItem("mapPromptIndex", "4");
 
+  const nextUrl = "rooftop.html?t=" + Date.now();
+  if (window.playThenNavigate) {
+    window.playThenNavigate(nextUrl);
+    return;
+  }
   // Cache-bust to avoid iOS Safari restoring an old page state
-  window.location.href = "rooftop.html?t=" + Date.now();
+  window.location.href = nextUrl;
 });
 
   </script>

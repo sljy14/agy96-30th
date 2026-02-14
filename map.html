@@ -436,7 +436,11 @@ document.querySelectorAll(".spot").forEach(el=>{
     const correct = prompts[currentIndex].place;
 
     if (pick === correct){
-      location.href = prompts[currentIndex].next;
+      if (window.playThenNavigate) {
+        window.playThenNavigate(prompts[currentIndex].next);
+      } else {
+        location.href = prompts[currentIndex].next;
+      }
     } else {
       jumpTwice();
     }
@@ -445,6 +449,10 @@ document.querySelectorAll(".spot").forEach(el=>{
 
 // Rooftop CTA
 goRooftop.addEventListener("click", ()=>{
+  if (window.playThenNavigate) {
+    window.playThenNavigate("./rooftop.html");
+    return;
+  }
   tryPlayBgm();
   location.href = "./rooftop.html";
 });

@@ -383,8 +383,13 @@ document.getElementById("nextBtn").addEventListener("click", ()=>{
   localStorage.removeItem("done_waterloo");
   localStorage.removeItem("done_stadium");
 
+  const nextUrl = "./map.html?t=" + Date.now();
+  if (window.playThenNavigate) {
+    window.playThenNavigate(nextUrl);
+    return;
+  }
   // Safari cache-bust
-  location.href = "./map.html?t=" + Date.now();
+  location.href = nextUrl;
 });
 
 </script>
