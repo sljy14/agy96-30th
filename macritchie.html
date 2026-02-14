@@ -395,38 +395,59 @@
 
   // ===== INPUT =====
   function onTap(){
-    ensureBgm();
+  ensureBgm();
 
-    if (!world.running) return;
-    if (world.state !== "playing") return;
-    if (world.currentIndex >= GOAL) return;
+  if (!world.running) return;
+  if (world.state !== "playing") return;
 
-    const target = logs[world.currentIndex];
+  // 1) Compute the player's FOOT position in WORLD space
+  // player.y is feet-baseline in world space already
+  const footY = player.y + SHOE_BOTTOM_OFFSET;
 
-    // Overlap test using avatar footprint width (hair width ~36, use 36-ish)
-    const pxL = player.x - 18;
-    const pxR = player.x + 18;
-    const lxL = target.x;
-    const lxR = target.x + target.w;
+  // 2) Find the log that is ACTUALLY under her feet (same-ish Y band)
+  //    and also horizontally overlapping.
+  //    This prevents "landing on 2nd branch" or "fall even though it looks aligned".
+  const FOOT_BAND = 10; // tolerance pixels; tweak 8-14
 
-    const overlap = (pxR > lxL) && (pxL < lxR);
+  const pxL = player.x - 18;
+  const pxR = player.x + 18;
 
-    if (overlap){
-      // LAND: make shoe bottom align to log top EXACTLY
-      // shoe bottom = player.y + 27
-      // so player.y = logTop - 27
-      player.y = target.y - SHOE_BOTTOM_OFFSET;
+  let bestIdx = -1;
+  let bestDy = 1e9;
 
-      // stick to this log so she moves with it
-      player.ridingLogIndex = world.currentIndex;
+  for (let i = 0; i < logs.length; i++){
+    const log = logs[i];
 
+    // Must overlap in X
+    const lxL = log.x;
+    const lxR = log.x + log.w;
+    const overlapX = (pxR > lxL) && (pxL < lxR);
+    if (!overlapX) continue;
+
+    // Must be close in Y (player feet close to log top)
+    const dy = Math.abs(footY - log.y);
+    if (dy <= FOOT_BAND && dy < bestDy){
+      bestDy = dy;
+      bestIdx = i;
+    }
+  }
+
+  if (bestIdx !== -1){
+    // LAND on the actual log found
+    const target = logs[bestIdx];
+
+    player.y = target.y - SHOE_BOTTOM_OFFSET;
+    player.ridingLogIndex = bestIdx;
+
+    // Count ONLY if this is the next required log (prevents double count / skipping)
+    if (bestIdx === world.currentIndex){
       world.landed++;
       world.currentIndex++;
       setHUD();
 
       // camera follows upward
       const approxTop = player.y - 80;
-      world.camTargetY = (canvas.height*0.58) - approxTop;
+      world.camTargetY = (canvas.height * 0.58) - approxTop;
 
       if (world.landed >= GOAL){
         world.state = "win";
@@ -436,16 +457,20 @@
           viewPage.classList.add("active");
         }, 220);
       }
-    } else {
-      // MISS -> fall -> restart
-      world.slips++;
-      setHUD();
-      world.state = "falling";
-      world.shake = 10;
-      player.vy = 6;
-      player.ridingLogIndex = -1;
     }
+
+    return;
   }
+
+  // MISS -> fall
+  world.slips++;
+  setHUD();
+  world.state = "falling";
+  world.shake = 10;
+  player.vy = 6;
+  player.ridingLogIndex = -1;
+}
+
 
   function bindTapInput(){
     if (window.PointerEvent){
