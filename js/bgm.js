@@ -91,7 +91,7 @@
       await audio.play();
       saveState({ playing: true, unlocked: true });
       return true;
-    } catch {
+    } catch (e) {
       // iOS/Android may block autoplay until user gesture; keep intent and retry on next gestures/pages
       return false;
     }
@@ -122,8 +122,9 @@
   // ---------- Restore on page load ----------
   const st = loadState();
   wantedPlaying = !!st.playing;
-  audio.volume = clamp01(st.vol, 0.5);
-
+  if (typeof st.vol === "number" && !Number.isNaN(st.vol)) {
+    audio.volume = Math.max(0, Math.min(1, st.vol));
+  }
   const pageSrc = audio.getAttribute("src") || audio.src;
   const targetSrc = pageSrc || st.src || DEFAULT_SRC;
   const targetKey = normalizeSrc(targetSrc);
@@ -168,7 +169,6 @@
       playing: wantedPlaying || !audio.paused
     });
   }
-
   let lastPersistAt = 0;
   audio.addEventListener("timeupdate", () => {
     const now = Date.now();
@@ -221,7 +221,6 @@
       });
     }
   };
-
   ["pointerdown", "touchstart", "touchend", "click", "keydown"].forEach((evt) => {
     document.addEventListener(evt, unlock, { capture: true, passive: true });
   });
