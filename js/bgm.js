@@ -53,9 +53,11 @@
 
     try {
       await audio.play();
-      saveState({ playing: true });
+      saveState({ playing: true, unlocked: true });
+      return true;
     } catch (e) {
       // iOS/Android may block autoplay until user gesture; keep intent and retry on next gestures/pages
+      return false;
     }
   }
 
@@ -139,9 +141,21 @@
     getAudio: () => audio
   };
 
-  // Start playing on first user interaction (iOS/Android autoplay rule)
-  const unlock = () => safePlay();
-  ["pointerdown", "touchstart", "click", "keydown"].forEach((evt) => {
-    document.addEventListener(evt, unlock, { once: true, passive: true });
+  // Keep trying to unlock playback on user interactions until play succeeds.
+  // iOS Safari can reject the first attempt when navigation/tap timing is tight.
+  let unlocked = !!st.unlocked;
+  const unlock = async () => {
+    if (unlocked) return;
+    const ok = await safePlay();
+    if (ok || !audio.paused) {
+      unlocked = true;
+      saveState({ unlocked: true, playing: true });
+      ["pointerdown", "touchstart", "touchend", "click", "keydown"].forEach((evt) => {
+        document.removeEventListener(evt, unlock, true);
+      });
+    }
+  };
+  ["pointerdown", "touchstart", "touchend", "click", "keydown"].forEach((evt) => {
+    document.addEventListener(evt, unlock, { capture: true, passive: true });
   });
 })();
