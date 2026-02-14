@@ -732,9 +732,18 @@
     // -------------------------
     // Button: go to rooftop scene
     // -------------------------
-    toRooftopBtn.addEventListener("click", () => {
-      window.location.href = "rooftop.html";
-    });
+   toRooftopBtn.addEventListener("click", () => {
+  // Mark Stadium done (so state machine never backtracks)
+  localStorage.setItem("done_stadium", "1");
+
+  // Optional: also lock the prompt index to the final step
+  // (helps if rooftop ever routes back to map)
+  localStorage.setItem("mapPromptIndex", "4");
+
+  // Cache-bust to avoid iOS Safari restoring an old page state
+  window.location.href = "rooftop.html?t=" + Date.now();
+});
+
   </script>
 </body>
 </html>
