@@ -227,6 +227,10 @@
 
 <script>
   document.getElementById("goBtn").addEventListener("click", () => {
+    if (window.playThenNavigate) {
+      window.playThenNavigate("./tampines.html");
+      return;
+    }
     if (window.tryPlayBgm) window.tryPlayBgm();
     location.href = "./tampines.html";
   });

@@ -817,7 +817,12 @@ c.fillRect(-28, 38, 56, 3);
   localStorage.setItem("mapPromptIndex", "3");
 
   // Cache-bust so iOS Safari doesn't restore an old map state
-  location.href = "./map.html?t=" + Date.now();
+  const nextUrl = "./map.html?t=" + Date.now();
+  if (window.playThenNavigate) {
+    window.playThenNavigate(nextUrl);
+    return;
+  }
+  location.href = nextUrl;
 });
 
 

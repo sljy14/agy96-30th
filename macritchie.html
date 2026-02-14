@@ -784,7 +784,12 @@
   localStorage.setItem("mapPromptIndex", "2");
 
   // Cache-bust to avoid Safari restoring old state
-  location.href = "./map.html?t=" + Date.now();
+  const nextUrl = "./map.html?t=" + Date.now();
+  if (window.playThenNavigate) {
+    window.playThenNavigate(nextUrl);
+    return;
+  }
+  location.href = nextUrl;
 });
 
 

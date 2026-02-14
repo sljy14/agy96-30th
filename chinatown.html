@@ -673,7 +673,12 @@ fullBtn.addEventListener("click", ()=>{
   localStorage.setItem("mapPromptIndex", "1");
 
   // Safari cache-bust (prevents bfcache restoring old prompt)
-  location.href = "./map.html?t=" + Date.now();
+  const nextUrl = "./map.html?t=" + Date.now();
+  if (window.playThenNavigate) {
+    window.playThenNavigate(nextUrl);
+    return;
+  }
+  location.href = nextUrl;
 });
 
 </script>
