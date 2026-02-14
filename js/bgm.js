@@ -58,13 +58,19 @@
 
   // ---------- Restore on page load ----------
   const st = loadState();
-  ensureSrc(st.src || DEFAULT_SRC);
+  const pageSrc = audio.getAttribute("src");
+  const targetSrc = pageSrc || st.src || DEFAULT_SRC;
+  const sameAsSaved = !!st.src && st.src === targetSrc;
+
+  ensureSrc(targetSrc);
   setLoop(st.loop ?? true);
 
-  // Try resume time if same src
-  if (typeof st.t === "number" && !Number.isNaN(st.t)) {
+  // Resume timestamp only when returning to the same track (e.g. arcade across map/game pages)
+  if (sameAsSaved && typeof st.t === "number" && !Number.isNaN(st.t)) {
     audio.currentTime = Math.max(0, st.t);
   }
+
+  saveState({ src: targetSrc, loop: audio.loop });
 
   // If previously playing, attempt to play (will only succeed after gesture on iOS)
   if (st.playing) safePlay();
