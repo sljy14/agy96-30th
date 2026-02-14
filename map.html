@@ -331,13 +331,6 @@
 
 <script>
 /* ===== BGM (plays after first tap) ===== */
-const bgm = document.getElementById("bgm");
-bgm.volume = 0.5;
-
-function tryPlayBgm(){
-  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
-}
-if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
 /* ===== LINEAR PROMPT FLOW (INDEX-BASED) =====
 0 Chinatown → 1 MacRitchie → 2 Waterloo → 3 Stadium → 4 Rooftop
@@ -542,6 +535,7 @@ drawTrees("macritchieIcon");
 drawPagoda("waterlooIcon");
 drawStadium("stadiumIcon");
 </script>
+<script src="./js/bgm.js"></script>
 
 </body>
 </html>
