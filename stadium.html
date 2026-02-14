@@ -1,164 +1,738 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>Stadium — Hurdles</title>
-  <link rel="stylesheet" href="./css/style.css">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Stadium Run!</title>
+
+<style>
+  :root{
+    --maxw: 420px;
+    --stroke: rgba(255,255,255,0.14);
+    --text: #fff;
+  }
+
+  html,body{
+    margin:0;height:100%;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:var(--text);
+    background:
+      radial-gradient(900px 520px at 50% 18%, rgba(255,170,120,0.10), transparent 62%),
+      radial-gradient(900px 520px at 50% 82%, rgba(120,160,255,0.12), transparent 62%),
+      linear-gradient(160deg,#071a2a,#060612);
+  }
+
+  .wrap{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:16px 14px 14px;
+    box-sizing:border-box;
+  }
+
+  h1{
+    margin:6px 0 6px;
+    font-weight:1000;
+    letter-spacing:-0.5px;
+    font-size:26px;
+    text-align:center;
+  }
+  .sub{
+    margin:0 0 8px;
+    opacity:0.86;
+    text-align:center;
+    font-size:13px;
+    line-height:1.25;
+  }
+  .hint{
+    margin:0 0 10px;
+    opacity:0.75;
+    text-align:center;
+    font-size:12px;
+  }
+
+  .titleBlock.hide{ display:none; }
+
+  .hud{
+    width:min(var(--maxw), 94vw);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:6px 0 10px;
+    gap:10px;
+  }
+
+  .pill{
+    flex:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--stroke);
+    background:rgba(0,0,0,0.20);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    font-weight:1000;
+    font-size:12px;
+    white-space:nowrap;
+  }
+
+  .stageCard{
+    width:min(var(--maxw), 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:12px;
+    box-sizing:border-box;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    aspect-ratio: 3 / 4;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.22) 100%),
+      linear-gradient(180deg, rgba(255,190,90,0.06), rgba(0,0,0,0.00));
+  }
+
+  canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    image-rendering:pixelated;
+  }
+
+  /* Win scene */
+  .winWrap{
+    width:min(var(--maxw), 94vw);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    margin-top:10px;
+  }
+  .winWrap.show{ display:flex; }
+
+  .winText{
+    width:min(var(--maxw), 94vw);
+    text-align:center;
+    font-weight:1000;
+    font-size:16px;
+    line-height:1.25;
+  }
+
+  .winStage{
+    width:min(var(--maxw), 94vw);
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:12px;
+    box-sizing:border-box;
+  }
+  .winBox{
+    position:relative;
+    width:100%;
+    aspect-ratio: 3 / 2;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.22) 100%),
+      linear-gradient(180deg, rgba(255,190,90,0.05), rgba(0,0,0,0.00));
+  }
+
+  .btn{
+    width:min(var(--maxw), 94vw);
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.10);
+    color:#fff;
+    font-weight:1000;
+    font-size:16px;
+    letter-spacing:0.4px;
+  }
+  .btn:active{ transform:scale(0.98); }
+
+  .gameWrap.hide{ display:none; }
+
+  @media (max-width: 360px){
+    h1{ font-size:24px; }
+    .sub{ font-size:12px; }
+    .pill{ font-size:11px; }
+  }
+</style>
 </head>
+
 <body>
-<div id="wrap">
-  <div class="bg"></div>
-  <canvas id="c"></canvas>
+<div class="wrap">
 
-  <div class="hud">
-    <div>
-      <div class="title">Stadium 🏟️</div>
-      <div class="sub">Tap to jump barricades. Score 10!</div>
-    </div>
-    <div class="right">Score: <span id="score">0</span> / 10</div>
+  <div class="titleBlock" id="titleBlock">
+    <h1>Welcome to the Stadium Run! 🏟️</h1>
+    <div class="sub">Tap to jump over barricades. Reach 10 to win.</div>
+    <div class="hint">Tap anywhere inside the game.</div>
   </div>
 
-  <div class="centerOverlay" id="overlay">
-    <div class="card">
-      <div class="big" id="big">Ready, set… 🏃‍♀️</div>
-      <div class="small" id="small">Tap to jump. Hit a barricade = Try again 😗</div>
-      <div class="hint">Tap to start</div>
+  <div class="hud gameWrap" id="gameHud">
+    <div class="pill">🏁 Clears: <span id="score">0</span> / 10</div>
+    <div class="pill">💥 Hits: <span id="hits">0</span></div>
+  </div>
+
+  <div class="stageCard gameWrap" id="gameWrap">
+    <div class="stage">
+      <canvas id="game" width="360" height="480" aria-label="Stadium run jump game"></canvas>
     </div>
   </div>
+
+  <!-- WIN SCENE -->
+  <div class="winWrap" id="winWrap">
+    <div class="winText">Now that we’re reaching nightfall, time for some quiet time. 🌃</div>
+    <div class="winStage">
+      <div class="winBox">
+        <canvas id="win" width="360" height="240" aria-label="finish line celebration scene"></canvas>
+      </div>
+    </div>
+    <button class="btn" id="nextBtn">Ready for my me time</button>
+  </div>
+
 </div>
 
-<script type="module">
-  import { fitCanvas, rand, setDone } from "./js/app.js";
+<script>
+/* =========================
+   SETTINGS YOU CAN EDIT
+========================= */
+const MAP_FILE = "./map.html";
+const NEXT_PROMPT_INDEX = 4; // set this to whatever "next" is after Stadium in your map
+const WIN_TARGET = 10;
 
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
-  window.addEventListener("resize", ()=>fitCanvas(canvas,ctx));
-  fitCanvas(canvas,ctx);
+/* =========================
+   GAME CANVAS
+========================= */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  const overlay = document.getElementById("overlay");
-  const big = document.getElementById("big");
-  const small = document.getElementById("small");
-  const scoreEl = document.getElementById("score");
+const scoreEl = document.getElementById("score");
+const hitsEl  = document.getElementById("hits");
 
-  let running=false, won=false;
-  let score=0;
+const gameWrap = document.getElementById("gameWrap");
+const gameHud  = document.getElementById("gameHud");
+const titleBlock = document.getElementById("titleBlock");
 
-  const player = { x: 90, y: window.innerHeight*0.78, vy:0, onGround:true };
-  const gravity = 0.75, jumpV = -13;
-  const hurdles = [];
+const winWrap = document.getElementById("winWrap");
+const nextBtn = document.getElementById("nextBtn");
 
-  function hud(){ scoreEl.textContent = score; }
-  function show(t,msg,h="Tap to continue"){
-    big.textContent=t; small.innerHTML=msg;
-    overlay.querySelector(".hint").textContent=h;
-    overlay.style.display="flex";
+const W = canvas.width;
+const H = canvas.height;
+
+let running = true;
+let score = 0;
+let hits = 0;
+let shake = 0;
+
+/* =========================
+   GLASSES (single source of truth)
+   --[]-[]-- with bridge + temple arms
+========================= */
+function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
+  g.fillStyle = "#000";
+
+  // left lens
+  g.fillRect(x, y, lensW, thick);
+  g.fillRect(x, y, thick, lensH);
+  g.fillRect(x, y + lensH - thick, lensW, thick);
+  g.fillRect(x + lensW - thick, y, thick, lensH);
+
+  // right lens
+  const rx = x + lensW + gap;
+  g.fillRect(rx, y, lensW, thick);
+  g.fillRect(rx, y, thick, lensH);
+  g.fillRect(rx, y + lensH - thick, lensW, thick);
+  g.fillRect(rx + lensW - thick, y, thick, lensH);
+
+  // bridge
+  const bridgeW = Math.max(3, Math.floor(gap * 0.7));
+  const bridgeX = x + lensW;
+  const bridgeY = y + Math.floor(lensH/2) - 1;
+  g.fillRect(bridgeX, bridgeY, bridgeW, 2);
+
+  // temple arms
+  g.fillRect(x - armLen, y + 2, armLen, 2);
+  g.fillRect(rx + lensW, y + 2, armLen, 2);
+}
+
+/* =========================
+   agy96 runner (same vibe as Chinatown gameplay)
+========================= */
+function drawAgyRunner(g, x, y){
+  // x,y = feet baseline
+  // hair
+  g.fillStyle="#000";
+  g.fillRect(x-18, y-68, 36, 68);
+  g.fillRect(x-22, y-52, 44, 44);
+
+  // face
+  g.fillStyle="#f1c7a6";
+  g.fillRect(x-12, y-54, 24, 28);
+
+  // glasses
+  const gy = y - 47;
+  drawGlasses(g, x-16, gy, 12, 9, 2, 6, 6);
+
+  // shirt
+  g.fillStyle="#c1272d";
+  g.fillRect(x-16, y-26, 32, 22);
+  // sleeves
+  g.fillRect(x-22, y-26, 6, 8);
+  g.fillRect(x+16, y-26, 6, 8);
+
+  // arms
+  g.fillStyle="#f1c7a6";
+  g.fillRect(x-22, y-18, 6, 12);
+  g.fillRect(x+16, y-18, 6, 12);
+
+  // pants
+  g.fillStyle="#0e0e18";
+  g.fillRect(x-16, y-4, 32, 16);
+
+  // shoes
+  g.fillStyle="#fff";
+  g.fillRect(x-14, y+10, 28, 5);
+}
+
+/* =========================
+   BACKGROUND: track + field + evening sky
+========================= */
+function bg(){
+  ctx.clearRect(0,0,W,H);
+
+  // sky dusk
+  const grd = ctx.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0, "rgba(60,90,130,0.35)");
+  grd.addColorStop(0.45, "rgba(20,30,55,0.35)");
+  grd.addColorStop(1, "rgba(5,8,20,0.45)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0,0,W,H);
+
+  // distant field
+  ctx.fillStyle="rgba(40,120,80,0.18)";
+  ctx.fillRect(0, H*0.45, W, H*0.22);
+
+  // track
+  ctx.fillStyle="rgba(180,80,80,0.22)";
+  ctx.fillRect(0, H*0.67, W, H*0.33);
+
+  // lane lines
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle="rgba(255,255,255,0.25)";
+  for(let i=0;i<5;i++){
+    ctx.fillRect(0, H*0.70 + i*26, W, 2);
   }
-  function hide(){ overlay.style.display="none"; }
+  ctx.globalAlpha = 1;
 
-  function reset(){
-    score=0; hud();
-    hurdles.length=0;
-    player.y=window.innerHeight*0.78; player.vy=0; player.onGround=true;
-    running=true; won=false; hide();
+  // simple stadium lights glow
+  ctx.fillStyle="rgba(255,255,255,0.10)";
+  ctx.fillRect(30, 50, 10, 70);
+  ctx.fillRect(W-40, 50, 10, 70);
+  ctx.beginPath(); ctx.arc(35, 45, 18, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W-35, 45, 18, 0, Math.PI*2); ctx.fill();
+}
+
+/* =========================
+   GAMEPLAY: tap to jump
+========================= */
+const groundY = Math.floor(H*0.86); // runner baseline
+const runner = {
+  x: 80,
+  y: groundY,
+  vy: 0,
+  onGround: true,
+  // forgiving hitbox
+  hbW: 26,
+  hbH: 46
+};
+
+let jumpQueued = false;
+function jump(){
+  // small buffer: if player taps slightly early, queue it
+  jumpQueued = true;
+}
+
+function applyJump(){
+  if(runner.onGround && jumpQueued){
+    runner.vy = -7.8;
+    runner.onGround = false;
+    jumpQueued = false;
   }
+}
 
-  function win(){
-    running=false; won=true;
-    setDone("stadium", true);
-    show("Dusk victory 🌇✨", "You cleared it.<br/>Back to the map?", "Tap to go back");
-  }
+canvas.addEventListener("mousedown", ()=>jump());
+canvas.addEventListener("touchstart", (e)=>{ e.preventDefault(); jump(); }, {passive:false});
 
-  function lose(){
-    running=false;
-    show("Try again! 😗", "You clipped a barricade.<br/>One more lap.", "Tap to retry");
-  }
+/* Barricades */
+const obstacles = [];
+let spawnT = 0;
 
-  document.addEventListener("click", ()=>{
-    if (overlay.style.display!=="none"){
-      if (won) location.href="./map.html";
-      else reset();
-      return;
-    }
-    if (!running) return;
-    if (player.onGround){
-      player.vy = jumpV;
-      player.onGround = false;
-    }
+function spawnObstacle(){
+  const height = 26;
+  obstacles.push({
+    x: W + 30,
+    w: 30,
+    h: height,
+    y: groundY - height,
+    passed: false
   });
+}
 
-  let lastSpawn=0;
-  function spawn(){
-    hurdles.push({ x: window.innerWidth+40, w: 26, h: rand(26, 42) });
+function rectHit(ax,ay,aw,ah, bx,by,bw,bh){
+  return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+}
+
+/* =========================
+   DRAW barricade
+========================= */
+function drawBarricade(o){
+  // base
+  ctx.fillStyle="rgba(255,255,255,0.18)";
+  ctx.fillRect(o.x, o.y+o.h-4, o.w, 4);
+
+  // rails
+  ctx.fillStyle="rgba(255,255,255,0.28)";
+  ctx.fillRect(o.x+2, o.y+6, o.w-4, 4);
+  ctx.fillRect(o.x+2, o.y+14, o.w-4, 4);
+
+  // legs
+  ctx.fillStyle="rgba(255,255,255,0.22)";
+  ctx.fillRect(o.x+4, o.y, 4, o.h);
+  ctx.fillRect(o.x+o.w-8, o.y, 4, o.h);
+
+  // orange stripes
+  ctx.fillStyle="rgba(255,140,80,0.65)";
+  ctx.fillRect(o.x+6, o.y+6, 6, 4);
+  ctx.fillRect(o.x+o.w-12, o.y+14, 6, 4);
+}
+
+/* =========================
+   MAIN LOOP
+========================= */
+function step(){
+  if(!running) return;
+
+  // spawn cadence
+  spawnT++;
+  if(spawnT > 70){
+    spawnT = 0;
+    spawnObstacle();
   }
 
-  let last=0;
-  function loop(ts){
-    requestAnimationFrame(loop);
-    const dt = Math.min(32, ts-last||16); last=ts;
+  // physics
+  applyJump();
+  runner.vy += 0.42; // gravity
+  runner.y += runner.vy;
 
-    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-
-    // dusk gradient overlay lines
-    ctx.globalAlpha=0.15;
-    ctx.fillStyle="#fff";
-    for(let i=0;i<12;i++) ctx.fillRect(0, 80+i*34, window.innerWidth, 1);
-    ctx.globalAlpha=1;
-
-    // track
-    ctx.globalAlpha=0.12; ctx.fillStyle="#fff";
-    ctx.fillRect(0, window.innerHeight*0.82, window.innerWidth, window.innerHeight*0.18);
-    ctx.globalAlpha=1;
-
-    // spawn hurdles
-    if (running){
-      lastSpawn += dt;
-      if (lastSpawn > 900 + Math.random()*500){
-        lastSpawn = 0;
-        spawn();
-      }
-    }
-
-    // update hurdles
-    for (let i=hurdles.length-1;i>=0;i--){
-      const h = hurdles[i];
-      if (running) h.x -= 5.2*(dt/16);
-      ctx.globalAlpha=0.95;
-      ctx.fillStyle="rgba(255,255,255,0.22)";
-      ctx.fillRect(h.x, window.innerHeight*0.78 - h.h, h.w, h.h);
-      ctx.globalAlpha=1;
-
-      // collision
-      const px = player.x, py = player.y;
-      const withinX = (px+18 > h.x && px-10 < h.x+h.w);
-      const hitY = (py > (window.innerHeight*0.78 - h.h));
-      if (running && withinX && hitY) lose();
-
-      if (h.x < -60) hurdles.splice(i,1);
-      // scoring when passed
-      if (running && !h.scored && h.x + h.w < player.x){
-        h.scored=true;
-        score++; hud();
-        if (score>=10) win();
-      }
-    }
-
-    // player physics
-    if (running){
-      player.vy += gravity*(dt/16);
-      player.y += player.vy*(dt/16);
-      if (player.y >= window.innerHeight*0.78){
-        player.y = window.innerHeight*0.78;
-        player.vy=0; player.onGround=true;
-      }
-    }
-
-    // player draw
-    ctx.font="34px system-ui";
-    ctx.textAlign="center";
-    ctx.fillText("🧍‍♀️", player.x, player.y);
+  if(runner.y >= groundY){
+    runner.y = groundY;
+    runner.vy = 0;
+    runner.onGround = true;
   }
-  requestAnimationFrame(loop);
+
+  // move obstacles
+  const speed = 2.4 + Math.min(1.2, score * 0.06);
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o = obstacles[i];
+    o.x -= speed;
+
+    // pass -> score
+    if(!o.passed && (o.x + o.w) < runner.x - 10){
+      o.passed = true;
+      score++;
+      scoreEl.textContent = score;
+      if(score >= WIN_TARGET){
+        win();
+        return;
+      }
+    }
+
+    // collision
+    const pBox = { x: runner.x - runner.hbW/2, y: runner.y - runner.hbH, w: runner.hbW, h: runner.hbH };
+    const oBox = { x: o.x, y: o.y, w: o.w, h: o.h };
+    if(rectHit(pBox.x,pBox.y,pBox.w,pBox.h, oBox.x,oBox.y,oBox.w,oBox.h)){
+      // bump + shake
+      hits++;
+      hitsEl.textContent = hits;
+      shake = 10;
+      // reset obstacle so it doesn't multi-hit
+      obstacles.splice(i,1);
+    } else if(o.x < -60){
+      obstacles.splice(i,1);
+    }
+  }
+
+  // draw
+  ctx.save();
+  if(shake>0){
+    shake *= 0.85;
+    ctx.translate((Math.random()*2-1)*shake, (Math.random()*2-1)*shake);
+  }
+
+  bg();
+
+  // shadow
+  ctx.fillStyle="rgba(0,0,0,0.22)";
+  ctx.beginPath();
+  ctx.ellipse(runner.x+6, groundY+10, 34, 10, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // obstacles
+  for(const o of obstacles) drawBarricade(o);
+
+  // runner
+  drawAgyRunner(ctx, runner.x, runner.y);
+
+  ctx.restore();
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+
+/* =========================
+   WIN FLOW
+========================= */
+function win(){
+  running = false;
+  gameWrap.classList.add("hide");
+  gameHud.classList.add("hide");
+  titleBlock.classList.add("hide");
+  winWrap.classList.add("show");
+  startWinScene();
+}
+
+/* =========================
+   WIN CANVAS: finish tape break + 5 hops + 👏
+========================= */
+const winCanvas = document.getElementById("win");
+const wctx = winCanvas.getContext("2d");
+const WW = winCanvas.width;
+const WH = winCanvas.height;
+
+let t = 0;
+let hopCount = 0;
+let phase = "tape"; // tape -> hops -> done
+let claps = [];
+
+function spawnClap(x,y){
+  claps.push({
+    x, y,
+    vx: (Math.random()*2-1)*0.6,
+    vy: -1.2 - Math.random()*0.8,
+    life: 60 + Math.random()*25,
+    age: 0
+  });
+}
+
+function winBg(){
+  wctx.clearRect(0,0,WW,WH);
+
+  // night gradient
+  const grd = wctx.createLinearGradient(0,0,0,WH);
+  grd.addColorStop(0, "rgba(20,35,70,0.45)");
+  grd.addColorStop(1, "rgba(5,8,20,0.55)");
+  wctx.fillStyle = grd;
+  wctx.fillRect(0,0,WW,WH);
+
+  // track
+  wctx.fillStyle="rgba(180,80,80,0.20)";
+  wctx.fillRect(0, WH*0.62, WW, WH*0.38);
+
+  // finish line base
+  const fx = WW/2 - 80;
+  const fy = WH*0.62 + 20;
+  wctx.fillStyle="rgba(255,255,255,0.16)";
+  wctx.fillRect(fx, fy, 160, 6);
+
+  // checkered
+  for(let i=0;i<16;i++){
+    wctx.fillStyle = i%2 ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.18)";
+    wctx.fillRect(fx + i*10, fy, 10, 6);
+  }
+
+  // field glow
+  wctx.fillStyle="rgba(40,120,80,0.14)";
+  wctx.fillRect(0, WH*0.42, WW, WH*0.20);
+}
+
+function drawTapeBreak(progress){
+  // progress 0..1
+  const cx = WW/2;
+  const y = WH*0.62 + 6;
+
+  // left tape piece
+  wctx.fillStyle="rgba(255,255,255,0.32)";
+  wctx.fillRect(cx-70 - Math.floor(progress*18), y, 60, 6);
+
+  // right tape piece
+  wctx.fillRect(cx+10 + Math.floor(progress*18), y, 60, 6);
+
+  // little “rip” bits
+  wctx.globalAlpha = 0.9;
+  for(let i=0;i<6;i++){
+    const rx = cx + (Math.random()*2-1) * (12 + progress*18);
+    const ry = y - 4 + Math.random()*10;
+    wctx.fillRect(rx, ry, 6, 2);
+  }
+  wctx.globalAlpha = 1;
+}
+
+function drawAgyWin(g, x, y, hopY){
+  // reuse runner look, slightly bigger
+  g.save();
+  g.translate(x, y - hopY);
+
+  // shadow
+  g.fillStyle="rgba(0,0,0,0.22)";
+  g.beginPath(); g.ellipse(0, 54, 30, 9, 0, 0, Math.PI*2); g.fill();
+
+  // body baseline
+  const base = 40;
+
+  // hair
+  g.fillStyle="#000";
+  g.fillRect(-18, base-68, 36, 68);
+  g.fillRect(-22, base-52, 44, 44);
+
+  // face
+  g.fillStyle="#f1c7a6";
+  g.fillRect(-12, base-54, 24, 28);
+
+  // glasses
+  drawGlasses(g, -16, base-47, 12, 9, 2, 6, 6);
+
+  // shirt
+  g.fillStyle="#c1272d";
+  g.fillRect(-16, base-26, 32, 22);
+  g.fillRect(-22, base-26, 6, 8);
+  g.fillRect(16,  base-26, 6, 8);
+
+  // arms (celebrate)
+  g.fillStyle="#f1c7a6";
+  g.fillRect(-26, base-30, 8, 18);
+  g.fillRect(18,  base-30, 8, 18);
+
+  // pants
+  g.fillStyle="#0e0e18";
+  g.fillRect(-16, base-4, 32, 16);
+
+  // shoes
+  g.fillStyle="#fff";
+  g.fillRect(-14, base+10, 28, 5);
+
+  g.restore();
+}
+
+function drawClaps(){
+  wctx.save();
+  wctx.font = "18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  wctx.textAlign = "center";
+
+  for(let i=claps.length-1;i>=0;i--){
+    const p = claps[i];
+    p.age++;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.03;
+
+    const a = 1 - (p.age / p.life);
+    wctx.globalAlpha = Math.max(0, a);
+    wctx.fillText("👏", p.x, p.y);
+
+    if(p.age >= p.life) claps.splice(i,1);
+  }
+
+  wctx.globalAlpha = 1;
+  wctx.restore();
+}
+
+function winLoop(){
+  t++;
+
+  winBg();
+
+  const A = { x: WW/2 - 30, y: WH*0.62 - 6 };
+  const B = { x: WW/2 + 30, y: WH*0.62 - 6 };
+
+  if(phase === "tape"){
+    const p = Math.min(1, t/40);
+    drawTapeBreak(p);
+
+    // runner crosses during tape
+    const hop = Math.sin(t*0.22) * 6;
+    drawAgyWin(wctx, WW/2, WH*0.62 - 8, Math.max(0, hop));
+
+    if(t % 5 === 0){
+      spawnClap(WW/2 + (Math.random()*2-1)*80, WH*0.45 + Math.random()*40);
+    }
+
+    if(p >= 1){
+      phase = "hops";
+      t = 0;
+      hopCount = 0;
+    }
+  }
+  else if(phase === "hops"){
+    // 5 hops, alternate A/B
+    const hop = Math.max(0, Math.sin(t*0.35) * 14);
+    const pos = (hopCount % 2 === 0) ? A : B;
+
+    drawAgyWin(wctx, pos.x, pos.y, hop);
+
+    // spawn more claps
+    if(t % 6 === 0){
+      spawnClap(WW/2 + (Math.random()*2-1)*110, WH*0.40 + Math.random()*60);
+    }
+
+    // count hops at peak-ish
+    if(t % 18 === 0){
+      hopCount++;
+      if(hopCount >= 5){
+        phase = "done";
+      }
+    }
+  }
+  else {
+    // final pose + lingering claps
+    drawAgyWin(wctx, WW/2, WH*0.62 - 8, 0);
+    if(t % 10 === 0 && t < 120){
+      spawnClap(WW/2 + (Math.random()*2-1)*120, WH*0.40 + Math.random()*70);
+    }
+  }
+
+  drawClaps();
+
+  if(winWrap.classList.contains("show")){
+    requestAnimationFrame(winLoop);
+  }
+}
+
+function startWinScene(){
+  t = 0;
+  hopCount = 0;
+  phase = "tape";
+  claps = [];
+  winLoop();
+}
+
+/* =========================
+   NEXT BUTTON: back to map
+========================= */
+nextBtn.addEventListener("click", ()=>{
+  localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
+  location.href = MAP_FILE;
+});
 </script>
 </body>
 </html>
