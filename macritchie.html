@@ -207,7 +207,7 @@
   const logsCountEl = document.getElementById("logsCount");
   const slipsCountEl = document.getElementById("slipsCount");
   const nextBtn = document.getElementById("nextBtn");
-  const bgm = document.getElementById("bgm");
+
 
   // ===== CANVAS =====
   const canvas = document.getElementById("game");
@@ -389,19 +389,7 @@
     setHUD();
   }
 
-  // ===== BGM: start on first interaction (iOS friendly) =====
-  let bgmStarted = false;
-  async function ensureBgm(){
-    if (bgmStarted) return;
-    bgmStarted = true;
-    try{
-      bgm.volume = 0.7;
-      await bgm.play();
-    }catch(e){
-      // if it fails, we'll try again on next tap
-      bgmStarted = false;
-    }
-  }
+  
 
   // ===== INPUT =====
   function onTap(){
@@ -784,5 +772,8 @@
 
 })();
 </script>
+
+  <script src="./js/bgm.js"></script>
+
 </body>
 </html>
