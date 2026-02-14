@@ -674,11 +674,14 @@ function startEatingScene(){
    BUTTON: back to map
 ========================= */
 fullBtn.addEventListener("click", ()=>{
-  // Mark Chinatown as completed for the new map flow
+  // Mark Chinatown done
   localStorage.setItem("done_chinatown", "1");
 
-  // Go back to map (map.html will now prompt MacRitchie)
-  location.href = "./map.html";
+  // Next prompt must be MacRitchie (index 1)
+  localStorage.setItem("mapPromptIndex", "1");
+
+  // Safari cache-bust (prevents bfcache restoring old prompt)
+  location.href = "./map.html?t=" + Date.now();
 });
 
 </script>
