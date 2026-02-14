@@ -769,29 +769,6 @@
   location.href = "./map.html";
 });
 
-function refreshPromptFromStorage(){
-  let i = Number(localStorage.getItem("mapPromptIndex") || 0);
-  if (!Number.isFinite(i) || i < 0) i = 0;
-
-  const END_INDEX = prompts.length; // 4
-  if (i > END_INDEX) i = 0;
-
-  if (i === END_INDEX){
-    location.replace("./rooftop.html");
-    return;
-  }
-
-  setPrompt(i); // updates questionText + current
-}
-
-// iOS/Safari: when page is restored from bfcache, this fires
-window.addEventListener("pageshow", refreshPromptFromStorage);
-
-// also useful when tab is backgrounded and resumed
-document.addEventListener("visibilitychange", ()=>{
-  if (!document.hidden) refreshPromptFromStorage();
-});
-
 
 
   // ===== INIT =====
