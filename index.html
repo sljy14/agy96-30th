@@ -223,28 +223,14 @@
 </div>
 
 <!-- BGM -->
-<audio id="bgm" src="./arcade.mp3?v=2" preload="auto" loop></audio>
+<audio id="bgm" src="./arcade.mp3" preload="auto" loop></audio>
 
 <script>
-  // Start button (also counts as "user interaction" so audio can play on mobile)
   document.getElementById("goBtn").addEventListener("click", () => {
-    const bgm = document.getElementById("bgm");
-    bgm.volume = 0.5;
-
-    // try play (allowed because click is a user gesture)
-    bgm.play().then(() => {
-      localStorage.setItem("bgmPlaying", "true");
-    }).catch(()=>{});
-
+    if (window.tryPlayBgm) window.tryPlayBgm();
     location.href = "./tampines.html";
   });
-
-  // If user returns back to index.html and bgm was playing, try resume
-  const bgm = document.getElementById("bgm");
-  if (localStorage.getItem("bgmPlaying") === "true") {
-    bgm.volume = 0.5;
-    bgm.play().catch(()=>{});
-  }
 </script>
+<script src="./js/bgm.js"></script>
 </body>
 </html>
