@@ -638,23 +638,41 @@ B. What is your 30 year old birthday wish for yourself?
 
     function drawSkylineStatic(){
       // layered buildings (STATIC)
-      for (const L of skylineLayers){
-        ctx.save();
-        ctx.globalAlpha = L.alpha;
-        ctx.fillStyle = L.color;
+      for (let li = 0; li < skylineLayers.length; li++){
+  const L = skylineLayers[li];
 
-        for (const r of L.rects){
-          ctx.fillRect(r.x, r.y, r.w, r.h);
+  ctx.save();
+  ctx.globalAlpha = L.alpha;
+  ctx.fillStyle = L.color;
 
-          // windows
-          ctx.fillStyle = "rgba(255,255,255,0.18)";
-          for (const w of r.windows){
-            ctx.fillRect(w.wx, w.wy, 2, 2);
-          }
-          ctx.fillStyle = L.color;
-        }
-        ctx.restore();
+  for (const r of L.rects){
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+
+    // windows
+    if (li === 0){
+      // first row: warm yellow glow
+      ctx.save();
+      ctx.shadowColor = "rgba(255,220,120,0.55)";
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = "rgba(255,220,120,0.45)";
+      for (const w of r.windows){
+        ctx.fillRect(w.wx, w.wy, 2, 2);
       }
+      ctx.restore();
+    } else {
+      // other rows: subtle white
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      for (const w of r.windows){
+        ctx.fillRect(w.wx, w.wy, 2, 2);
+      }
+    }
+
+    ctx.fillStyle = L.color;
+  }
+
+  ctx.restore();
+}
+
 
       // Water band
       ctx.fillStyle = "#062242";
@@ -815,7 +833,7 @@ B. What is your 30 year old birthday wish for yourself?
             bouquet.t = 0;
 
             // start position = your hand
-            bouquet.fromX = you.x + 44;
+            bouquet.fromX = you.x - 44;
             bouquet.fromY = you.y - 20;
 
             // end position = next to agy96 (right side of her)
@@ -875,16 +893,21 @@ B. What is your 30 year old birthday wish for yourself?
       ctx.fillRect(-12, 20, 10, 6);
       ctx.fillRect(2, 20, 10, 6);
 
-      // Arms
-      ctx.fillStyle = "#eab48f";
-      if (you.bouquetGiven){
-        ctx.fillRect(14, -16, 12, 4); // extended arm
-      } else {
-        ctx.fillRect(14, -18, 4, 16);
-      }
-      ctx.fillRect(-18, -18, 4, 16);
+    // Arms
+ctx.fillStyle = "#eab48f";
 
-      ctx.restore();
+// LEFT arm = near agy96 (this one holds bouquet when given)
+if (you.bouquetGiven){
+  // extended LEFT arm (towards agy)
+  ctx.fillRect(-26, -16, 12, 4);
+} else {
+  // left arm down
+  ctx.fillRect(-18, -18, 4, 16);
+}
+
+// RIGHT arm always down straight
+ctx.fillRect(14, -18, 4, 16);
+
 
       // Bouquet animation
       if (bouquet.active && !bouquet.done){
