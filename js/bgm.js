@@ -15,6 +15,7 @@
   }
 
   audio.volume = 0.5;
+  let wantedPlaying = false;
 
   // ---------- State helpers ----------
   function loadState() {
@@ -35,11 +36,15 @@
   }
 
   async function safePlay() {
+    // Mark intent immediately so fast navigations still persist "should be playing"
+    wantedPlaying = true;
+    saveState({ playing: true });
+
     try {
       await audio.play();
       saveState({ playing: true });
     } catch (e) {
-      // iOS blocks autoplay until user gesture; ignore quietly
+      // iOS/Android may block autoplay until user gesture; keep intent and retry on next gestures/pages
     }
   }
 
@@ -48,30 +53,44 @@
   }
 
   function switchTo(src, loop = true, restart = false) {
-    const wasPlaying = !audio.paused;
+    const shouldPlay = wantedPlaying || !audio.paused;
     ensureSrc(src);
     setLoop(loop);
     if (restart) audio.currentTime = 0;
-    saveState({ src, loop, playing: wasPlaying });
-    if (wasPlaying) safePlay();
+    saveState({ src, loop, playing: shouldPlay });
+    if (shouldPlay) safePlay();
   }
 
   // ---------- Restore on page load ----------
   const st = loadState();
-  ensureSrc(st.src || DEFAULT_SRC);
+  wantedPlaying = !!st.playing;
+  const pageSrc = audio.getAttribute("src");
+  const targetSrc = pageSrc || st.src || DEFAULT_SRC;
+  const sameAsSaved = !!st.src && st.src === targetSrc;
+
+  ensureSrc(targetSrc);
   setLoop(st.loop ?? true);
 
-  // Try resume time if same src
-  if (typeof st.t === "number" && !Number.isNaN(st.t)) {
+  // Resume timestamp only when returning to the same track (e.g. arcade across map/game pages)
+  if (sameAsSaved && typeof st.t === "number" && !Number.isNaN(st.t)) {
     audio.currentTime = Math.max(0, st.t);
   }
+
+  saveState({ src: targetSrc, loop: audio.loop });
 
   // If previously playing, attempt to play (will only succeed after gesture on iOS)
   if (st.playing) safePlay();
 
+  // Retry on pageshow (helps Safari/Android when playback is interrupted during quick navigation)
+  window.addEventListener("pageshow", () => {
+    const latest = loadState();
+    wantedPlaying = !!latest.playing || wantedPlaying;
+    if (wantedPlaying) safePlay();
+  });
+
   // ---------- Keep time across pages ----------
   function persistTime() {
-    saveState({ t: audio.currentTime, src: audio.getAttribute("src"), loop: audio.loop, playing: !audio.paused });
+    saveState({ t: audio.currentTime, src: audio.getAttribute("src"), loop: audio.loop, playing: wantedPlaying || !audio.paused });
   }
   window.addEventListener("pagehide", persistTime);
   document.addEventListener("visibilitychange", () => {
@@ -84,8 +103,8 @@
   // For your special pages:
   window.BGM = {
     play: () => safePlay(),
-    pause: () => { audio.pause(); saveState({ playing: false }); },
-    stop: () => { audio.pause(); audio.currentTime = 0; saveState({ playing: false, t: 0 }); },
+    pause: () => { wantedPlaying = false; audio.pause(); saveState({ playing: false }); },
+    stop: () => { wantedPlaying = false; audio.pause(); audio.currentTime = 0; saveState({ playing: false, t: 0 }); },
     switchTo: (src, loop = true, restart = true) => switchTo(src, loop, restart),
     setVolume: (v) => { audio.volume = Math.max(0, Math.min(1, v)); saveState({ vol: audio.volume }); },
     getAudio: () => audio
