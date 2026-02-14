@@ -4,6 +4,14 @@
   const DEFAULT_SRC = "./arcade.mp3"; // your normal bgm
   const STORAGE_KEY = "bgm_state_v1";
 
+  function normalizeSrc(src) {
+    try {
+      return new URL(src, window.location.href).href;
+    } catch {
+      return src || "";
+    }
+  }
+
   // ---------- Get or create the <audio> ----------
   let audio = document.getElementById("bgm");
   if (!audio) {
@@ -29,7 +37,8 @@
 
   function ensureSrc(src) {
     if (!src) src = DEFAULT_SRC;
-    if (audio.getAttribute("src") !== src) {
+    const current = audio.getAttribute("src") || audio.src || "";
+    if (normalizeSrc(current) !== normalizeSrc(src)) {
       audio.src = src;
       audio.load();
     }
@@ -57,16 +66,16 @@
     ensureSrc(src);
     setLoop(loop);
     if (restart) audio.currentTime = 0;
-    saveState({ src, loop, playing: shouldPlay });
+    saveState({ src: normalizeSrc(audio.currentSrc || src), loop, playing: shouldPlay });
     if (shouldPlay) safePlay();
   }
 
   // ---------- Restore on page load ----------
   const st = loadState();
   wantedPlaying = !!st.playing;
-  const pageSrc = audio.getAttribute("src");
+  const pageSrc = audio.getAttribute("src") || audio.src;
   const targetSrc = pageSrc || st.src || DEFAULT_SRC;
-  const sameAsSaved = !!st.src && st.src === targetSrc;
+  const sameAsSaved = !!st.src && normalizeSrc(st.src) === normalizeSrc(targetSrc);
 
   ensureSrc(targetSrc);
   setLoop(st.loop ?? true);
@@ -76,7 +85,7 @@
     audio.currentTime = Math.max(0, st.t);
   }
 
-  saveState({ src: targetSrc, loop: audio.loop });
+  saveState({ src: normalizeSrc(audio.currentSrc || targetSrc), loop: audio.loop });
 
   // If previously playing, attempt to play (will only succeed after gesture on iOS)
   if (st.playing) safePlay();
@@ -90,7 +99,12 @@
 
   // ---------- Keep time across pages ----------
   function persistTime() {
-    saveState({ t: audio.currentTime, src: audio.getAttribute("src"), loop: audio.loop, playing: wantedPlaying || !audio.paused });
+    saveState({
+      t: audio.currentTime,
+      src: normalizeSrc(audio.currentSrc || audio.getAttribute("src")),
+      loop: audio.loop,
+      playing: wantedPlaying || !audio.paused
+    });
   }
   window.addEventListener("pagehide", persistTime);
   document.addEventListener("visibilitychange", () => {
