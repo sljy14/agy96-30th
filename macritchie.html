@@ -764,10 +764,16 @@
 
 
   nextBtn.addEventListener("click", ()=>{
-  // After MacRitchie, next is Waterloo (index 2)
+  // Mark MacRitchie done
+  localStorage.setItem("done_macritchie", "1");
+
+  // Next prompt: Waterloo (index 2)
   localStorage.setItem("mapPromptIndex", "2");
-  location.href = "./map.html";
+
+  // Cache-bust to avoid Safari restoring old state
+  location.href = "./map.html?t=" + Date.now();
 });
+
 
 
 
