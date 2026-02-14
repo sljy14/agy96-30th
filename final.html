@@ -21,6 +21,7 @@
       <div class="soft" id="out"></div>
 
       <div class="btnRow">
+        <button id="openSurpriseBtn">Open mini surprise 🎁</button>
         <button onclick="location.href='./map.html'">Back to map</button>
         <button onclick="location.href='./index.html'">Home</button>
       </div>
@@ -32,9 +33,14 @@
   <!-- BGM -->
 <audio id="bgm" src="./loop.mp3" preload="auto" loop></audio>
 
-<script type="module">
-  import { loadState } from "./js/app.js";
-  const s = loadState();
+<script>
+  const s = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("bday_pixel_v1") || "{}");
+    } catch {
+      return {};
+    }
+  })();
   // ===== BGM CONTROL =====
 const bgm = document.getElementById("bgm");
 
@@ -78,8 +84,10 @@ document.addEventListener("pointerdown", function firstTap(){
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
   }
 
-  // Switch to birthday music when page loads
-switchBgmTo("./bday.mp3", true);
+const openSurpriseBtn = document.getElementById("openSurpriseBtn");
+openSurpriseBtn.addEventListener("click", () => {
+  switchBgmTo("./bday.mp3", true);
+});
 
 </script>
 </body>
