@@ -537,6 +537,10 @@ Sandra`;
     function startSurprise(){
       miniPopup.classList.remove("show");
 
+      if (window.BGM) {
+        window.BGM.switchTo("./bday.mp3", true, true);
+      }
+
       // Hide record/share controls + hint
       card.classList.add("hideControls");
 
@@ -941,11 +945,7 @@ Sandra`;
             bouquet.toX = 210;
             bouquet.toY = 392;
 
-            // Audio + fireworks begin after bouquet starts
-            if (window.BGM) {
-              window.BGM.switchTo("./bday.mp3", true, true);
-            }
-
+            // Fireworks begin after bouquet starts
             fireworksOn = true;
             lastFireworkAt = performance.now();
           }, 500);
