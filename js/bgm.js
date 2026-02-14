@@ -21,6 +21,9 @@
     audio.preload = "auto";
     document.body.appendChild(audio);
   }
+  audio.setAttribute("playsinline", "true");
+  audio.setAttribute("webkit-playsinline", "true");
+  audio.playsInline = true;
 
   audio.volume = 0.5;
   let wantedPlaying = false;
@@ -51,9 +54,11 @@
 
     try {
       await audio.play();
-      saveState({ playing: true });
+      saveState({ playing: true, unlocked: true });
+      return true;
     } catch (e) {
       // iOS/Android may block autoplay until user gesture; keep intent and retry on next gestures/pages
+      return false;
     }
   }
 
@@ -73,6 +78,9 @@
   // ---------- Restore on page load ----------
   const st = loadState();
   wantedPlaying = !!st.playing;
+  if (typeof st.vol === "number" && !Number.isNaN(st.vol)) {
+    audio.volume = Math.max(0, Math.min(1, st.vol));
+  }
   const pageSrc = audio.getAttribute("src") || audio.src;
   const targetSrc = pageSrc || st.src || DEFAULT_SRC;
   const sameAsSaved = !!st.src && normalizeSrc(st.src) === normalizeSrc(targetSrc);
@@ -106,7 +114,17 @@
       playing: wantedPlaying || !audio.paused
     });
   }
+  let lastPersistAt = 0;
+  audio.addEventListener("timeupdate", () => {
+    const now = Date.now();
+    if (now - lastPersistAt > 500) {
+      lastPersistAt = now;
+      persistTime();
+    }
+  });
   window.addEventListener("pagehide", persistTime);
+  window.addEventListener("beforeunload", persistTime);
+  window.addEventListener("freeze", persistTime);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) persistTime();
   });
@@ -124,9 +142,21 @@
     getAudio: () => audio
   };
 
-  // Start playing on first user interaction (iOS autoplay rule)
-  document.addEventListener("pointerdown", function firstTap() {
-    safePlay();
-    document.removeEventListener("pointerdown", firstTap);
-  }, { once: true });
+  // Keep trying to unlock playback on user interactions until play succeeds.
+  // iOS Safari can reject the first attempt when navigation/tap timing is tight.
+  let unlocked = !!st.unlocked;
+  const unlock = async () => {
+    if (unlocked) return;
+    const ok = await safePlay();
+    if (ok || !audio.paused) {
+      unlocked = true;
+      saveState({ unlocked: true, playing: true });
+      ["pointerdown", "touchstart", "touchend", "click", "keydown"].forEach((evt) => {
+        document.removeEventListener(evt, unlock, true);
+      });
+    }
+  };
+  ["pointerdown", "touchstart", "touchend", "click", "keydown"].forEach((evt) => {
+    document.addEventListener(evt, unlock, { capture: true, passive: true });
+  });
 })();
