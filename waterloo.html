@@ -814,10 +814,18 @@ c.fillRect(-28, 38, 56, 3);
   bindBtn(upBtn, "up");
 
   nextBtn.addEventListener("click", ()=>{
-    ensureBgm();
-    localStorage.setItem("mapPromptIndex", "3"); // stadium prompt
-    location.href = "./map.html";
-  });
+  ensureBgm();
+
+  // Mark Waterloo done
+  localStorage.setItem("done_waterloo", "1");
+
+  // Next is Stadium
+  localStorage.setItem("mapPromptIndex", "3");
+
+  // Cache-bust so iOS Safari doesn't restore an old map state
+  location.href = "./map.html?t=" + Date.now();
+});
+
 
   // start
   resetRound();
