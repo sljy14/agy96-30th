@@ -1,738 +1,753 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Stadium Run!</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Stadium Run</title>
+  <style>
+    :root{
+      --bg1:#0b1c2d;
+      --bg2:#162a3d;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --muted2: rgba(255,255,255,0.55);
+      --stroke: rgba(255,255,255,0.12);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 50% -10%, rgba(255,255,255,0.08), transparent 55%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color: var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding: 18px 14px 28px;
+    }
+    .wrap{
+      width:min(760px, 100%);
+    }
+    h1{
+      margin: 6px 0 6px;
+      text-align:center;
+      font-size: 38px;
+      letter-spacing:-0.5px;
+      line-height:1.05;
+      font-weight: 800;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .sub{
+      text-align:center;
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+    .sub2{
+      text-align:center;
+      color: var(--muted2);
+      font-size: 14px;
+      margin-top: -6px;
+      margin-bottom: 14px;
+    }
+    .hud{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin: 8px 0 14px;
+      flex-wrap: wrap;
+    }
+    .pill{
+      min-width: 220px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.05));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25) inset, 0 8px 24px rgba(0,0,0,0.15);
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      align-items:center;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+    .gameCard{
+      width:100%;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+      padding: 16px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+      position:relative;
+      overflow:hidden;
+    }
+    canvas{
+      width:100%;
+      height:auto;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.08);
+      display:block;
+      touch-action: manipulation;
+    }
 
-<style>
-  :root{
-    --maxw: 420px;
-    --stroke: rgba(255,255,255,0.14);
-    --text: #fff;
-  }
+    /* Win overlay */
+    .overlay{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.65));
+      display:none;
+      align-items:center;
+      justify-content:flex-start;
+      flex-direction:column;
+      padding: 20px 16px;
+      gap: 14px;
+    }
+    .overlay.show{ display:flex; }
 
-  html,body{
-    margin:0;height:100%;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    color:var(--text);
-    background:
-      radial-gradient(900px 520px at 50% 18%, rgba(255,170,120,0.10), transparent 62%),
-      radial-gradient(900px 520px at 50% 82%, rgba(120,160,255,0.12), transparent 62%),
-      linear-gradient(160deg,#071a2a,#060612);
-  }
+    .overlay h2{
+      margin: 10px 0 0;
+      font-size: 22px;
+      text-align:center;
+      font-weight: 800;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    .cta{
+      width: min(520px, 92%);
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.95);
+      font-weight: 800;
+      font-size: 18px;
+      text-align:center;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.35);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cta:active{ transform: translateY(1px); }
 
-  .wrap{
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    padding:16px 14px 14px;
-    box-sizing:border-box;
-  }
-
-  h1{
-    margin:6px 0 6px;
-    font-weight:1000;
-    letter-spacing:-0.5px;
-    font-size:26px;
-    text-align:center;
-  }
-  .sub{
-    margin:0 0 8px;
-    opacity:0.86;
-    text-align:center;
-    font-size:13px;
-    line-height:1.25;
-  }
-  .hint{
-    margin:0 0 10px;
-    opacity:0.75;
-    text-align:center;
-    font-size:12px;
-  }
-
-  .titleBlock.hide{ display:none; }
-
-  .hud{
-    width:min(var(--maxw), 94vw);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin:6px 0 10px;
-    gap:10px;
-  }
-
-  .pill{
-    flex:1;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    padding:8px 12px;
-    border-radius:999px;
-    border:1px solid var(--stroke);
-    background:rgba(0,0,0,0.20);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-    font-weight:1000;
-    font-size:12px;
-    white-space:nowrap;
-  }
-
-  .stageCard{
-    width:min(var(--maxw), 94vw);
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:12px;
-    box-sizing:border-box;
-  }
-
-  .stage{
-    position:relative;
-    width:100%;
-    aspect-ratio: 3 / 4;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-    background:
-      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.22) 100%),
-      linear-gradient(180deg, rgba(255,190,90,0.06), rgba(0,0,0,0.00));
-  }
-
-  canvas{
-    width:100%;
-    height:100%;
-    display:block;
-    image-rendering:pixelated;
-  }
-
-  /* Win scene */
-  .winWrap{
-    width:min(var(--maxw), 94vw);
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    gap:14px;
-    margin-top:10px;
-  }
-  .winWrap.show{ display:flex; }
-
-  .winText{
-    width:min(var(--maxw), 94vw);
-    text-align:center;
-    font-weight:1000;
-    font-size:16px;
-    line-height:1.25;
-  }
-
-  .winStage{
-    width:min(var(--maxw), 94vw);
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:12px;
-    box-sizing:border-box;
-  }
-  .winBox{
-    position:relative;
-    width:100%;
-    aspect-ratio: 3 / 2;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-    background:
-      radial-gradient(120% 120% at 50% 30%, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.22) 100%),
-      linear-gradient(180deg, rgba(255,190,90,0.05), rgba(0,0,0,0.00));
-  }
-
-  .btn{
-    width:min(var(--maxw), 94vw);
-    padding:16px 18px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,0.22);
-    background:rgba(255,255,255,0.10);
-    color:#fff;
-    font-weight:1000;
-    font-size:16px;
-    letter-spacing:0.4px;
-  }
-  .btn:active{ transform:scale(0.98); }
-
-  .gameWrap.hide{ display:none; }
-
-  @media (max-width: 360px){
-    h1{ font-size:24px; }
-    .sub{ font-size:12px; }
-    .pill{ font-size:11px; }
-  }
-</style>
+    /* Small screens */
+    @media (max-width: 420px){
+      h1{ font-size: 34px; }
+      .pill{ min-width: 160px; }
+    }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
-
-  <div class="titleBlock" id="titleBlock">
-    <h1>Welcome to the Stadium Run! 🏟️</h1>
+  <div class="wrap">
+    <h1>Welcome to the Stadium<br/>Run! 🏟️</h1>
     <div class="sub">Tap to jump over barricades. Reach 10 to win.</div>
-    <div class="hint">Tap anywhere inside the game.</div>
-  </div>
+    <div class="sub2">Tap anywhere inside the game.</div>
 
-  <div class="hud gameWrap" id="gameHud">
-    <div class="pill">🏁 Clears: <span id="score">0</span> / 10</div>
-    <div class="pill">💥 Hits: <span id="hits">0</span></div>
-  </div>
-
-  <div class="stageCard gameWrap" id="gameWrap">
-    <div class="stage">
-      <canvas id="game" width="360" height="480" aria-label="Stadium run jump game"></canvas>
+    <div class="hud">
+      <div class="pill">🏁 <span>Clears:</span> <span id="clearsTxt">0 / 10</span></div>
+      <div class="pill">💥 <span>Hits:</span> <span id="hitsTxt">0</span></div>
     </div>
-  </div>
 
-  <!-- WIN SCENE -->
-  <div class="winWrap" id="winWrap">
-    <div class="winText">Now that we’re reaching nightfall, time for some quiet time. 🌃</div>
-    <div class="winStage">
-      <div class="winBox">
-        <canvas id="win" width="360" height="240" aria-label="finish line celebration scene"></canvas>
+    <div class="gameCard">
+      <canvas id="game" width="720" height="560"></canvas>
+
+      <div id="winOverlay" class="overlay">
+        <h2>Now that we’re reaching nightfall, time for some quiet time. 🌃</h2>
+        <div class="cta" id="toRooftopBtn">Ready for my me time</div>
       </div>
     </div>
-    <button class="btn" id="nextBtn">Ready for my me time</button>
   </div>
 
-</div>
+  <script>
+    // =========================
+    // Stadium Run - Full file
+    // =========================
 
-<script>
-/* =========================
-   SETTINGS YOU CAN EDIT
-========================= */
-const MAP_FILE = "./map.html";
-const NEXT_PROMPT_INDEX = 4; // set this to whatever "next" is after Stadium in your map
-const WIN_TARGET = 10;
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-/* =========================
-   GAME CANVAS
-========================= */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+    const clearsTxt = document.getElementById("clearsTxt");
+    const hitsTxt   = document.getElementById("hitsTxt");
+    const winOverlay = document.getElementById("winOverlay");
+    const toRooftopBtn = document.getElementById("toRooftopBtn");
 
-const scoreEl = document.getElementById("score");
-const hitsEl  = document.getElementById("hits");
+    // --- Game constants (tuned for "feel"; gameplay is simple + stable) ---
+    const GOAL_CLEARS = 10;
 
-const gameWrap = document.getElementById("gameWrap");
-const gameHud  = document.getElementById("gameHud");
-const titleBlock = document.getElementById("titleBlock");
+    const world = {
+      gravity: 0.85,
+      groundY: 470,          // avatar feet baseline
+      floorShadowY: 490,
+      speed: 4.2,            // obstacle speed
+      jumpVelocity: -14.2,   // jump strength
+      spawnMin: 900,         // ms
+      spawnMax: 1400         // ms
+    };
 
-const winWrap = document.getElementById("winWrap");
-const nextBtn = document.getElementById("nextBtn");
+    // Player (agy96)
+    const player = {
+      x: 170,
+      y: world.groundY,
+      vy: 0,
+      w: 44,
+      h: 74,
+      isJumping: false,
+      bob: 0
+    };
 
-const W = canvas.width;
-const H = canvas.height;
+    // Obstacles
+    let barriers = [];
+    let lastSpawnAt = 0;
+    let nextSpawnIn = rand(world.spawnMin, world.spawnMax);
 
-let running = true;
-let score = 0;
-let hits = 0;
-let shake = 0;
+    // Score
+    let clears = 0;
+    let hits = 0;
 
-/* =========================
-   GLASSES (single source of truth)
-   --[]-[]-- with bridge + temple arms
-========================= */
-function drawGlasses(g, x, y, lensW, lensH, thick, gap, armLen){
-  g.fillStyle = "#000";
+    // State
+    let running = true;
+    let won = false;
 
-  // left lens
-  g.fillRect(x, y, lensW, thick);
-  g.fillRect(x, y, thick, lensH);
-  g.fillRect(x, y + lensH - thick, lensW, thick);
-  g.fillRect(x + lensW - thick, y, thick, lensH);
+    // Win animation state
+    const winAnim = {
+      active: false,
+      t: 0,
+      hopsDone: 0,
+      clapBursts: [], // {x,y,life}
+      hopSide: 0      // 0 = A, 1 = B
+    };
 
-  // right lens
-  const rx = x + lensW + gap;
-  g.fillRect(rx, y, lensW, thick);
-  g.fillRect(rx, y, thick, lensH);
-  g.fillRect(rx, y + lensH - thick, lensW, thick);
-  g.fillRect(rx + lensW - thick, y, thick, lensH);
+    // Finishing line position for win scene
+    const finishLine = {
+      x: 540,
+      y: world.groundY + 6,
+      w: 8,
+      h: 120
+    };
 
-  // bridge
-  const bridgeW = Math.max(3, Math.floor(gap * 0.7));
-  const bridgeX = x + lensW;
-  const bridgeY = y + Math.floor(lensH/2) - 1;
-  g.fillRect(bridgeX, bridgeY, bridgeW, 2);
-
-  // temple arms
-  g.fillRect(x - armLen, y + 2, armLen, 2);
-  g.fillRect(rx + lensW, y + 2, armLen, 2);
-}
-
-/* =========================
-   agy96 runner (same vibe as Chinatown gameplay)
-========================= */
-function drawAgyRunner(g, x, y){
-  // x,y = feet baseline
-  // hair
-  g.fillStyle="#000";
-  g.fillRect(x-18, y-68, 36, 68);
-  g.fillRect(x-22, y-52, 44, 44);
-
-  // face
-  g.fillStyle="#f1c7a6";
-  g.fillRect(x-12, y-54, 24, 28);
-
-  // glasses
-  const gy = y - 47;
-  drawGlasses(g, x-16, gy, 12, 9, 2, 6, 6);
-
-  // shirt
-  g.fillStyle="#c1272d";
-  g.fillRect(x-16, y-26, 32, 22);
-  // sleeves
-  g.fillRect(x-22, y-26, 6, 8);
-  g.fillRect(x+16, y-26, 6, 8);
-
-  // arms
-  g.fillStyle="#f1c7a6";
-  g.fillRect(x-22, y-18, 6, 12);
-  g.fillRect(x+16, y-18, 6, 12);
-
-  // pants
-  g.fillStyle="#0e0e18";
-  g.fillRect(x-16, y-4, 32, 16);
-
-  // shoes
-  g.fillStyle="#fff";
-  g.fillRect(x-14, y+10, 28, 5);
-}
-
-/* =========================
-   BACKGROUND: track + field + evening sky
-========================= */
-function bg(){
-  ctx.clearRect(0,0,W,H);
-
-  // sky dusk
-  const grd = ctx.createLinearGradient(0,0,0,H);
-  grd.addColorStop(0, "rgba(60,90,130,0.35)");
-  grd.addColorStop(0.45, "rgba(20,30,55,0.35)");
-  grd.addColorStop(1, "rgba(5,8,20,0.45)");
-  ctx.fillStyle = grd;
-  ctx.fillRect(0,0,W,H);
-
-  // distant field
-  ctx.fillStyle="rgba(40,120,80,0.18)";
-  ctx.fillRect(0, H*0.45, W, H*0.22);
-
-  // track
-  ctx.fillStyle="rgba(180,80,80,0.22)";
-  ctx.fillRect(0, H*0.67, W, H*0.33);
-
-  // lane lines
-  ctx.globalAlpha = 0.55;
-  ctx.fillStyle="rgba(255,255,255,0.25)";
-  for(let i=0;i<5;i++){
-    ctx.fillRect(0, H*0.70 + i*26, W, 2);
-  }
-  ctx.globalAlpha = 1;
-
-  // simple stadium lights glow
-  ctx.fillStyle="rgba(255,255,255,0.10)";
-  ctx.fillRect(30, 50, 10, 70);
-  ctx.fillRect(W-40, 50, 10, 70);
-  ctx.beginPath(); ctx.arc(35, 45, 18, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W-35, 45, 18, 0, Math.PI*2); ctx.fill();
-}
-
-/* =========================
-   GAMEPLAY: tap to jump
-========================= */
-const groundY = Math.floor(H*0.86); // runner baseline
-const runner = {
-  x: 80,
-  y: groundY,
-  vy: 0,
-  onGround: true,
-  // forgiving hitbox
-  hbW: 26,
-  hbH: 46
-};
-
-let jumpQueued = false;
-function jump(){
-  // small buffer: if player taps slightly early, queue it
-  jumpQueued = true;
-}
-
-function applyJump(){
-  if(runner.onGround && jumpQueued){
-    runner.vy = -7.8;
-    runner.onGround = false;
-    jumpQueued = false;
-  }
-}
-
-canvas.addEventListener("mousedown", ()=>jump());
-canvas.addEventListener("touchstart", (e)=>{ e.preventDefault(); jump(); }, {passive:false});
-
-/* Barricades */
-const obstacles = [];
-let spawnT = 0;
-
-function spawnObstacle(){
-  const height = 26;
-  obstacles.push({
-    x: W + 30,
-    w: 30,
-    h: height,
-    y: groundY - height,
-    passed: false
-  });
-}
-
-function rectHit(ax,ay,aw,ah, bx,by,bw,bh){
-  return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-}
-
-/* =========================
-   DRAW barricade
-========================= */
-function drawBarricade(o){
-  // base
-  ctx.fillStyle="rgba(255,255,255,0.18)";
-  ctx.fillRect(o.x, o.y+o.h-4, o.w, 4);
-
-  // rails
-  ctx.fillStyle="rgba(255,255,255,0.28)";
-  ctx.fillRect(o.x+2, o.y+6, o.w-4, 4);
-  ctx.fillRect(o.x+2, o.y+14, o.w-4, 4);
-
-  // legs
-  ctx.fillStyle="rgba(255,255,255,0.22)";
-  ctx.fillRect(o.x+4, o.y, 4, o.h);
-  ctx.fillRect(o.x+o.w-8, o.y, 4, o.h);
-
-  // orange stripes
-  ctx.fillStyle="rgba(255,140,80,0.65)";
-  ctx.fillRect(o.x+6, o.y+6, 6, 4);
-  ctx.fillRect(o.x+o.w-12, o.y+14, 6, 4);
-}
-
-/* =========================
-   MAIN LOOP
-========================= */
-function step(){
-  if(!running) return;
-
-  // spawn cadence
-  spawnT++;
-  if(spawnT > 70){
-    spawnT = 0;
-    spawnObstacle();
-  }
-
-  // physics
-  applyJump();
-  runner.vy += 0.42; // gravity
-  runner.y += runner.vy;
-
-  if(runner.y >= groundY){
-    runner.y = groundY;
-    runner.vy = 0;
-    runner.onGround = true;
-  }
-
-  // move obstacles
-  const speed = 2.4 + Math.min(1.2, score * 0.06);
-  for(let i=obstacles.length-1;i>=0;i--){
-    const o = obstacles[i];
-    o.x -= speed;
-
-    // pass -> score
-    if(!o.passed && (o.x + o.w) < runner.x - 10){
-      o.passed = true;
-      score++;
-      scoreEl.textContent = score;
-      if(score >= WIN_TARGET){
-        win();
-        return;
+    // -------------------------
+    // Input
+    // -------------------------
+    function jump(){
+      if (!running || won) return;
+      if (player.y >= world.groundY - 0.5){
+        player.vy = world.jumpVelocity;
+        player.isJumping = true;
       }
     }
 
-    // collision
-    const pBox = { x: runner.x - runner.hbW/2, y: runner.y - runner.hbH, w: runner.hbW, h: runner.hbH };
-    const oBox = { x: o.x, y: o.y, w: o.w, h: o.h };
-    if(rectHit(pBox.x,pBox.y,pBox.w,pBox.h, oBox.x,oBox.y,oBox.w,oBox.h)){
-      // bump + shake
-      hits++;
-      hitsEl.textContent = hits;
-      shake = 10;
-      // reset obstacle so it doesn't multi-hit
-      obstacles.splice(i,1);
-    } else if(o.x < -60){
-      obstacles.splice(i,1);
-    }
-  }
+    canvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      jump();
+    }, {passive:false});
 
-  // draw
-  ctx.save();
-  if(shake>0){
-    shake *= 0.85;
-    ctx.translate((Math.random()*2-1)*shake, (Math.random()*2-1)*shake);
-  }
+    // Prevent page scroll on touch inside canvas
+    canvas.addEventListener("touchstart", (e) => e.preventDefault(), {passive:false});
 
-  bg();
-
-  // shadow
-  ctx.fillStyle="rgba(0,0,0,0.22)";
-  ctx.beginPath();
-  ctx.ellipse(runner.x+6, groundY+10, 34, 10, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // obstacles
-  for(const o of obstacles) drawBarricade(o);
-
-  // runner
-  drawAgyRunner(ctx, runner.x, runner.y);
-
-  ctx.restore();
-  requestAnimationFrame(step);
-}
-requestAnimationFrame(step);
-
-/* =========================
-   WIN FLOW
-========================= */
-function win(){
-  running = false;
-  gameWrap.classList.add("hide");
-  gameHud.classList.add("hide");
-  titleBlock.classList.add("hide");
-  winWrap.classList.add("show");
-  startWinScene();
-}
-
-/* =========================
-   WIN CANVAS: finish tape break + 5 hops + 👏
-========================= */
-const winCanvas = document.getElementById("win");
-const wctx = winCanvas.getContext("2d");
-const WW = winCanvas.width;
-const WH = winCanvas.height;
-
-let t = 0;
-let hopCount = 0;
-let phase = "tape"; // tape -> hops -> done
-let claps = [];
-
-function spawnClap(x,y){
-  claps.push({
-    x, y,
-    vx: (Math.random()*2-1)*0.6,
-    vy: -1.2 - Math.random()*0.8,
-    life: 60 + Math.random()*25,
-    age: 0
-  });
-}
-
-function winBg(){
-  wctx.clearRect(0,0,WW,WH);
-
-  // night gradient
-  const grd = wctx.createLinearGradient(0,0,0,WH);
-  grd.addColorStop(0, "rgba(20,35,70,0.45)");
-  grd.addColorStop(1, "rgba(5,8,20,0.55)");
-  wctx.fillStyle = grd;
-  wctx.fillRect(0,0,WW,WH);
-
-  // track
-  wctx.fillStyle="rgba(180,80,80,0.20)";
-  wctx.fillRect(0, WH*0.62, WW, WH*0.38);
-
-  // finish line base
-  const fx = WW/2 - 80;
-  const fy = WH*0.62 + 20;
-  wctx.fillStyle="rgba(255,255,255,0.16)";
-  wctx.fillRect(fx, fy, 160, 6);
-
-  // checkered
-  for(let i=0;i<16;i++){
-    wctx.fillStyle = i%2 ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.18)";
-    wctx.fillRect(fx + i*10, fy, 10, 6);
-  }
-
-  // field glow
-  wctx.fillStyle="rgba(40,120,80,0.14)";
-  wctx.fillRect(0, WH*0.42, WW, WH*0.20);
-}
-
-function drawTapeBreak(progress){
-  // progress 0..1
-  const cx = WW/2;
-  const y = WH*0.62 + 6;
-
-  // left tape piece
-  wctx.fillStyle="rgba(255,255,255,0.32)";
-  wctx.fillRect(cx-70 - Math.floor(progress*18), y, 60, 6);
-
-  // right tape piece
-  wctx.fillRect(cx+10 + Math.floor(progress*18), y, 60, 6);
-
-  // little “rip” bits
-  wctx.globalAlpha = 0.9;
-  for(let i=0;i<6;i++){
-    const rx = cx + (Math.random()*2-1) * (12 + progress*18);
-    const ry = y - 4 + Math.random()*10;
-    wctx.fillRect(rx, ry, 6, 2);
-  }
-  wctx.globalAlpha = 1;
-}
-
-function drawAgyWin(g, x, y, hopY){
-  // reuse runner look, slightly bigger
-  g.save();
-  g.translate(x, y - hopY);
-
-  // shadow
-  g.fillStyle="rgba(0,0,0,0.22)";
-  g.beginPath(); g.ellipse(0, 54, 30, 9, 0, 0, Math.PI*2); g.fill();
-
-  // body baseline
-  const base = 40;
-
-  // hair
-  g.fillStyle="#000";
-  g.fillRect(-18, base-68, 36, 68);
-  g.fillRect(-22, base-52, 44, 44);
-
-  // face
-  g.fillStyle="#f1c7a6";
-  g.fillRect(-12, base-54, 24, 28);
-
-  // glasses
-  drawGlasses(g, -16, base-47, 12, 9, 2, 6, 6);
-
-  // shirt
-  g.fillStyle="#c1272d";
-  g.fillRect(-16, base-26, 32, 22);
-  g.fillRect(-22, base-26, 6, 8);
-  g.fillRect(16,  base-26, 6, 8);
-
-  // arms (celebrate)
-  g.fillStyle="#f1c7a6";
-  g.fillRect(-26, base-30, 8, 18);
-  g.fillRect(18,  base-30, 8, 18);
-
-  // pants
-  g.fillStyle="#0e0e18";
-  g.fillRect(-16, base-4, 32, 16);
-
-  // shoes
-  g.fillStyle="#fff";
-  g.fillRect(-14, base+10, 28, 5);
-
-  g.restore();
-}
-
-function drawClaps(){
-  wctx.save();
-  wctx.font = "18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  wctx.textAlign = "center";
-
-  for(let i=claps.length-1;i>=0;i--){
-    const p = claps[i];
-    p.age++;
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.03;
-
-    const a = 1 - (p.age / p.life);
-    wctx.globalAlpha = Math.max(0, a);
-    wctx.fillText("👏", p.x, p.y);
-
-    if(p.age >= p.life) claps.splice(i,1);
-  }
-
-  wctx.globalAlpha = 1;
-  wctx.restore();
-}
-
-function winLoop(){
-  t++;
-
-  winBg();
-
-  const A = { x: WW/2 - 30, y: WH*0.62 - 6 };
-  const B = { x: WW/2 + 30, y: WH*0.62 - 6 };
-
-  if(phase === "tape"){
-    const p = Math.min(1, t/40);
-    drawTapeBreak(p);
-
-    // runner crosses during tape
-    const hop = Math.sin(t*0.22) * 6;
-    drawAgyWin(wctx, WW/2, WH*0.62 - 8, Math.max(0, hop));
-
-    if(t % 5 === 0){
-      spawnClap(WW/2 + (Math.random()*2-1)*80, WH*0.45 + Math.random()*40);
+    // -------------------------
+    // Utilities
+    // -------------------------
+    function rand(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    if(p >= 1){
-      phase = "hops";
-      t = 0;
-      hopCount = 0;
-    }
-  }
-  else if(phase === "hops"){
-    // 5 hops, alternate A/B
-    const hop = Math.max(0, Math.sin(t*0.35) * 14);
-    const pos = (hopCount % 2 === 0) ? A : B;
-
-    drawAgyWin(wctx, pos.x, pos.y, hop);
-
-    // spawn more claps
-    if(t % 6 === 0){
-      spawnClap(WW/2 + (Math.random()*2-1)*110, WH*0.40 + Math.random()*60);
+    function clamp(v, a, b){
+      return Math.max(a, Math.min(b, v));
     }
 
-    // count hops at peak-ish
-    if(t % 18 === 0){
-      hopCount++;
-      if(hopCount >= 5){
-        phase = "done";
+    // AABB collision
+    function intersects(a, b){
+      return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
+    }
+
+    // -------------------------
+    // Restart logic (on hit)
+    // -------------------------
+    function restartGame(){
+      // On hit: restart the run
+      clears = 0;
+      hits = 0;
+      updateHUD();
+
+      player.y = world.groundY;
+      player.vy = 0;
+      player.isJumping = false;
+
+      barriers = [];
+      lastSpawnAt = performance.now();
+      nextSpawnIn = rand(world.spawnMin, world.spawnMax);
+
+      // keep visuals + loop running
+    }
+
+    // -------------------------
+    // HUD
+    // -------------------------
+    function updateHUD(){
+      clearsTxt.textContent = `${clears} / ${GOAL_CLEARS}`;
+      hitsTxt.textContent = `${hits}`;
+    }
+    updateHUD();
+
+    // -------------------------
+    // Stadium background (Image 2 vibe) + lights glow
+    // -------------------------
+    function drawStadiumBackground(){
+      // Sky gradient
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, "#0b1c2d");
+      g.addColorStop(1, "#162a3d");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Soft vignette
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Crowd band
+      ctx.fillStyle = "#caa76c";
+      ctx.fillRect(0, 60, canvas.width, 34);
+
+      // Stand shadow band
+      ctx.fillStyle = "#2b3f63";
+      ctx.fillRect(0, 94, canvas.width, 30);
+
+      // Crowd dots
+      for (let i=0;i<48;i++){
+        const x = (i/48) * canvas.width + rand(-6, 6);
+        const y = 68 + rand(-4, 8);
+        ctx.fillStyle = ["#111", "#fff", "#2b2b2b", "#0f0f0f"][i%4];
+        ctx.fillRect(x, y, 10, 10);
+      }
+
+      // Field green bands
+      ctx.fillStyle = "#2fdc2a";
+      ctx.fillRect(0, 124, canvas.width, 54);
+      ctx.fillStyle = "#26c624";
+      ctx.fillRect(0, 178, canvas.width, 26);
+
+      // Track
+      ctx.fillStyle = "#5b2e2e";
+      ctx.fillRect(0, 204, canvas.width, 356);
+
+      // Lane dashed lines
+      ctx.strokeStyle = "rgba(255,255,255,0.42)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([12, 12]);
+      for(let y=250; y<=520; y+=40){
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Big diagonal stripe like ref
+      ctx.fillStyle = "rgba(255,255,255,0.58)";
+      ctx.save();
+      ctx.translate(230, 210);
+      ctx.rotate(-0.28);
+      ctx.fillRect(0, 0, 18, 350);
+      ctx.restore();
+
+      // Stadium lights poles (simple pixel style) + glow
+      drawLightPole(90, 45);
+      drawLightPole(canvas.width/2, 40);
+      drawLightPole(canvas.width-90, 45);
+
+      // Gentle atmospheric haze
+      const haze = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      haze.addColorStop(0, "rgba(255,255,255,0.05)");
+      haze.addColorStop(1, "rgba(255,255,255,0.00)");
+      ctx.fillStyle = haze;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawLightPole(x, yTop){
+      // Pole
+      ctx.fillStyle = "rgba(200,220,255,0.28)";
+      ctx.fillRect(x-4, yTop+10, 8, 70);
+
+      // Light head
+      ctx.fillStyle = "rgba(255,255,255,0.80)";
+      ctx.fillRect(x-14, yTop, 28, 12);
+
+      // Lamps
+      ctx.fillStyle = "#ffd86b";
+      ctx.fillRect(x-12, yTop+2, 8, 8);
+      ctx.fillRect(x-0,  yTop+2, 8, 8);
+
+      // Glow (soft radial)
+      const rg = ctx.createRadialGradient(x, yTop+6, 2, x, yTop+6, 90);
+      rg.addColorStop(0, "rgba(255,226,140,0.32)");
+      rg.addColorStop(1, "rgba(255,226,140,0.0)");
+      ctx.fillStyle = rg;
+      ctx.beginPath();
+      ctx.arc(x, yTop+6, 90, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // -------------------------
+    // Obstacles (barricades)
+    // -------------------------
+    function spawnBarrier(){
+      const b = {
+        x: canvas.width + 30,
+        y: world.groundY + 4,
+        w: 42,
+        h: 26,
+        passed: false
+      };
+      barriers.push(b);
+    }
+
+    function drawBarrier(b){
+      // Pixel barricade (simple)
+      ctx.save();
+      ctx.translate(b.x, b.y);
+
+      // base shadow
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(2, 14, b.w-4, 10);
+
+      // legs
+      ctx.fillStyle = "#6d6f77";
+      ctx.fillRect(4, 6, 6, 18);
+      ctx.fillRect(b.w-10, 6, 6, 18);
+
+      // top rail
+      ctx.fillStyle = "#9aa0ab";
+      ctx.fillRect(0, 0, b.w, 8);
+
+      // stripes
+      for(let i=0;i<4;i++){
+        ctx.fillStyle = (i%2===0) ? "#d24a4a" : "#f2f2f2";
+        ctx.fillRect(6 + i*9, 2, 7, 4);
+      }
+
+      ctx.restore();
+    }
+
+    // -------------------------
+    // Avatar (agy96) - stable, clean hair block + clean glasses + label
+    // -------------------------
+    function drawPlayer(){
+      ctx.save();
+      ctx.translate(player.x, player.y);
+
+      // floor shadow
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      ctx.beginPath();
+      ctx.ellipse(0, 26, 30, 10, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      // Name label (moves with player)
+      drawNameLabel(ctx);
+
+      // Body stack
+      drawHair(ctx);
+      drawFace(ctx);
+      drawGlasses(ctx);
+      drawBody(ctx);
+      drawLegs(ctx);
+      drawArms(ctx);
+
+      ctx.restore();
+    }
+
+    function drawNameLabel(c){
+      c.fillStyle = "#ffffff";
+      c.font = "bold 12px sans-serif";
+      c.textAlign = "center";
+      c.fillText("agy96", 0, -58);
+    }
+
+    function drawHair(c){
+      c.fillStyle = "#0a0a0a";
+      // Main hair block
+      c.fillRect(-18, -52, 36, 34);
+      // Slight bottom extension
+      c.fillRect(-18, -18, 36, 7);
+    }
+
+    function drawFace(c){
+      // Face
+      c.fillStyle = "#f1c9a8";
+      c.fillRect(-14, -40, 28, 22);
+    }
+
+    function drawGlasses(c){
+      c.strokeStyle = "#000";
+      c.lineWidth = 2;
+
+      // Left lens
+      c.strokeRect(-12, -36, 10, 8);
+      // Right lens
+      c.strokeRect(2, -36, 10, 8);
+
+      // Bridge
+      c.beginPath();
+      c.moveTo(-2, -32);
+      c.lineTo(2, -32);
+      c.stroke();
+    }
+
+    function drawBody(c){
+      // Torso shirt
+      c.fillStyle = "#c43737";
+      c.fillRect(-16, -18, 32, 24);
+
+      // Pants
+      c.fillStyle = "#1f2530";
+      c.fillRect(-16, 6, 32, 18);
+    }
+
+    function drawLegs(c){
+      // Shoes / feet block
+      c.fillStyle = "#ffffff";
+      c.fillRect(-16, 24, 32, 8);
+    }
+
+    function drawArms(c){
+      // Simple arms at sides (consistent)
+      c.fillStyle = "#f1c9a8";
+      c.fillRect(-20, -14, 4, 18);
+      c.fillRect(16, -14, 4, 18);
+    }
+
+    // -------------------------
+    // Win animation (finish line + hop 5x + claps)
+    // -------------------------
+    function triggerWin(){
+      won = true;
+      running = false;
+
+      winAnim.active = true;
+      winAnim.t = 0;
+      winAnim.hopsDone = 0;
+      winAnim.clapBursts = [];
+      winAnim.hopSide = 0;
+
+      // Clear barriers so the scene is clean
+      barriers = [];
+
+      // Move player near finish line area
+      player.x = 300;
+      player.y = world.groundY;
+      player.vy = 0;
+      player.isJumping = false;
+
+      // Show overlay text + button (like your Image 3)
+      winOverlay.classList.add("show");
+    }
+
+    function drawWinScene(dt){
+      // same stadium background but darker, and a finish line + claps
+      drawStadiumBackground();
+
+      // Darken a touch
+      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Finish line
+      drawFinishLine();
+
+      // Hop logic: 5 hops total
+      if (winAnim.active){
+        winAnim.t += dt;
+
+        // Every ~380ms do a hop (and spawn claps)
+        if (winAnim.t > 380){
+          winAnim.t = 0;
+          winAnim.hopsDone++;
+
+          // alternate between A and B positions
+          winAnim.hopSide = 1 - winAnim.hopSide;
+          player.x = (winAnim.hopSide === 0) ? 300 : 420;
+
+          // hop impulse (small)
+          player.vy = -11.8;
+          player.isJumping = true;
+
+          // spawn clap burst
+          spawnClaps();
+
+          if (winAnim.hopsDone >= 5){
+            winAnim.active = false;
+            // settle
+            player.vy = 0;
+            player.y = world.groundY;
+            player.isJumping = false;
+          }
+        }
+      }
+
+      // Update vertical physics (so hops actually animate)
+      applyPhysics();
+
+      // Draw claps
+      drawClaps(dt);
+
+      // Draw player on top
+      drawPlayer();
+    }
+
+    function drawFinishLine(){
+      // pole
+      ctx.fillStyle = "rgba(255,255,255,0.70)";
+      ctx.fillRect(finishLine.x, 220, finishLine.w, finishLine.h);
+
+      // checkered tape
+      const tapeY = world.groundY - 10;
+      for (let i=0;i<12;i++){
+        ctx.fillStyle = (i%2===0) ? "rgba(255,255,255,0.90)" : "rgba(0,0,0,0.50)";
+        ctx.fillRect(finishLine.x - 90 + i*15, tapeY, 15, 10);
       }
     }
-  }
-  else {
-    // final pose + lingering claps
-    drawAgyWin(wctx, WW/2, WH*0.62 - 8, 0);
-    if(t % 10 === 0 && t < 120){
-      spawnClap(WW/2 + (Math.random()*2-1)*120, WH*0.40 + Math.random()*70);
+
+    function spawnClaps(){
+      // scatter a few claps above player
+      for (let i=0;i<8;i++){
+        winAnim.clapBursts.push({
+          x: player.x + rand(-80, 80),
+          y: player.y - 180 + rand(-20, 60),
+          life: 700
+        });
+      }
     }
-  }
 
-  drawClaps();
+    function drawClaps(dt){
+      for (const p of winAnim.clapBursts){
+        p.life -= dt;
+        p.y -= 0.04 * dt; // float up slightly
+      }
+      winAnim.clapBursts = winAnim.clapBursts.filter(p => p.life > 0);
 
-  if(winWrap.classList.contains("show")){
-    requestAnimationFrame(winLoop);
-  }
-}
+      ctx.save();
+      ctx.font = "22px sans-serif";
+      ctx.textAlign = "center";
+      for (const p of winAnim.clapBursts){
+        const a = clamp(p.life / 700, 0, 1);
+        ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.65*a})`;
+        ctx.fillText("👏", p.x, p.y);
+      }
+      ctx.restore();
+    }
 
-function startWinScene(){
-  t = 0;
-  hopCount = 0;
-  phase = "tape";
-  claps = [];
-  winLoop();
-}
+    // -------------------------
+    // Core loop
+    // -------------------------
+    let last = performance.now();
 
-/* =========================
-   NEXT BUTTON: back to map
-========================= */
-nextBtn.addEventListener("click", ()=>{
-  localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
-  location.href = MAP_FILE;
-});
-</script>
+    function loop(now){
+      const dt = now - last;
+      last = now;
+
+      // Main render
+      if (!won){
+        update(dt);
+        render();
+      } else {
+        // winning scene only (no gameplay changes)
+        drawWinScene(dt);
+      }
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    function update(dt){
+      if (!running) return;
+
+      // Physics
+      applyPhysics();
+
+      // Spawn barriers
+      if (nowSince(lastSpawnAt) > nextSpawnIn){
+        spawnBarrier();
+        lastSpawnAt = performance.now();
+        nextSpawnIn = rand(world.spawnMin, world.spawnMax);
+      }
+
+      // Move barriers
+      for (const b of barriers){
+        b.x -= world.speed;
+      }
+
+      // Remove offscreen + count clears
+      barriers = barriers.filter(b => {
+        if (!b.passed && b.x + b.w < player.x - 10){
+          b.passed = true;
+          clears++;
+          updateHUD();
+          if (clears >= GOAL_CLEARS){
+            triggerWin();
+          }
+        }
+        return b.x + b.w > -60;
+      });
+
+      // Collision (hit -> restart)
+      const playerBox = {
+        x: player.x - (player.w/2) + 6,
+        y: player.y - player.h + 8,
+        w: player.w - 12,
+        h: player.h - 8
+      };
+
+      for (const b of barriers){
+        const barrierBox = {
+          x: b.x + 4,
+          y: b.y - b.h + 8,
+          w: b.w - 8,
+          h: b.h - 8
+        };
+        if (intersects(playerBox, barrierBox)){
+          hits++;
+          updateHUD();
+          restartGame();
+          break;
+        }
+      }
+    }
+
+    function applyPhysics(){
+      player.vy += world.gravity;
+      player.y += player.vy;
+
+      if (player.y >= world.groundY){
+        player.y = world.groundY;
+        player.vy = 0;
+        player.isJumping = false;
+      }
+    }
+
+    function render(){
+      // Background (Image 2 vibe + glow)
+      drawStadiumBackground();
+
+      // Barriers
+      for (const b of barriers){
+        drawBarrier(b);
+      }
+
+      // Player
+      drawPlayer();
+    }
+
+    function nowSince(t){
+      return performance.now() - t;
+    }
+
+    // -------------------------
+    // Button: go to rooftop scene
+    // -------------------------
+    toRooftopBtn.addEventListener("click", () => {
+      window.location.href = "rooftop.html";
+    });
+
+  </script>
 </body>
 </html>
