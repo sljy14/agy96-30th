@@ -8,8 +8,6 @@
     :root{
       --bg1:#0b1c2d;
       --bg2:#162a3d;
-      --card: rgba(255,255,255,0.06);
-      --card2: rgba(255,255,255,0.10);
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.70);
       --muted2: rgba(255,255,255,0.55);
@@ -27,9 +25,8 @@
       justify-content:center;
       padding: 18px 14px 28px;
     }
-    .wrap{
-      width:min(760px, 100%);
-    }
+    .wrap{ width:min(760px, 100%); }
+
     h1{
       margin: 6px 0 6px;
       text-align:center;
@@ -106,7 +103,6 @@
       gap: 14px;
     }
     .overlay.show{ display:flex; }
-
     .overlay h2{
       margin: 10px 0 0;
       font-size: 22px;
@@ -132,7 +128,6 @@
     }
     .cta:active{ transform: translateY(1px); }
 
-    /* Small screens */
     @media (max-width: 420px){
       h1{ font-size: 34px; }
       .pill{ min-width: 160px; }
@@ -162,7 +157,7 @@
 
   <script>
     // =========================
-    // Stadium Run - Full file
+    // Stadium Run (clean rebuild)
     // =========================
 
     const canvas = document.getElementById("game");
@@ -173,53 +168,44 @@
     const winOverlay = document.getElementById("winOverlay");
     const toRooftopBtn = document.getElementById("toRooftopBtn");
 
-    // --- Game constants (tuned for "feel"; gameplay is simple + stable) ---
     const GOAL_CLEARS = 10;
 
     const world = {
       gravity: 0.85,
-      groundY: 470,          // avatar feet baseline
-      floorShadowY: 490,
-      speed: 4.2,            // obstacle speed
-      jumpVelocity: -14.2,   // jump strength
-      spawnMin: 900,         // ms
-      spawnMax: 1400         // ms
+      groundY: 470,
+      speed: 4.2,
+      jumpVelocity: -14.2,
+      spawnMin: 900,
+      spawnMax: 1400
     };
 
-    // Player (agy96)
     const player = {
       x: 170,
       y: world.groundY,
       vy: 0,
       w: 44,
       h: 74,
-      isJumping: false,
-      bob: 0
+      isJumping: false
     };
 
-    // Obstacles
     let barriers = [];
-    let lastSpawnAt = 0;
+    let lastSpawnAt = performance.now();
     let nextSpawnIn = rand(world.spawnMin, world.spawnMax);
 
-    // Score
     let clears = 0;
     let hits = 0;
 
-    // State
     let running = true;
     let won = false;
 
-    // Win animation state
     const winAnim = {
       active: false,
       t: 0,
       hopsDone: 0,
-      clapBursts: [], // {x,y,life}
-      hopSide: 0      // 0 = A, 1 = B
+      clapBursts: [],
+      hopSide: 0
     };
 
-    // Finishing line position for win scene
     const finishLine = {
       x: 540,
       y: world.groundY + 6,
@@ -228,27 +214,22 @@
     };
 
     // ---------- Crowd (prebuilt, slow animate) ----------
-const crowd = buildCrowd(54); // number of people across
+    const crowd = buildCrowd(54);
 
-function buildCrowd(n){
-  const people = [];
-  for (let i=0;i<n;i++){
-    people.push({
-      // position along stands
-      x: (i/(n-1)) * (canvas.width - 40) + 20,
-      // simple style variety
-      shirt: ["#2f6fff","#c43737","#ffd400","#ffffff","#111111","#7a4cff"][i % 6],
-      skin:  ["#f1c9a8","#eab48f","#d79a73"][i % 3],
-      hair:  ["#111111","#222222","#0a0a0a"][i % 3],
-      // unique slow phase so they don't sync
-      phase: (i * 0.45) % (Math.PI * 2),
-      // some are "cheerers"
-      cheer: (i % 5 === 0)
-    });
-  }
-  return people;
-}
-
+    function buildCrowd(n){
+      const people = [];
+      for (let i=0;i<n;i++){
+        people.push({
+          x: (i/(n-1)) * (canvas.width - 40) + 20,
+          shirt: ["#2f6fff","#c43737","#ffd400","#ffffff","#111111","#7a4cff"][i % 6],
+          skin:  ["#f1c9a8","#eab48f","#d79a73"][i % 3],
+          hair:  ["#111111","#222222","#0a0a0a"][i % 3],
+          phase: (i * 0.45) % (Math.PI * 2),
+          cheer: (i % 5 === 0)
+        });
+      }
+      return people;
+    }
 
     // -------------------------
     // Input
@@ -260,13 +241,10 @@ function buildCrowd(n){
         player.isJumping = true;
       }
     }
-
     canvas.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       jump();
     }, {passive:false});
-
-    // Prevent page scroll on touch inside canvas
     canvas.addEventListener("touchstart", (e) => e.preventDefault(), {passive:false});
 
     // -------------------------
@@ -275,34 +253,14 @@ function buildCrowd(n){
     function rand(min, max){
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-
     function clamp(v, a, b){
       return Math.max(a, Math.min(b, v));
     }
-
-    // AABB collision
     function intersects(a, b){
       return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
     }
-
-    // -------------------------
-    // Restart logic (on hit)
-    // -------------------------
-    function restartGame(){
-      // On hit: restart the run
-      clears = 0;
-      hits = 0;
-      updateHUD();
-
-      player.y = world.groundY;
-      player.vy = 0;
-      player.isJumping = false;
-
-      barriers = [];
-      lastSpawnAt = performance.now();
-      nextSpawnIn = rand(world.spawnMin, world.spawnMax);
-
-      // keep visuals + loop running
+    function nowSince(t){
+      return performance.now() - t;
     }
 
     // -------------------------
@@ -315,9 +273,47 @@ function buildCrowd(n){
     updateHUD();
 
     // -------------------------
-    // Stadium background (Image 2 vibe) + lights glow
+    // Restart logic (on hit)
+    // -------------------------
+    function restartGame(){
+      clears = 0;
+      hits = 0;
+      updateHUD();
+
+      player.x = 170;
+      player.y = world.groundY;
+      player.vy = 0;
+      player.isJumping = false;
+
+      barriers = [];
+      lastSpawnAt = performance.now();
+      nextSpawnIn = rand(world.spawnMin, world.spawnMax);
+
+      running = true;
+      won = false;
+      winOverlay.classList.remove("show");
+    }
+
+    // -------------------------
+    // Backgrounds
     // -------------------------
     function drawStadiumBackground(){
+      drawBaseStadium();
+      // Big diagonal stripe (gameplay only)
+      ctx.fillStyle = "rgba(255,255,255,0.58)";
+      ctx.save();
+      ctx.translate(230, 210);
+      ctx.rotate(-0.28);
+      ctx.fillRect(0, 0, 18, 350);
+      ctx.restore();
+    }
+
+    function drawWinBackground(){
+      // Same stadium, but WITHOUT diagonal stripe / random pole
+      drawBaseStadium();
+    }
+
+    function drawBaseStadium(){
       // Sky gradient
       const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
       g.addColorStop(0, "#0b1c2d");
@@ -337,10 +333,7 @@ function buildCrowd(n){
       ctx.fillStyle = "#2b3f63";
       ctx.fillRect(0, 94, canvas.width, 30);
 
-      
-drawCrowd(performance.now());
-
-      
+      drawCrowd(performance.now());
 
       // Field green bands
       ctx.fillStyle = "#2fdc2a";
@@ -350,7 +343,7 @@ drawCrowd(performance.now());
 
       // Track
       ctx.fillStyle = "#5b2e2e";
-      ctx.fillRect(0, 204, canvas.width, 356);
+      ctx.fillRect(0, 204, canvas.width, canvas.height - 204);
 
       // Lane dashed lines
       ctx.strokeStyle = "rgba(255,255,255,0.42)";
@@ -364,48 +357,7 @@ drawCrowd(performance.now());
       }
       ctx.setLineDash([]);
 
-
-  drawCrowd(performance.now());
-
-  // Field
-  ctx.fillStyle = "#2fdc2a";
-  ctx.fillRect(0, 124, canvas.width, 54);
-
-  ctx.fillStyle = "#26c624";
-  ctx.fillRect(0, 178, canvas.width, 26);
-
-  // Track
-  ctx.fillStyle = "#5b2e2e";
-  ctx.fillRect(0, 204, canvas.width, 356);
-
-  // Track dashed lanes only (no diagonal stripe)
-  ctx.strokeStyle = "rgba(255,255,255,0.42)";
-  ctx.lineWidth = 2;
-  ctx.setLineDash([12, 12]);
-  for(let y=250; y<=520; y+=40){
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(canvas.width, y);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
-
-  // Lights (keep glow)
-  drawLightPole(90, 45);
-  drawLightPole(canvas.width/2, 40);
-  drawLightPole(canvas.width-90, 45);
-}
-
-
-      // Big diagonal stripe like ref
-      ctx.fillStyle = "rgba(255,255,255,0.58)";
-      ctx.save();
-      ctx.translate(230, 210);
-      ctx.rotate(-0.28);
-      ctx.fillRect(0, 0, 18, 350);
-      ctx.restore();
-
-      // Stadium lights poles (simple pixel style) + glow
+      // Stadium lights poles + glow
       drawLightPole(90, 45);
       drawLightPole(canvas.width/2, 40);
       drawLightPole(canvas.width-90, 45);
@@ -432,7 +384,7 @@ drawCrowd(performance.now());
       ctx.fillRect(x-12, yTop+2, 8, 8);
       ctx.fillRect(x-0,  yTop+2, 8, 8);
 
-      // Glow (soft radial)
+      // Glow
       const rg = ctx.createRadialGradient(x, yTop+6, 2, x, yTop+6, 90);
       rg.addColorStop(0, "rgba(255,226,140,0.32)");
       rg.addColorStop(1, "rgba(255,226,140,0.0)");
@@ -443,63 +395,57 @@ drawCrowd(performance.now());
     }
 
     function drawCrowd(t){
-  // Slow “cheer” cycle: changes every ~3 seconds
-  const beat = Math.sin(t/3000);
+      const beat = Math.sin(t/3000);
 
-  for (const p of crowd){
-    const baseY = 72; // sits within the tan band
-    const wobble = Math.sin(t/1800 + p.phase) * 1.2; // slow
-    const y = baseY + wobble;
+      for (const p of crowd){
+        const baseY = 72;
+        const wobble = Math.sin(t/1800 + p.phase) * 1.2;
+        const y = baseY + wobble;
 
-    // head
-    ctx.fillStyle = p.skin;
-    ctx.fillRect(p.x - 3, y - 6, 6, 6);
+        // head
+        ctx.fillStyle = p.skin;
+        ctx.fillRect(p.x - 3, y - 6, 6, 6);
 
-    // hair cap
-    ctx.fillStyle = p.hair;
-    ctx.fillRect(p.x - 3, y - 6, 6, 2);
+        // hair cap
+        ctx.fillStyle = p.hair;
+        ctx.fillRect(p.x - 3, y - 6, 6, 2);
 
-    // body (shirt)
-    ctx.fillStyle = p.shirt;
-    ctx.fillRect(p.x - 4, y, 8, 7);
+        // body (shirt)
+        ctx.fillStyle = p.shirt;
+        ctx.fillRect(p.x - 4, y, 8, 7);
 
-    // legs (tiny)
-    ctx.fillStyle = "#111";
-    ctx.fillRect(p.x - 3, y + 7, 2, 3);
-    ctx.fillRect(p.x + 1, y + 7, 2, 3);
+        // legs
+        ctx.fillStyle = "#111";
+        ctx.fillRect(p.x - 3, y + 7, 2, 3);
+        ctx.fillRect(p.x + 1, y + 7, 2, 3);
 
-    // arms: only some cheer, and only on beat peaks -> looks like waves
-    const cheeringNow = p.cheer && beat > 0.55;
-    ctx.fillStyle = p.skin;
-    if (cheeringNow){
-      // arms up
-      ctx.fillRect(p.x - 6, y - 1, 2, 6);
-      ctx.fillRect(p.x + 4, y - 1, 2, 6);
-    } else {
-      // arms down
-      ctx.fillRect(p.x - 6, y + 1, 2, 6);
-      ctx.fillRect(p.x + 4, y + 1, 2, 6);
+        // arms (slow cheer)
+        const cheeringNow = p.cheer && beat > 0.55;
+        ctx.fillStyle = p.skin;
+        if (cheeringNow){
+          ctx.fillRect(p.x - 6, y - 1, 2, 6);
+          ctx.fillRect(p.x + 4, y - 1, 2, 6);
+        } else {
+          ctx.fillRect(p.x - 6, y + 1, 2, 6);
+          ctx.fillRect(p.x + 4, y + 1, 2, 6);
+        }
+      }
     }
-  }
-}
-
 
     // -------------------------
-    // Obstacles (barricades)
+    // Obstacles
     // -------------------------
     function spawnBarrier(){
-      const b = {
+      barriers.push({
         x: canvas.width + 30,
         y: world.groundY + 4,
         w: 42,
         h: 26,
         passed: false
-      };
-      barriers.push(b);
+      });
     }
 
     function drawBarrier(b){
-      // Pixel barricade (simple)
       ctx.save();
       ctx.translate(b.x, b.y);
 
@@ -526,7 +472,7 @@ drawCrowd(performance.now());
     }
 
     // -------------------------
-    // Avatar (agy96) - stable, clean hair block + clean glasses + label
+    // Avatar (agy96)
     // -------------------------
     function drawPlayer(){
       ctx.save();
@@ -538,10 +484,9 @@ drawCrowd(performance.now());
       ctx.ellipse(0, 26, 30, 10, 0, 0, Math.PI*2);
       ctx.fill();
 
-      // Name label (moves with player)
+      // Name label (always above head)
       drawNameLabel(ctx);
 
-      // Body stack
       drawHair(ctx);
       drawFace(ctx);
       drawGlasses(ctx);
@@ -560,21 +505,17 @@ drawCrowd(performance.now());
     }
 
     function drawHair(c){
-  c.fillStyle = "#0a0a0a";
-
-  // Wider main block (+2px each side)
-  c.fillRect(-20, -52, 40, 34);
-
-  // Side thickness columns (makes silhouette less skinny)
-  c.fillRect(-22, -48, 4, 30);
-  c.fillRect(18,  -48, 4, 30);
-
-  // Slight bottom extension
-  c.fillRect(-20, -18, 40, 7);
-}
+      c.fillStyle = "#0a0a0a";
+      // main block
+      c.fillRect(-20, -52, 40, 34);
+      // thicker sides
+      c.fillRect(-22, -48, 4, 30);
+      c.fillRect(18,  -48, 4, 30);
+      // bottom extension
+      c.fillRect(-20, -18, 40, 7);
+    }
 
     function drawFace(c){
-      // Face
       c.fillStyle = "#f1c9a8";
       c.fillRect(-14, -40, 28, 22);
     }
@@ -582,13 +523,8 @@ drawCrowd(performance.now());
     function drawGlasses(c){
       c.strokeStyle = "#000";
       c.lineWidth = 2;
-
-      // Left lens
       c.strokeRect(-12, -36, 10, 8);
-      // Right lens
       c.strokeRect(2, -36, 10, 8);
-
-      // Bridge
       c.beginPath();
       c.moveTo(-2, -32);
       c.lineTo(2, -32);
@@ -596,30 +532,25 @@ drawCrowd(performance.now());
     }
 
     function drawBody(c){
-      // Torso shirt
       c.fillStyle = "#c43737";
       c.fillRect(-16, -18, 32, 24);
-
-      // Pants
       c.fillStyle = "#1f2530";
       c.fillRect(-16, 6, 32, 18);
     }
 
     function drawLegs(c){
-      // Shoes / feet block
       c.fillStyle = "#ffffff";
       c.fillRect(-16, 24, 32, 8);
     }
 
     function drawArms(c){
-      // Simple arms at sides (consistent)
       c.fillStyle = "#f1c9a8";
       c.fillRect(-20, -14, 4, 18);
       c.fillRect(16, -14, 4, 18);
     }
 
     // -------------------------
-    // Win animation (finish line + hop 5x + claps)
+    // Win animation
     // -------------------------
     function triggerWin(){
       won = true;
@@ -631,58 +562,45 @@ drawCrowd(performance.now());
       winAnim.clapBursts = [];
       winAnim.hopSide = 0;
 
-      // Clear barriers so the scene is clean
       barriers = [];
 
-      // Move player near finish line area
       player.x = 300;
       player.y = world.groundY;
       player.vy = 0;
       player.isJumping = false;
 
-      // Show overlay text + button (like your Image 3)
+      // Overlay appears after 5s
       winOverlay.classList.remove("show");
-setTimeout(() => {
-  winOverlay.classList.add("show");
-}, 5000);
-
+      setTimeout(() => winOverlay.classList.add("show"), 5000);
     }
 
     function drawWinScene(dt){
-      // same stadium background but darker, and a finish line + claps
       drawWinBackground();
 
-
-      // Darken a touch
+      // Slight darken
       ctx.fillStyle = "rgba(0,0,0,0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Finish line
+      // Finish line pole only (no tape)
       drawFinishLine();
 
-      // Hop logic: 5 hops total
+      // hop 5x
       if (winAnim.active){
         winAnim.t += dt;
-
-        // Every ~380ms do a hop (and spawn claps)
         if (winAnim.t > 380){
           winAnim.t = 0;
           winAnim.hopsDone++;
 
-          // alternate between A and B positions
           winAnim.hopSide = 1 - winAnim.hopSide;
           player.x = (winAnim.hopSide === 0) ? 300 : 420;
 
-          // hop impulse (small)
           player.vy = -11.8;
           player.isJumping = true;
 
-          // spawn clap burst
           spawnClaps();
 
           if (winAnim.hopsDone >= 5){
             winAnim.active = false;
-            // settle
             player.vy = 0;
             player.y = world.groundY;
             player.isJumping = false;
@@ -690,25 +608,17 @@ setTimeout(() => {
         }
       }
 
-      // Update vertical physics (so hops actually animate)
       applyPhysics();
-
-      // Draw claps
       drawClaps(dt);
-
-      // Draw player on top
       drawPlayer();
     }
 
     function drawFinishLine(){
-      // pole
       ctx.fillStyle = "rgba(255,255,255,0.70)";
       ctx.fillRect(finishLine.x, 220, finishLine.w, finishLine.h);
-
     }
 
     function spawnClaps(){
-      // scatter a few claps above player
       for (let i=0;i<8;i++){
         winAnim.clapBursts.push({
           x: player.x + rand(-80, 80),
@@ -721,7 +631,7 @@ setTimeout(() => {
     function drawClaps(dt){
       for (const p of winAnim.clapBursts){
         p.life -= dt;
-        p.y -= 0.04 * dt; // float up slightly
+        p.y -= 0.04 * dt;
       }
       winAnim.clapBursts = winAnim.clapBursts.filter(p => p.life > 0);
 
@@ -737,7 +647,7 @@ setTimeout(() => {
     }
 
     // -------------------------
-    // Core loop
+    // Game loop
     // -------------------------
     let last = performance.now();
 
@@ -745,12 +655,10 @@ setTimeout(() => {
       const dt = now - last;
       last = now;
 
-      // Main render
       if (!won){
         update(dt);
         render();
       } else {
-        // winning scene only (no gameplay changes)
         drawWinScene(dt);
       }
 
@@ -761,20 +669,15 @@ setTimeout(() => {
     function update(dt){
       if (!running) return;
 
-      // Physics
       applyPhysics();
 
-      // Spawn barriers
       if (nowSince(lastSpawnAt) > nextSpawnIn){
         spawnBarrier();
         lastSpawnAt = performance.now();
         nextSpawnIn = rand(world.spawnMin, world.spawnMax);
       }
 
-      // Move barriers
-      for (const b of barriers){
-        b.x -= world.speed;
-      }
+      for (const b of barriers) b.x -= world.speed;
 
       // Remove offscreen + count clears
       barriers = barriers.filter(b => {
@@ -782,14 +685,12 @@ setTimeout(() => {
           b.passed = true;
           clears++;
           updateHUD();
-          if (clears >= GOAL_CLEARS){
-            triggerWin();
-          }
+          if (clears >= GOAL_CLEARS) triggerWin();
         }
         return b.x + b.w > -60;
       });
 
-      // Collision (hit -> restart)
+      // Collision => restart run
       const playerBox = {
         x: player.x - (player.w/2) + 6,
         y: player.y - player.h + 8,
@@ -807,7 +708,7 @@ setTimeout(() => {
         if (intersects(playerBox, barrierBox)){
           hits++;
           updateHUD();
-          restartGame();
+          restartGame(); // resets clears/hits + barriers
           break;
         }
       }
@@ -825,79 +726,9 @@ setTimeout(() => {
     }
 
     function render(){
-      // Background (Image 2 vibe + glow)
       drawStadiumBackground();
-
-      // Barriers
-      for (const b of barriers){
-        drawBarrier(b);
-      }
-
-      // Player
+      for (const b of barriers) drawBarrier(b);
       drawPlayer();
-    }
-
-    function drawWinBackground(){
-  // Same sky
-  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  g.addColorStop(0, "#0b1c2d");
-  g.addColorStop(1, "#162a3d");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Soft vignette
-  ctx.fillStyle = "rgba(0,0,0,0.18)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Crowd band
-  ctx.fillStyle = "#caa76c";
-  ctx.fillRect(0, 60, canvas.width, 34);
-
-  // Stand shadow band
-  ctx.fillStyle = "#2b3f63";
-  ctx.fillRect(0, 94, canvas.width, 30);
-
-  drawCrowd(performance.now());
-
-  // Field
-  ctx.fillStyle = "#2fdc2a";
-  ctx.fillRect(0, 124, canvas.width, 54);
-
-  ctx.fillStyle = "#26c624";
-  ctx.fillRect(0, 178, canvas.width, 26);
-
-  // Track
-  ctx.fillStyle = "#5b2e2e";
-  ctx.fillRect(0, 204, canvas.width, 356);
-
-  // Lane dashed lines (keep), but NO diagonal stripe, NO random pole
-  ctx.strokeStyle = "rgba(255,255,255,0.42)";
-  ctx.lineWidth = 2;
-  ctx.setLineDash([12, 12]);
-  for(let y=250; y<=520; y+=40){
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(canvas.width, y);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
-
-  // Lights + glow
-  drawLightPole(90, 45);
-  drawLightPole(canvas.width/2, 40);
-  drawLightPole(canvas.width-90, 45);
-
-  // Gentle atmospheric haze
-  const haze = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  haze.addColorStop(0, "rgba(255,255,255,0.05)");
-  haze.addColorStop(1, "rgba(255,255,255,0.00)");
-  ctx.fillStyle = haze;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-
-    function nowSince(t){
-      return performance.now() - t;
     }
 
     // -------------------------
@@ -906,7 +737,6 @@ setTimeout(() => {
     toRooftopBtn.addEventListener("click", () => {
       window.location.href = "rooftop.html";
     });
-
   </script>
 </body>
 </html>
