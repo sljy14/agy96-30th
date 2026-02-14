@@ -8,8 +8,6 @@
     :root{
       --bg1:#081525;
       --bg2:#0f2742;
-      --card: rgba(255,255,255,0.06);
-      --stroke: rgba(255,255,255,0.12);
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.70);
       --muted2: rgba(255,255,255,0.55);
@@ -42,7 +40,6 @@
       font-size: 14px;
       margin-bottom: 12px;
     }
-
     .card{
       width:100%;
       border-radius: 22px;
@@ -61,7 +58,6 @@
       background: rgba(0,0,0,0.10);
       display:block;
     }
-
     .panel{
       margin-top: 12px;
       border-radius: 16px;
@@ -69,7 +65,6 @@
       background: rgba(0,0,0,0.18);
       padding: 12px;
     }
-
     .typed{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       color: rgba(255,255,255,0.92);
@@ -78,14 +73,7 @@
       white-space: pre-wrap;
       min-height: 160px;
     }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
-
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
     .btn{
       flex: 1 1 180px;
       padding: 14px 14px;
@@ -102,19 +90,9 @@
       box-shadow: 0 18px 48px rgba(0,0,0,0.25);
     }
     .btn:active{ transform: translateY(1px); }
-    .btn.disabled{
-      opacity: 0.45;
-      pointer-events:none;
-    }
+    .btn.disabled{ opacity: 0.45; pointer-events:none; }
+    .smallHint{ margin-top: 8px; color: var(--muted2); font-size: 12px; text-align:center; }
 
-    .smallHint{
-      margin-top: 8px;
-      color: var(--muted2);
-      font-size: 12px;
-      text-align:center;
-    }
-
-    /* Mini-surprise popup */
     .popup{
       position:absolute;
       left: 50%;
@@ -131,23 +109,18 @@
       justify-content:space-between;
       gap: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+      cursor:pointer;
     }
     .popup.show{ display:flex; }
-    .popup .text{
-      font-weight: 800;
-      color: rgba(255,255,255,0.95);
-      font-size: 14px;
-    }
+    .popup .text{ font-weight: 800; color: rgba(255,255,255,0.95); font-size: 14px; }
     .popup .go{
       padding: 10px 12px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.18);
       background: rgba(255,255,255,0.10);
       font-weight: 900;
-      cursor:pointer;
       white-space:nowrap;
     }
-
     @media (max-width: 420px){
       h1{ font-size: 30px; }
       .typed{ font-size: 12px; }
@@ -164,7 +137,7 @@
 
       <div class="popup" id="miniPopup">
         <div class="text">Click for a mini surprise! 🌸</div>
-        <div class="go" id="miniGo">Open</div>
+        <div class="go">Open</div>
       </div>
 
       <div class="panel">
@@ -182,31 +155,22 @@
     </div>
   </div>
 
-  <script>
-    // -----------------------------
-    // Rooftop Scene + Recording + Share + Surprise
-    // -----------------------------
+<script>
+  const canvas = document.getElementById("scene");
+  const ctx = canvas.getContext("2d");
 
-    const canvas = document.getElementById("scene");
-    const ctx = canvas.getContext("2d");
+  const typedEl  = document.getElementById("typed");
+  const recordBtn = document.getElementById("recordBtn");
+  const sendBtn   = document.getElementById("sendBtn");
+  const hintEl    = document.getElementById("hint");
+  const miniPopup = document.getElementById("miniPopup");
 
-    const typedEl  = document.getElementById("typed");
-    const recordBtn = document.getElementById("recordBtn");
-    const sendBtn   = document.getElementById("sendBtn");
-    const hintEl    = document.getElementById("hint");
+  const bdayAudio = new Audio("bday.mp3");
+  bdayAudio.preload = "auto";
 
-    const miniPopup = document.getElementById("miniPopup");
-    const miniGo = document.getElementById("miniGo");
+  const SHARE_TEXT = "here’s my 30th rooftop reflection 🥹";
 
-    // Audio to play on surprise (place bday.mp3 next to this file)
-    const bdayAudio = new Audio("bday.mp3");
-    bdayAudio.preload = "auto";
-
-    // Prefilled share message
-    const SHARE_TEXT = "here’s my 30th rooftop reflection 🥹";
-
-    // Typewriter (word-by-word)
-    const instructions =
+  const instructions =
 `Follow these instructions carefully.
 
 1. Think about these two questions:
@@ -217,732 +181,602 @@ B. What is your 30 year old birthday wish for yourself?
 4. A pop up will appear, send it to Sandra through telegram
 5. !Important! Come back to this screen for a mini surprise`;
 
-    function tokenizeWords(text){
-      const tokens = [];
-      const lines = text.split("\n");
-      for (let li=0; li<lines.length; li++){
-        const line = lines[li];
-        if (line.trim().length === 0){
-          tokens.push({t:"\n"});
-          continue;
-        }
-        const parts = line.split(" ");
-        for (let i=0;i<parts.length;i++){
-          const w = parts[i];
-          tokens.push({t: (i===0 ? w : " " + w)});
-        }
-        if (li !== lines.length-1) tokens.push({t:"\n"});
+  function tokenizeWords(text){
+    const tokens = [];
+    const lines = text.split("\n");
+    for (let li=0; li<lines.length; li++){
+      const line = lines[li];
+      if (line.trim().length === 0){ tokens.push({t:"\n"}); continue; }
+      const parts = line.split(" ");
+      for (let i=0;i<parts.length;i++){
+        const w = parts[i];
+        tokens.push({t: (i===0 ? w : " " + w)});
       }
-      return tokens;
+      if (li !== lines.length-1) tokens.push({t:"\n"});
     }
-
-    const wordTokens = tokenizeWords(instructions);
-    let typeIdx = 0;
-
-    function startTypewriter(){
-      typedEl.textContent = "";
-      typeIdx = 0;
-
-      const tick = () => {
-        if (typeIdx >= wordTokens.length) return;
-        typedEl.textContent += wordTokens[typeIdx].t;
-        typeIdx++;
-
-        const last = wordTokens[typeIdx-1]?.t || "";
-        let delay = 70;
-        if (last.includes("\n")) delay = 220;
-        if (/[.!?]$/.test(last.trim())) delay = 220;
-
-        setTimeout(tick, delay);
-      };
-      tick();
-    }
-    startTypewriter();
-
-    // -----------------------------
-    // Recording (one take)
-    // -----------------------------
-    let mediaStream = null;
-    let recorder = null;
-    let chunks = [];
-    let recordedBlob = null;
-    let recordedFile = null;
-    let isRecording = false;
-
-    function setBtn(el, text, enabled){
-      el.textContent = text;
-      el.classList.toggle("disabled", !enabled);
-    }
-
-    function pickMimeType(){
-      // Prefer formats Telegram is happiest with. iOS Safari sometimes supports audio/mp4.
-      const candidates = [
-        "audio/mp4;codecs=mp4a.40.2",
-        "audio/mp4",
-        "audio/webm;codecs=opus",
-        "audio/webm"
-      ];
-      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return "";
-      for (const c of candidates){
-        if (MediaRecorder.isTypeSupported(c)) return c;
-      }
-      return "";
-    }
-
-    function extFromType(t){
-      if (!t) return "webm";
-      if (t.includes("mp4")) return "m4a";
-      if (t.includes("webm")) return "webm";
-      return "webm";
-    }
-
-    async function startRecording(){
-      if (!navigator.mediaDevices?.getUserMedia){
-        throw new Error("getUserMedia not supported");
-      }
-
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      chunks = [];
-      recordedBlob = null;
-      recordedFile = null;
-
-      const mimeType = pickMimeType();
-      recorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunks.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        const type = recorder.mimeType || mimeType || "audio/webm";
-        recordedBlob = new Blob(chunks, { type });
-
-        const ext = extFromType(type);
-        const filename = `rooftop_reflection.${ext}`;
-        recordedFile = new File([recordedBlob], filename, { type });
-
-        setBtn(sendBtn, "📤 Send to Sandra", true);
-
-        if (mediaStream){
-          mediaStream.getTracks().forEach(t => t.stop());
-          mediaStream = null;
-        }
-      };
-
-      recorder.start();
-      isRecording = true;
-      setBtn(recordBtn, "⏹ Stop", true);
-      setBtn(sendBtn, "📤 Send to Sandra", false);
-      hintEl.textContent = "Recording… Answer A then B in one take. Tap Stop when done.";
-    }
-
-    function stopRecording(){
-      if (recorder && isRecording){
-        recorder.stop();
-      }
-      isRecording = false;
-      setBtn(recordBtn, "🎙️ Record again", true);
-      hintEl.textContent = "Nice. Now tap “Send to Sandra”.";
-    }
-
-    recordBtn.addEventListener("click", async () => {
-      try{
-        if (!isRecording){
-          await startRecording();
-        } else {
-          stopRecording();
-        }
-      } catch (err){
-        console.error(err);
-        hintEl.textContent = "Mic permission blocked (or not supported). Please allow microphone access and try again.";
-      }
-    });
-
-    // -----------------------------
-    // Share flow + return detection + popup
-    // -----------------------------
-    let shareInitiated = false;
-    let surpriseReady = false;
-
-    function forceDownload(){
-      if (!recordedBlob || !recordedFile) return;
-      const url = URL.createObjectURL(recordedBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = recordedFile.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-    }
-
-    async function shareToSandra(){
-      if (!recordedFile) return;
-
-      shareInitiated = true;
-
-      // If share sheet not available, fallback download
-      if (!navigator.share){
-        forceDownload();
-        hintEl.textContent = "Downloaded. Please send the audio to Sandra on Telegram, then come back here for a mini surprise.";
-        return;
-      }
-
-      try{
-        await navigator.share({
-          files: [recordedFile],
-          text: SHARE_TEXT,
-          title: "Rooftop Reflection"
-        });
-      } catch (err){
-        // Common: Telegram rejects some file types, or user cancels.
-        console.log("Share failed/cancelled:", err);
-        // Provide a reliable fallback
-        forceDownload();
-        hintEl.textContent = "If Telegram didn’t attach it, use the downloaded file and send it in Telegram. Then come back here.";
-      }
-    }
-
-    sendBtn.addEventListener("click", async () => {
-      try{
-        hintEl.textContent = "Choose Telegram and send it to Sandra. Then come back here.";
-        await shareToSandra();
-      } catch (err){
-        console.error(err);
-        forceDownload();
-        hintEl.textContent = "Sharing failed. A download should start — send that file to Sandra on Telegram, then come back.";
-      }
-    });
-
-    function onReturnToPage(){
-      if (!shareInitiated || surpriseReady) return;
-      surpriseReady = true;
-
-      setTimeout(() => {
-        miniPopup.classList.add("show");
-      }, 2500);
-    }
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") onReturnToPage();
-    });
-    window.addEventListener("focus", () => onReturnToPage());
-
-    // -----------------------------
-    // STATIC skyline (prebuilt once)
-    // -----------------------------
-    function mulberry32(seed){
-      let a = seed >>> 0;
-      return function(){
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-
-    function buildSkyLayer(seed, yMin, yMax, wMin, wMax){
-      const rnd = mulberry32(seed);
-      const rects = [];
-      let x = 0;
-
-      while (x < canvas.width + 30){
-        const w = wMin + rnd() * (wMax - wMin);
-        const h = (yMax - yMin) * (0.4 + rnd() * 0.9);
-        const y = yMax - h;
-
-        // windows prebuilt too
-        const windows = [];
-        const winCount = 5;
-        for (let i=0;i<winCount;i++){
-          windows.push({
-            wx: x + 2 + rnd()*(w-6),
-            wy: y + 4 + rnd()*(h-10)
-          });
-        }
-
-        rects.push({ x, y, w, h, windows });
-        x += w + 6;
-      }
-      return rects;
-    }
-
-    const skylineLayers = [
-      { color:"#1b3f73", alpha:0.45, rects: buildSkyLayer(101, 40, 210, 10, 18) },
-      { color:"#25518f", alpha:0.55, rects: buildSkyLayer(202, 80, 260, 14, 22) },
-      { color:"#2f68b8", alpha:0.70, rects: buildSkyLayer(303, 130, 320, 18, 28) }
-    ];
-
-    // Stars / moon
-    const stars = makeStars(90);
-    function makeStars(n){
-      const arr = [];
-      for (let i=0;i<n;i++){
-        arr.push({
-          x: Math.random()*canvas.width,
-          y: Math.random()*170,
-          r: 0.6 + Math.random()*1.4,
-          tw: Math.random()*Math.PI*2
-        });
-      }
-      return arr;
-    }
-
-    // Fireworks particles
-    let fireworksOn = false;
-    let particles = [];
-    let lastFireworkAt = 0;
-
-    function spawnFirework(){
-      const cx = 120 + Math.random()*(canvas.width-240);
-      const cy = 60 + Math.random()*150;
-      const count = 36;
-
-      for (let i=0;i<count;i++){
-        const a = (i/count) * Math.PI*2;
-        const sp = 1.2 + Math.random()*2.0;
-        particles.push({
-          x: cx, y: cy,
-          vx: Math.cos(a)*sp,
-          vy: Math.sin(a)*sp,
-          life: 110 + Math.random()*40
-        });
-      }
-    }
-
-    function updateFireworks(){
-      const now = performance.now();
-      if (fireworksOn && now - lastFireworkAt > 650){
-        lastFireworkAt = now;
-        spawnFirework();
-      }
-      for (const p of particles){
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.01;
-        p.life -= 1;
-      }
-      particles = particles.filter(p => p.life > 0);
-    }
-
-    function drawFireworks(){
-      if (particles.length === 0) return;
-      ctx.save();
-      for (const p of particles){
-        const a = Math.max(0, Math.min(1, p.life/160));
-        ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.65*a})`;
-        ctx.fillRect(p.x, p.y, 2, 2);
-      }
-      ctx.restore();
-    }
-
-    // Surprise actor (you)
-    const you = {
-      x: -80,
-      y: 420,
-      targetX: 250,
-      walking: false,
-      arrived: false,
-      bouquetGiven: false
-    };
-
-    // Bouquet animation (moves to agy and ends next to her)
-    const bouquet = {
-      active:false,
-      t:0,
-      x:0, y:0,
-      fromX:0, fromY:0,
-      toX:0, toY:0,
-      done:false
-    };
-
-    function lerp(a,b,t){ return a + (b-a)*t; }
-    function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
-
-    function startSurprise(){
-      miniPopup.classList.remove("show");
-
-      you.x = -80;
-      you.walking = true;
-      you.arrived = false;
-      you.bouquetGiven = false;
-
-      fireworksOn = false;
-
-      bouquet.active = false;
-      bouquet.t = 0;
-      bouquet.done = false;
-    }
-
-    miniGo.addEventListener("click", startSurprise);
-    miniPopup.addEventListener("click", startSurprise);
-
-    function drawScene(t){
-      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      g.addColorStop(0, "#04101f");
-      g.addColorStop(1, "#0f2742");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Stars
-      ctx.save();
-      for (const s of stars){
-        const tw = 0.35 + 0.65*(0.5 + 0.5*Math.sin(t/900 + s.tw));
-        ctx.fillStyle = `rgba(255,255,255,${0.15 + 0.55*tw})`;
-        ctx.fillRect(s.x, s.y, s.r, s.r);
-      }
-      ctx.restore();
-
-      drawCrescentMoon(610, 80, 22);
-
-      drawSkylineStatic();
-
-      drawRooftopDeck();
-
-      // Fireworks behind foreground
-      drawFireworks();
-
-      // agy96 sitting
-      drawAgySitting(160, 444);
-
-      // you + bouquet
-      drawYouAndBouquet();
-
-      // vignette
-      ctx.fillStyle = "rgba(0,0,0,0.20)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function drawCrescentMoon(x,y,r){
-      ctx.save();
-      ctx.fillStyle = "rgba(255,255,255,0.75)";
-      ctx.beginPath();
-      ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fill();
-
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.beginPath();
-      ctx.arc(x+8,y-2,r,0,Math.PI*2);
-      ctx.fill();
-      ctx.globalCompositeOperation = "source-over";
-
-      const rg = ctx.createRadialGradient(x,y,2,x,y,80);
-      rg.addColorStop(0,"rgba(255,255,255,0.10)");
-      rg.addColorStop(1,"rgba(255,255,255,0.0)");
-      ctx.fillStyle = rg;
-      ctx.beginPath();
-      ctx.arc(x,y,80,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawSkylineStatic(){
-      // layered buildings (STATIC)
-      for (let li = 0; li < skylineLayers.length; li++){
-  const L = skylineLayers[li];
-
-  ctx.save();
-  ctx.globalAlpha = L.alpha;
-  ctx.fillStyle = L.color;
-
-  for (const r of L.rects){
-    ctx.fillRect(r.x, r.y, r.w, r.h);
-
-    // windows
-    if (li === 0){
-      // first row: warm yellow glow
-      ctx.save();
-      ctx.shadowColor = "rgba(255,220,120,0.55)";
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = "rgba(255,220,120,0.45)";
-      for (const w of r.windows){
-        ctx.fillRect(w.wx, w.wy, 2, 2);
-      }
-      ctx.restore();
-    } else {
-      // other rows: subtle white
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      for (const w of r.windows){
-        ctx.fillRect(w.wx, w.wy, 2, 2);
-      }
-    }
-
-    ctx.fillStyle = L.color;
+    return tokens;
   }
 
-  ctx.restore();
-}
+  const wordTokens = tokenizeWords(instructions);
+  function startTypewriter(){
+    typedEl.textContent = "";
+    let i = 0;
+    (function tick(){
+      if (i >= wordTokens.length) return;
+      typedEl.textContent += wordTokens[i].t;
+      const last = wordTokens[i].t || "";
+      i++;
+      let delay = 70;
+      if (last.includes("\n")) delay = 220;
+      if (/[.!?]$/.test(last.trim())) delay = 220;
+      setTimeout(tick, delay);
+    })();
+  }
+  startTypewriter();
 
+  // ---------------- Recording ----------------
+  let mediaStream = null;
+  let recorder = null;
+  let chunks = [];
+  let recordedBlob = null;
+  let recordedFile = null;
+  let isRecording = false;
 
-      // Water band
-      ctx.fillStyle = "#062242";
-      ctx.fillRect(0, 330, canvas.width, 70);
+  function setBtn(el, text, enabled){
+    el.textContent = text;
+    el.classList.toggle("disabled", !enabled);
+  }
 
-      // Water sparkles (static-ish pattern)
-      ctx.fillStyle = "rgba(255,255,255,0.25)";
-      for (let i=0;i<40;i++){
-        const x = (i/40) * canvas.width + (Math.sin(i*9)*4);
-        const y = 350 + (i%6)*6;
-        ctx.fillRect(x, y, 3, 1);
+  function pickMimeType(){
+    const candidates = [
+      "audio/mp4;codecs=mp4a.40.2",
+      "audio/mp4",
+      "audio/webm;codecs=opus",
+      "audio/webm"
+    ];
+    if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return "";
+    for (const c of candidates){
+      if (MediaRecorder.isTypeSupported(c)) return c;
+    }
+    return "";
+  }
+
+  function extFromType(t){
+    if (!t) return "webm";
+    if (t.includes("mp4")) return "m4a";
+    if (t.includes("webm")) return "webm";
+    return "webm";
+  }
+
+  async function startRecording(){
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    chunks = [];
+    recordedBlob = null;
+    recordedFile = null;
+
+    const mimeType = pickMimeType();
+    recorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
+
+    recorder.onstop = () => {
+      const type = recorder.mimeType || mimeType || "audio/webm";
+      recordedBlob = new Blob(chunks, { type });
+
+      const ext = extFromType(type);
+      const filename = `rooftop_reflection.${ext}`;
+      recordedFile = new File([recordedBlob], filename, { type });
+
+      setBtn(sendBtn, "📤 Send to Sandra", true);
+
+      if (mediaStream){
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
       }
+    };
+
+    recorder.start();
+    isRecording = true;
+
+    setBtn(recordBtn, "⏹ Stop", true);
+    setBtn(sendBtn, "📤 Send to Sandra", false);
+    hintEl.textContent = "Recording… Answer A then B in one take. Tap Stop when done.";
+  }
+
+  function stopRecording(){
+    if (recorder && isRecording) recorder.stop();
+    isRecording = false;
+    setBtn(recordBtn, "🎙️ Record again", true);
+    hintEl.textContent = "Nice. Now tap “Send to Sandra”.";
+  }
+
+  recordBtn.addEventListener("click", async () => {
+    try{
+      if (!isRecording) await startRecording();
+      else stopRecording();
+    } catch (e){
+      console.error(e);
+      hintEl.textContent = "Mic permission blocked (or not supported). Please allow microphone access and try again.";
+    }
+  });
+
+  // ---------------- Share + return popup ----------------
+  let shareInitiated = false;
+  let surpriseReady = false;
+
+  function forceDownload(){
+    if (!recordedBlob || !recordedFile) return;
+    const url = URL.createObjectURL(recordedBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = recordedFile.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  async function shareToSandra(){
+    if (!recordedFile) return;
+    shareInitiated = true;
+
+    if (!navigator.share){
+      forceDownload();
+      hintEl.textContent = "Downloaded. Please send the audio in Telegram, then come back here for a mini surprise.";
+      return;
     }
 
-    function drawRooftopDeck(){
-      ctx.fillStyle = "#101010";
-      ctx.fillRect(0, 400, canvas.width, 160);
+    try{
+      await navigator.share({
+        files: [recordedFile],
+        text: SHARE_TEXT,
+        title: "Rooftop Reflection"
+      });
+    } catch (err){
+      console.log("Share failed/cancelled:", err);
+      forceDownload();
+      hintEl.textContent = "If Telegram didn’t attach it, use the downloaded file and send it in Telegram. Then come back here.";
+    }
+  }
 
-      // Glass railing
-      ctx.fillStyle = "rgba(255,255,255,0.10)";
-      ctx.fillRect(80, 370, 560, 38);
-      ctx.strokeStyle = "rgba(255,255,255,0.20)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(80, 370, 560, 38);
+  sendBtn.addEventListener("click", async () => {
+    try{
+      hintEl.textContent = "Choose Telegram and send it to Sandra. Then come back here.";
+      await shareToSandra();
+    } catch (err){
+      console.error(err);
+      forceDownload();
+      hintEl.textContent = "Sharing failed. A download should start — send that file on Telegram, then come back.";
+    }
+  });
 
-      // Posts
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      for (let x=90;x<=630;x+=70){
-        ctx.fillRect(x, 370, 4, 38);
+  function onReturnToPage(){
+    if (!shareInitiated || surpriseReady) return;
+    surpriseReady = true;
+    setTimeout(() => miniPopup.classList.add("show"), 2500);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") onReturnToPage();
+  });
+  window.addEventListener("focus", onReturnToPage);
+
+  // ---------------- Graphics helpers ----------------
+  function mulberry32(seed){
+    let a = seed >>> 0;
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildSkyLayer(seed, yMin, yMax, wMin, wMax){
+    const rnd = mulberry32(seed);
+    const rects = [];
+    let x = 0;
+    while (x < canvas.width + 30){
+      const w = wMin + rnd() * (wMax - wMin);
+      const h = (yMax - yMin) * (0.4 + rnd() * 0.9);
+      const y = yMax - h;
+
+      const windows = [];
+      for (let i=0;i<6;i++){
+        windows.push({
+          wx: x + 2 + rnd()*(w-6),
+          wy: y + 6 + rnd()*(h-12)
+        });
       }
 
-      // Couch
-      ctx.fillStyle = "#6a5a1a";
-      ctx.fillRect(110, 430, 210, 70);
-      ctx.fillStyle = "#7a6820";
-      ctx.fillRect(110, 420, 210, 16);
-
-      // Table
-      ctx.fillStyle = "#c8b79a";
-      ctx.fillRect(350, 452, 90, 38);
-      ctx.fillStyle = "#b8a788";
-      ctx.fillRect(360, 444, 70, 10);
-
-      // Plant pot
-      ctx.fillStyle = "#d1b06a";
-      ctx.fillRect(510, 450, 44, 50);
-      ctx.fillStyle = "#c09a58";
-      ctx.fillRect(516, 440, 32, 10);
-      // Plant
-      ctx.fillStyle = "#30c15b";
-      ctx.fillRect(520, 418, 24, 24);
-      ctx.fillStyle = "#27a94c";
-      ctx.fillRect(526, 410, 12, 12);
+      rects.push({ x, y, w, h, windows });
+      x += w + 6;
     }
+    return rects;
+  }
 
-    // Draw agy96 sitting on couch
-    function drawAgySitting(x, y){
+  // NOTE: skyline is only drawn ONCE region (top), no lower "duplicate" look.
+  const skylineLayers = [
+    { color:"#1b3f73", alpha:0.45, rects: buildSkyLayer(101, 40, 210, 10, 18) },
+    { color:"#25518f", alpha:0.55, rects: buildSkyLayer(202, 80, 260, 14, 22) },
+    { color:"#2f68b8", alpha:0.70, rects: buildSkyLayer(303, 130, 320, 18, 28) }
+  ];
+
+  const stars = (() => {
+    const arr = [];
+    for (let i=0;i<90;i++){
+      arr.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*170,
+        r: 0.6 + Math.random()*1.4,
+        tw: Math.random()*Math.PI*2
+      });
+    }
+    return arr;
+  })();
+
+  function drawCrescentMoon(x,y,r){
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(x+8,y-2,r,0,Math.PI*2);
+    ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+
+    const rg = ctx.createRadialGradient(x,y,2,x,y,80);
+    rg.addColorStop(0,"rgba(255,255,255,0.10)");
+    rg.addColorStop(1,"rgba(255,255,255,0.0)");
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.arc(x,y,80,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSkylineStatic(){
+    for (let li=0; li<skylineLayers.length; li++){
+      const L = skylineLayers[li];
       ctx.save();
-      ctx.translate(x, y);
+      ctx.globalAlpha = L.alpha;
+      ctx.fillStyle = L.color;
 
-      // Name label
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.font = "bold 12px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("agy96", 0, -70);
+      for (const r of L.rects){
+        ctx.fillRect(r.x, r.y, r.w, r.h);
 
-      // Hair
-      ctx.fillStyle = "#0a0a0a";
-      ctx.fillRect(-20, -62, 40, 34);
-      ctx.fillRect(-22, -58, 4, 30);
-      ctx.fillRect(18,  -58, 4, 30);
-      ctx.fillRect(-20, -28, 40, 7);
-
-      // Face
-      ctx.fillStyle = "#f1c9a8";
-      ctx.fillRect(-14, -50, 28, 22);
-
-      // Glasses
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(-12, -46, 10, 8);
-      ctx.strokeRect(2, -46, 10, 8);
-      ctx.beginPath(); ctx.moveTo(-2, -42); ctx.lineTo(2, -42); ctx.stroke();
-
-      // Torso
-      ctx.fillStyle = "#c43737";
-      ctx.fillRect(-16, -28, 32, 20);
-
-      // Seated legs (FIXED: even)
-      ctx.fillStyle = "#1f2530";
-      // thighs
-      ctx.fillRect(-16, -8, 16, 12);
-      ctx.fillRect(0,   -8, 16, 12);
-      // shoes (even)
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(-16, 4, 16, 6);
-      ctx.fillRect(0,   4, 16, 6);
-
-      // Arms
-      ctx.fillStyle = "#f1c9a8";
-      ctx.fillRect(-20, -26, 4, 16);
-      ctx.fillRect(16, -26, 4, 16);
+        // windows: ONLY FIRST skyline layer warm glow
+        if (li === 0){
+          ctx.save();
+          ctx.shadowColor = "rgba(255,220,120,0.55)";
+          ctx.shadowBlur = 6;
+          ctx.fillStyle = "rgba(255,220,120,0.45)";
+          for (const w of r.windows){
+            ctx.fillRect(w.wx, w.wy, 2, 2);
+          }
+          ctx.restore();
+        }
+      }
 
       ctx.restore();
     }
 
-    function drawBouquetAt(bx, by){
-      // Soft glow
-      const rg = ctx.createRadialGradient(bx, by, 4, bx, by, 80);
-      rg.addColorStop(0, "rgba(255,230,200,0.20)");
-      rg.addColorStop(1, "rgba(255,230,200,0.00)");
-      ctx.fillStyle = rg;
-      ctx.beginPath();
-      ctx.arc(bx, by, 80, 0, Math.PI*2);
-      ctx.fill();
+    // IMPORTANT: keep water band small so it doesn't look like a second skyline
+    ctx.fillStyle = "#062242";
+    ctx.fillRect(0, 330, canvas.width, 40);
 
-      // Flowers
-      ctx.fillStyle = "#ff7ab6";
-      ctx.fillRect(bx-8, by-12, 6, 6);
-      ctx.fillRect(bx,   by-14, 6, 6);
-      ctx.fillRect(bx+8, by-10, 6, 6);
-      ctx.fillStyle = "#ffd1e5";
-      ctx.fillRect(bx-2, by-6, 6, 6);
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    for (let i=0;i<26;i++){
+      const x = (i/26)*canvas.width + (Math.sin(i*9)*3);
+      const y = 345 + (i%4)*6;
+      ctx.fillRect(x, y, 3, 1);
+    }
+  }
 
-      // Leaves
-      ctx.fillStyle = "#30c15b";
-      ctx.fillRect(bx-6, by, 6, 6);
-      ctx.fillRect(bx+6, by, 6, 6);
+  function drawRooftopDeck(){
+    ctx.fillStyle = "#101010";
+    ctx.fillRect(0, 400, canvas.width, 160);
 
-      // Wrap
-      ctx.fillStyle = "#f2e6d6";
-      ctx.fillRect(bx-6, by+6, 16, 10);
+    // railing
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    ctx.fillRect(80, 370, 560, 38);
+    ctx.strokeStyle = "rgba(255,255,255,0.20)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(80, 370, 560, 38);
 
-      // tiny sparkle
-      ctx.fillStyle = "rgba(255,255,255,0.8)";
-      if ((Math.floor(performance.now()/120) % 2) === 0){
-        ctx.fillRect(bx+22, by-18, 2, 2);
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    for (let x=90;x<=630;x+=70){
+      ctx.fillRect(x, 370, 4, 38);
+    }
+
+    // couch
+    ctx.fillStyle = "#6a5a1a";
+    ctx.fillRect(110, 430, 210, 70);
+    ctx.fillStyle = "#7a6820";
+    ctx.fillRect(110, 420, 210, 16);
+
+    // table
+    ctx.fillStyle = "#c8b79a";
+    ctx.fillRect(350, 452, 90, 38);
+    ctx.fillStyle = "#b8a788";
+    ctx.fillRect(360, 444, 70, 10);
+
+    // plant
+    ctx.fillStyle = "#d1b06a";
+    ctx.fillRect(510, 450, 44, 50);
+    ctx.fillStyle = "#c09a58";
+    ctx.fillRect(516, 440, 32, 10);
+    ctx.fillStyle = "#30c15b";
+    ctx.fillRect(520, 418, 24, 24);
+    ctx.fillStyle = "#27a94c";
+    ctx.fillRect(526, 410, 12, 12);
+  }
+
+  function drawAgySitting(x, y){
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("agy96", 0, -70);
+
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(-20, -62, 40, 34);
+    ctx.fillRect(-22, -58, 4, 30);
+    ctx.fillRect(18,  -58, 4, 30);
+    ctx.fillRect(-20, -28, 40, 7);
+
+    ctx.fillStyle = "#f1c9a8";
+    ctx.fillRect(-14, -50, 28, 22);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-12, -46, 10, 8);
+    ctx.strokeRect(2, -46, 10, 8);
+    ctx.beginPath(); ctx.moveTo(-2, -42); ctx.lineTo(2, -42); ctx.stroke();
+
+    ctx.fillStyle = "#c43737";
+    ctx.fillRect(-16, -28, 32, 20);
+
+    // even seated legs
+    ctx.fillStyle = "#1f2530";
+    ctx.fillRect(-16, -8, 16, 12);
+    ctx.fillRect(0,   -8, 16, 12);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-16, 4, 16, 6);
+    ctx.fillRect(0,   4, 16, 6);
+
+    ctx.fillStyle = "#f1c9a8";
+    ctx.fillRect(-20, -26, 4, 16);
+    ctx.fillRect(16, -26, 4, 16);
+
+    ctx.restore();
+  }
+
+  // ---------------- Fireworks ----------------
+  let fireworksOn = false;
+  let particles = [];
+  let lastFireworkAt = 0;
+
+  function spawnFirework(){
+    const cx = 120 + Math.random()*(canvas.width-240);
+    const cy = 60 + Math.random()*150;
+    const count = 36;
+    for (let i=0;i<count;i++){
+      const a = (i/count)*Math.PI*2;
+      const sp = 1.2 + Math.random()*2.0;
+      particles.push({ x:cx, y:cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:120 + Math.random()*40 });
+    }
+  }
+
+  function updateFireworks(){
+    const now = performance.now();
+    if (fireworksOn && now - lastFireworkAt > 650){
+      lastFireworkAt = now;
+      spawnFirework();
+    }
+    for (const p of particles){
+      p.x += p.vx; p.y += p.vy;
+      p.vy += 0.01;
+      p.life -= 1;
+    }
+    particles = particles.filter(p => p.life > 0);
+  }
+
+  function drawFireworks(){
+    if (!particles.length) return;
+    ctx.save();
+    for (const p of particles){
+      const a = Math.max(0, Math.min(1, p.life/160));
+      ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.65*a})`;
+      ctx.fillRect(p.x, p.y, 2, 2);
+    }
+    ctx.restore();
+  }
+
+  // ---------------- Surprise (sljy14 + bouquet) ----------------
+  const you = { x:-80, y:420, targetX:250, walking:false, bouquetGiven:false };
+  const bouquet = { active:false, t:0, fromX:0, fromY:0, toX:0, toY:0, done:false };
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+
+  function drawBouquetAt(bx, by){
+    const rg = ctx.createRadialGradient(bx, by, 4, bx, by, 80);
+    rg.addColorStop(0, "rgba(255,230,200,0.20)");
+    rg.addColorStop(1, "rgba(255,230,200,0.00)");
+    ctx.fillStyle = rg;
+    ctx.beginPath(); ctx.arc(bx, by, 80, 0, Math.PI*2); ctx.fill();
+
+    ctx.fillStyle = "#ff7ab6";
+    ctx.fillRect(bx-8, by-12, 6, 6);
+    ctx.fillRect(bx,   by-14, 6, 6);
+    ctx.fillRect(bx+8, by-10, 6, 6);
+    ctx.fillStyle = "#ffd1e5";
+    ctx.fillRect(bx-2, by-6, 6, 6);
+
+    ctx.fillStyle = "#30c15b";
+    ctx.fillRect(bx-6, by, 6, 6);
+    ctx.fillRect(bx+6, by, 6, 6);
+
+    ctx.fillStyle = "#f2e6d6";
+    ctx.fillRect(bx-6, by+6, 16, 10);
+  }
+
+  function startSurprise(){
+    miniPopup.classList.remove("show");
+
+    you.x = -80;
+    you.walking = true;
+    you.bouquetGiven = false;
+
+    bouquet.active = false;
+    bouquet.done = false;
+    bouquet.t = 0;
+
+    fireworksOn = false;
+  }
+
+  miniPopup.addEventListener("click", startSurprise);
+
+  function drawYouAndBouquet(){
+    // move in
+    if (you.walking){
+      you.x += 3.2;
+      if (you.x >= you.targetX){
+        you.x = you.targetX;
+        you.walking = false;
+
+        // give bouquet shortly after arriving
+        setTimeout(() => {
+          you.bouquetGiven = true;
+
+          bouquet.active = true;
+          bouquet.done = false;
+          bouquet.t = 0;
+
+          // FROM: left hand (closest to agy who is left of you)
+          bouquet.fromX = you.x - 44;
+          bouquet.fromY = you.y - 20;
+
+          // TO: beside agy on couch (right side of her head area)
+          bouquet.toX = 215;
+          bouquet.toY = 410;
+
+          bdayAudio.currentTime = 0;
+          bdayAudio.play().catch(()=>{});
+
+          fireworksOn = true;
+          lastFireworkAt = performance.now();
+        }, 500);
       }
     }
 
-    // "You" avatar walking in + bouquet handoff
-    function drawYouAndBouquet(){
-      // Update your position
-      if (you.walking){
-        you.x += 3.2;
-        if (you.x >= you.targetX){
-          you.x = you.targetX;
-          you.walking = false;
-          you.arrived = true;
+    // draw you (translated), then RESTORE properly
+    ctx.save();
+    ctx.translate(you.x, you.y);
 
-          // after arrive, give bouquet after a short beat
-          setTimeout(() => {
-            you.bouquetGiven = true;
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("sljy14", 0, -70);
 
-            // bouquet moves from your hand to agy side
-            bouquet.active = true;
-            bouquet.done = false;
-            bouquet.t = 0;
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.beginPath(); ctx.ellipse(0, 26, 26, 8, 0, 0, Math.PI*2); ctx.fill();
 
-            // start position = your hand
-            bouquet.fromX = you.x - 44;
-            bouquet.fromY = you.y - 20;
+    ctx.fillStyle = "#111";
+    ctx.fillRect(-18, -52, 36, 30);
 
-            // end position = next to agy96 (right side of her)
-            bouquet.toX = 235;   // tuned to sit beside agy on couch
-            bouquet.toY = 410;
+    ctx.fillStyle = "#eab48f";
+    ctx.fillRect(-12, -40, 24, 18);
 
-            // Start audio now (allowed because this chain began from a click)
-            bdayAudio.currentTime = 0;
-            bdayAudio.play().catch(()=>{});
+    // black tee
+    ctx.fillStyle = "#0b0b0b";
+    ctx.fillRect(-14, -22, 28, 18);
 
-            // Start fireworks after bouquet is given
-            fireworksOn = true;
-            lastFireworkAt = performance.now();
-          }, 500);
-        }
-      }
+    // black mini skirt
+    ctx.fillStyle = "#101010";
+    ctx.fillRect(-14, -4, 28, 12);
 
-      // Draw you
-      ctx.save();
-      ctx.translate(you.x, you.y);
+    // legs
+    ctx.fillStyle = "#eab48f";
+    ctx.fillRect(-12, 8, 10, 12);
+    ctx.fillRect(2, 8, 10, 12);
 
-      // label sljy14
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.font = "bold 12px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("sljy14", 0, -70);
+    // shoes
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-12, 20, 10, 6);
+    ctx.fillRect(2, 20, 10, 6);
 
-      // shadow
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.beginPath();
-      ctx.ellipse(0, 26, 26, 8, 0, 0, Math.PI*2);
-      ctx.fill();
-
-      // Hair
-      ctx.fillStyle = "#111";
-      ctx.fillRect(-18, -52, 36, 30);
-
-      // Face
-      ctx.fillStyle = "#eab48f";
-      ctx.fillRect(-12, -40, 24, 18);
-
-      // Black tee
-      ctx.fillStyle = "#0b0b0b";
-      ctx.fillRect(-14, -22, 28, 18);
-
-      // Black mini skirt
-      ctx.fillStyle = "#101010";
-      ctx.fillRect(-14, -4, 28, 12);
-
-      // Legs
-      ctx.fillStyle = "#eab48f";
-      ctx.fillRect(-12, 8, 10, 12);
-      ctx.fillRect(2, 8, 10, 12);
-
-      // Shoes
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(-12, 20, 10, 6);
-      ctx.fillRect(2, 20, 10, 6);
-
-    // Arms
-ctx.fillStyle = "#eab48f";
-
-// LEFT arm = near agy96 (this one holds bouquet when given)
-if (you.bouquetGiven){
-  // extended LEFT arm (towards agy)
-  ctx.fillRect(-26, -16, 12, 4);
-} else {
-  // left arm down
-  ctx.fillRect(-18, -18, 4, 16);
-}
-
-// RIGHT arm always down straight
-ctx.fillRect(14, -18, 4, 16);
-
-
-      // Bouquet animation
-      if (bouquet.active && !bouquet.done){
-        bouquet.t += 1/40; // ~40 frames for smooth move
-        const tt = Math.min(1, bouquet.t);
-        const e = easeOutCubic(tt);
-
-        bouquet.x = lerp(bouquet.fromX, bouquet.toX, e);
-        bouquet.y = lerp(bouquet.fromY, bouquet.toY, e);
-
-        drawBouquetAt(bouquet.x, bouquet.y);
-
-        if (tt >= 1){
-          bouquet.done = true;
-        }
-      } else if (bouquet.done){
-        // bouquet stays next to agy
-        drawBouquetAt(bouquet.toX, bouquet.toY);
-      }
+    // arms: LEFT arm extends when giving bouquet, right arm stays down
+    ctx.fillStyle = "#eab48f";
+    if (you.bouquetGiven){
+      ctx.fillRect(-26, -16, 12, 4); // left arm extended
+    } else {
+      ctx.fillRect(-18, -18, 4, 16); // left arm down
     }
+    ctx.fillRect(14, -18, 4, 16);   // right arm down
 
-    // -----------------------------
-    // Animation loop
-    // -----------------------------
-    let last = performance.now();
-    function loop(now){
-      const dt = now - last;
-      last = now;
+    ctx.restore();
 
-      updateFireworks();
-      drawScene(now);
-
-      requestAnimationFrame(loop);
+    // bouquet should be drawn in WORLD coords (NOT inside translate)
+    if (bouquet.active && !bouquet.done){
+      bouquet.t += 1/40;
+      const tt = Math.min(1, bouquet.t);
+      const e = easeOutCubic(tt);
+      const bx = lerp(bouquet.fromX, bouquet.toX, e);
+      const by = lerp(bouquet.fromY, bouquet.toY, e);
+      drawBouquetAt(bx, by);
+      if (tt >= 1) bouquet.done = true;
+    } else if (bouquet.done){
+      drawBouquetAt(bouquet.toX, bouquet.toY);
     }
+  }
+
+  // ---------------- Main loop ----------------
+  function drawScene(t){
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, "#04101f");
+    g.addColorStop(1, "#0f2742");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // stars
+    ctx.save();
+    for (const s of stars){
+      const tw = 0.35 + 0.65*(0.5 + 0.5*Math.sin(t/900 + s.tw));
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + 0.55*tw})`;
+      ctx.fillRect(s.x, s.y, s.r, s.r);
+    }
+    ctx.restore();
+
+    drawCrescentMoon(610, 80, 22);
+    drawSkylineStatic();
+
+    // fireworks in sky
+    drawFireworks();
+
+    drawRooftopDeck();
+    drawAgySitting(160, 444);
+    drawYouAndBouquet();
+
+    ctx.fillStyle = "rgba(0,0,0,0.20)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function loop(now){
+    updateFireworks();
+    drawScene(now);
     requestAnimationFrame(loop);
-  </script>
+  }
+  requestAnimationFrame(loop);
+</script>
 </body>
 </html>
