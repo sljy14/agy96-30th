@@ -1,368 +1,42 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Map view</title>
-
-<style>
-  :root{
-    --maxw: 420px;
-
-    --town-base1: #c7efd1;
-    --town-base2: #b6e4c3;
-    --town-path1: rgba(255,255,255,0.18);
-    --town-path2: rgba(0,0,0,0.06);
-
-    --card: rgba(255,255,255,0.10);
-    --stroke: rgba(255,255,255,0.16);
-    --shadow: rgba(0,0,0,0.18);
-  }
-
-  html,body{
-    margin:0;height:100%;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    color:#fff;
-    background:
-      radial-gradient(900px 520px at 50% 22%, rgba(120,255,235,0.12), transparent 62%),
-      radial-gradient(900px 520px at 50% 78%, rgba(160,120,255,0.10), transparent 62%),
-      linear-gradient(160deg,#06202a,#070714);
-  }
-
-  .wrap{
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    padding:16px 14px 14px;
-    box-sizing:border-box;
-  }
-
-  h1{
-    margin:6px 0 6px;
-    font-weight:1000;
-    letter-spacing:-0.5px;
-    font-size:26px;
-    text-align:center;
-  }
-
-  .sub{
-    margin:0 0 10px;
-    opacity:0.86;
-    text-align:center;
-    font-size:13px;
-  }
-
-  .qLine{
-    width:min(var(--maxw), 94vw);
-    text-align:center;
-    font-size:15px;
-    font-weight:900;
-    letter-spacing:0.2px;
-    margin:6px 0 8px;
-    line-height:1.25;
-  }
-
-  .tryAgain{
-    width:min(var(--maxw), 94vw);
-    text-align:center;
-    margin:2px 0 10px;
-    font-weight:1000;
-    color:#ffd0d0;
-    display:none;
-  }
-  .tryAgain.show{ display:block; }
-
-  .mapCard{
-    width:min(var(--maxw), 94vw);
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(255,255,255,0.06);
-    border-radius:18px;
-    padding:12px;
-    box-sizing:border-box;
-  }
-
-  .stage{
-    position:relative;
-    width:100%;
-    aspect-ratio: 1 / 1;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-
-    background:
-      radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,0.00) 55%, rgba(0,0,0,0.12) 100%),
-      linear-gradient(90deg, transparent 0 42%, var(--town-path1) 42% 58%, transparent 58% 100%),
-      linear-gradient(180deg, transparent 0 42%, var(--town-path1) 42% 58%, transparent 58% 100%),
-      radial-gradient(2px 2px at 12% 18%, rgba(0,0,0,0.08) 45%, transparent 46%),
-      radial-gradient(2px 2px at 38% 62%, rgba(0,0,0,0.08) 45%, transparent 46%),
-      radial-gradient(2px 2px at 74% 34%, rgba(0,0,0,0.08) 45%, transparent 46%),
-      radial-gradient(2px 2px at 86% 78%, rgba(0,0,0,0.08) 45%, transparent 46%),
-      radial-gradient(2px 2px at 24% 82%, rgba(0,0,0,0.06) 45%, transparent 46%),
-      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06)),
-      linear-gradient(180deg, var(--town-base1), var(--town-base2));
-  }
-
-  .spot{
-    position:absolute;
-    width:104px;
-    height:104px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:14px;
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(0,0,0,0.10);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.14);
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-    transform: translateY(0);
-    transition: transform 120ms ease, box-shadow 120ms ease;
-    animation: floaty 2.8s ease-in-out infinite;
-  }
-  .spot:nth-child(1){ animation-delay: 0.00s; }
-  .spot:nth-child(2){ animation-delay: 0.18s; }
-  .spot:nth-child(3){ animation-delay: 0.35s; }
-  .spot:nth-child(4){ animation-delay: 0.52s; }
-
-  @keyframes floaty{
-    0%,100%{ transform: translateY(0); }
-    50%{ transform: translateY(-3px); }
-  }
-
-  .spot:active{
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-  }
-
-  .label{
-    position:absolute;
-    top:-24px;
-    left:50%;
-    transform:translateX(-50%);
-    font-weight:1000;
-    font-size:12px;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(0,0,0,0.22);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.22);
-    white-space:nowrap;
-    pointer-events:none;
-  }
-
-  canvas.icon{
-    width:78px;
-    height:78px;
-    image-rendering:pixelated;
-  }
-
-  #stadiumSpot   { left:32px; top:26px; }
-  #waterlooSpot  { right:32px; top:26px; }
-  #chinatownSpot { left:32px; bottom:26px; }
-  #macritchieSpot{ right:32px; bottom:26px; }
-
-  .center{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    width:110px;
-    height:150px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-  }
-
-  .agyTag{
-    position:absolute;
-    top:-22px;
-    left:50%;
-    transform:translateX(-50%);
-    font-weight:1000;
-    font-size:12px;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,0.14);
-    background:rgba(0,0,0,0.22);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.22);
-  }
-
-  .pixel{ width:92px; height:132px; position:relative; }
-  .hair{
-    position:absolute; width:66px; height:92px; background:#000;
-    top:0; left:50%; transform:translateX(-50%); border-radius:10px;
-  }
-  .face{
-    position:absolute; width:44px; height:50px; background:#f1c7a6;
-    top:24px; left:50%; transform:translateX(-50%); border-radius:2px;
-  }
-  .glasses{
-    position:absolute; top:43px; left:50%; transform:translateX(-50%);
-    display:flex; align-items:center;
-  }
-  .glasses .side{ width:10px; height:4px; background:#000; }
-  .glasses .lens{ width:16px; height:13px; border:3px solid #000; box-sizing:border-box; }
-  .glasses .bridge{ width:8px; height:4px; background:#000; }
-
-  .body{
-    position:absolute; top:82px; left:50%; transform:translateX(-50%);
-    width:58px; height:36px; background:#c1272d;
-  }
-  .pants{
-    position:absolute; top:118px; left:50%; transform:translateX(-50%);
-    width:60px; height:22px; background:#0e0e18;
-  }
-  .shoes{
-    position:absolute; top:140px; left:50%; transform:translateX(-50%);
-    width:54px; height:9px; background:#fff;
-  }
-
-  @keyframes hop {
-    0%{ transform:translate(-50%,-50%) translateY(0); }
-    25%{ transform:translate(-50%,-50%) translateY(-10px); }
-    50%{ transform:translate(-50%,-50%) translateY(0); }
-    75%{ transform:translate(-50%,-50%) translateY(-10px); }
-    100%{ transform:translate(-50%,-50%) translateY(0); }
-  }
-  .jumpTwice{ animation: hop 420ms ease-in-out 1; }
-
-  /* Rooftop CTA */
-  .cta{
-    width:min(var(--maxw), 94vw);
-    margin-top: 10px;
-    display:none;
-  }
-  .cta.show{ display:block; }
-  .bigBtn{
-    width:100%;
-    padding: 14px 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.10);
-    color: rgba(255,255,255,0.95);
-    font-weight: 1000;
-    font-size: 15px;
-    text-align:center;
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 18px 48px rgba(0,0,0,0.25);
-  }
-  .bigBtn:active{ transform: translateY(1px); }
-
-  @media (max-width: 360px){
-    h1{ font-size:24px; }
-    .qLine{ font-size:14px; }
-    .spot{ width:98px; height:98px; }
-    canvas.icon{ width:74px; height:74px; }
-
-    #stadiumSpot   { left:24px; top:22px; }
-    #waterlooSpot  { right:24px; top:22px; }
-    #chinatownSpot { left:24px; bottom:22px; }
-    #macritchieSpot{ right:24px; bottom:22px; }
-  }
-</style>
-</head>
-
-<body>
-<div class="wrap">
-  <h1>Map view 🗺️</h1>
-  <div class="sub">Tap on the right place!</div>
-
-  <div class="qLine" id="questionText">...</div>
-  <div class="tryAgain" id="tryAgain">Try again!</div>
-
-  <div class="mapCard">
-    <div class="stage" id="stage">
-
-      <div class="spot" id="stadiumSpot" data-place="stadium" role="button" aria-label="Stadium">
-        <div class="label">Stadium</div>
-        <canvas class="icon" id="stadiumIcon" width="96" height="96"></canvas>
-      </div>
-
-      <div class="spot" id="waterlooSpot" data-place="waterloo" role="button" aria-label="Waterloo">
-        <div class="label">Waterloo</div>
-        <canvas class="icon" id="waterlooIcon" width="96" height="96"></canvas>
-      </div>
-
-      <div class="spot" id="chinatownSpot" data-place="chinatown" role="button" aria-label="Chinatown">
-        <div class="label">Chinatown</div>
-        <canvas class="icon" id="chinatownIcon" width="96" height="96"></canvas>
-      </div>
-
-      <div class="spot" id="macritchieSpot" data-place="macritchie" role="button" aria-label="MacRitchie">
-        <div class="label">MacRitchie</div>
-        <canvas class="icon" id="macritchieIcon" width="96" height="96"></canvas>
-      </div>
-
-      <div class="center" id="agyCenter" aria-label="agy96">
-        <div class="agyTag">agy96</div>
-        <div class="pixel">
-          <div class="hair"></div>
-          <div class="face"></div>
-          <div class="glasses">
-            <div class="side"></div>
-            <div class="lens"></div>
-            <div class="bridge"></div>
-            <div class="lens"></div>
-            <div class="side"></div>
-          </div>
-          <div class="body"></div>
-          <div class="pants"></div>
-          <div class="shoes"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="cta" id="cta">
-    <div class="bigBtn" id="goRooftop">🌙 Go to Rooftop Quiet Time</div>
-  </div>
-</div>
-
-<audio id="bgm" src="./arcade.mp3" loop></audio>
-
 <script>
-/* ===== BGM (plays after first tap) ===== */
+/* =========================
+   BGM (plays after first tap)
+   ========================= */
 const bgm = document.getElementById("bgm");
 bgm.volume = 0.5;
+
 function tryPlayBgm(){
-  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
+  bgm.play()
+    .then(()=>localStorage.setItem("bgmPlaying","true"))
+    .catch(()=>{});
 }
 if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
-/* ===== ORDERED STATE MACHINE (NOT RANDOM) =====
-   We use completion flags. Each winning scene should set these:
-   done_chinatown, done_macritchie, done_waterloo, done_stadium (value "1")
-*/
-const ORDER = [
+/* =========================
+   PROMPT FLOW (INDEX-BASED)
+   0 = Chinatown
+   1 = MacRitchie
+   2 = Waterloo
+   3 = Stadium
+   4 = Rooftop (end)
+   ========================= */
+const STAGES = [
   {
-    key: "done_chinatown",
     place: "chinatown",
     q: "Where will you get some shiok and numbing food?",
     next: "./chinatown.html"
   },
   {
-    key: "done_macritchie",
     place: "macritchie",
     q: "Where will you get your food stolen from you?",
     next: "./macritchie.html"
   },
   {
-    key: "done_waterloo",
     place: "waterloo",
     q: "Where would your toes hurt the most?",
     next: "./waterloo.html"
   },
   {
-    key: "done_stadium",
     place: "stadium",
     q: "Where would you be more than happy for your ear drums to hurt?",
     next: "./stadium.html"
@@ -375,53 +49,57 @@ const agyCenter = document.getElementById("agyCenter");
 const cta = document.getElementById("cta");
 const goRooftop = document.getElementById("goRooftop");
 
-// Optional: allow quick reset with ?reset=1
+function clampIndex(i){
+  const end = STAGES.length; // 4
+  if (!Number.isFinite(i) || i < 0) return 0;
+  if (i > end) return 0; // safety wrap
+  return i;
+}
+
+function getIndex(){
+  return clampIndex(Number(localStorage.getItem("mapPromptIndex") || 0));
+}
+
+function setIndex(i){
+  localStorage.setItem("mapPromptIndex", String(clampIndex(i)));
+}
+
+/* Optional: allow quick reset with ?reset=1 */
 (function maybeReset(){
   const u = new URL(location.href);
   if (u.searchParams.get("reset") === "1"){
-    ORDER.forEach(s => localStorage.removeItem(s.key));
+    localStorage.removeItem("mapPromptIndex");
     localStorage.removeItem("bgmPlaying");
     u.searchParams.delete("reset");
     history.replaceState(null, "", u.toString());
   }
 })();
 
-function isDone(key){ return localStorage.getItem(key) === "1"; }
-
-function getCurrentStage(){
-  for (const s of ORDER){
-    if (!isDone(s.key)) return s;
-  }
-  return null; // all done
-}
-
-let currentStage = getCurrentStage();
-
 function render(){
   tryAgain.classList.remove("show");
 
-  if (!currentStage){
-    // All stages complete -> show rooftop CTA
+  const i = getIndex();
+  const END_INDEX = STAGES.length;
+
+  // Dim / undim spots helper
+  const setSpotsDim = (dim)=>{
+    document.querySelectorAll(".spot").forEach(s => {
+      s.style.opacity = dim ? "0.35" : "1";
+    });
+  };
+
+  if (i === END_INDEX){
     questionText.textContent = "Final stop unlocked: Rooftop Quiet Time 🌙";
     cta.classList.add("show");
-
-    // You can also optionally dim/hide the spots
-    document.querySelectorAll(".spot").forEach(s => {
-      s.style.opacity = "0.35";
-    });
-
+    setSpotsDim(true);
     return;
   }
 
-  // Normal stage prompt
-  questionText.textContent = currentStage.q;
   cta.classList.remove("show");
-  document.querySelectorAll(".spot").forEach(s => {
-    s.style.opacity = "1";
-  });
-}
+  setSpotsDim(false);
 
-render();
+  questionText.textContent = STAGES[i].q;
+}
 
 function jumpTwice(){
   agyCenter.classList.remove("jumpTwice");
@@ -430,34 +108,53 @@ function jumpTwice(){
   tryAgain.classList.add("show");
 }
 
+/* Keep prompt correct even on iOS back/forward cache restore */
+function refreshPromptFromStorage(){
+  render();
+}
+window.addEventListener("pageshow", refreshPromptFromStorage);
+document.addEventListener("visibilitychange", ()=>{
+  if (!document.hidden) refreshPromptFromStorage();
+});
+
 /* ===== Click handling ===== */
 document.querySelectorAll(".spot").forEach(el=>{
   el.addEventListener("click", ()=>{
     tryPlayBgm();
 
-    // If all done, ignore map spots (force rooftop button)
-    if (!currentStage){
+    const i = getIndex();
+    const END_INDEX = STAGES.length;
+
+    // If already finished, don't allow map clicks
+    if (i === END_INDEX){
       jumpTwice();
       return;
     }
 
     const pick = el.dataset.place;
-    if (pick === currentStage.place){
-      // Go to the correct game page
-      location.href = currentStage.next;
+    const stage = STAGES[i];
+
+    if (pick === stage.place){
+      location.href = stage.next;
     } else {
       jumpTwice();
     }
   });
 });
 
-// Rooftop CTA
+/* Rooftop CTA */
 goRooftop.addEventListener("click", ()=>{
   tryPlayBgm();
+  setIndex(STAGES.length); // 4
   location.href = "./rooftop.html";
 });
 
-/* ===== Pixel art drawing ===== */
+/* Initial render */
+render();
+
+/* =========================
+   Pixel art drawing (UNCHANGED)
+   ========================= */
 function px(ctx, x,y,w,h,color){
   ctx.fillStyle = color; ctx.fillRect(x,y,w,h);
 }
@@ -543,5 +240,3 @@ drawTrees("macritchieIcon");
 drawPagoda("waterlooIcon");
 drawStadium("stadiumIcon");
 </script>
-</body>
-</html>
