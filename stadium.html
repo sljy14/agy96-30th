@@ -629,7 +629,7 @@
     function drawClaps(dt){
       for (const p of winAnim.clapBursts){
         p.life -= dt;
-        p.y -= 0.04 * dt;
+        p.y -= 0.02 * dt;
       }
       winAnim.clapBursts = winAnim.clapBursts.filter(p => p.life > 0);
 
@@ -637,7 +637,7 @@
       ctx.font = "22px sans-serif";
       ctx.textAlign = "center";
       for (const p of winAnim.clapBursts){
-        const a = clamp(p.life / 700, 0, 1);
+        const a = clamp(p.life / 1800, 0, 1);
         ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.65*a})`;
         ctx.fillText("👏", p.x, p.y);
       }
