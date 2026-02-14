@@ -1,86 +1,99 @@
-// js/bgm.js
-(function () {
-  const DEFAULT_TRACK = "./arcade.mp3";
-  const KEY_TRACK = "bgmTrack";
-  const KEY_TIME  = "bgmTime";
-  const KEY_PLAY  = "bgmPlaying";
+// ./js/bgm.js
+(() => {
+  // ---------- CONFIG ----------
+  const DEFAULT_SRC = "./arcade.mp3"; // your normal bgm
+  const STORAGE_KEY = "bgm_state_v1";
 
-  // Create (or reuse) a single <audio id="bgm"> on the page
-  let bgm = document.getElementById("bgm");
-  if (!bgm) {
-    bgm = document.createElement("audio");
-    bgm.id = "bgm";
-    bgm.loop = true;
-    bgm.preload = "auto";
-    document.body.appendChild(bgm);
+  // ---------- Get or create the <audio> ----------
+  let audio = document.getElementById("bgm");
+  if (!audio) {
+    audio = document.createElement("audio");
+    audio.id = "bgm";
+    audio.loop = true;
+    audio.preload = "auto";
+    document.body.appendChild(audio);
   }
 
-  bgm.volume = 0.5;
+  audio.volume = 0.5;
 
-  function getTrack() {
-    return localStorage.getItem(KEY_TRACK) || DEFAULT_TRACK;
+  // ---------- State helpers ----------
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    catch { return {}; }
+  }
+  function saveState(partial) {
+    const s = { ...loadState(), ...partial };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
   }
 
-  function setTrack(src, { resetTime = false, loop = true } = {}) {
-    const current = bgm.getAttribute("src") || "";
-    if (current !== src) {
-      bgm.loop = !!loop;
-      bgm.src = src;
-      bgm.load();
-    }
-    localStorage.setItem(KEY_TRACK, src);
-
-    if (resetTime) {
-      localStorage.setItem(KEY_TIME, "0");
-      try { bgm.currentTime = 0; } catch(e) {}
+  function ensureSrc(src) {
+    if (!src) src = DEFAULT_SRC;
+    if (audio.getAttribute("src") !== src) {
+      audio.src = src;
+      audio.load();
     }
   }
 
-  function restoreTime() {
-    const t = Number(localStorage.getItem(KEY_TIME) || "0");
-    if (Number.isFinite(t) && t > 0 && t < 36000) {
-      try { bgm.currentTime = t; } catch(e) {}
-    }
-  }
-
-  async function play() {
-    localStorage.setItem(KEY_PLAY, "true");
+  async function safePlay() {
     try {
-      await bgm.play();
+      await audio.play();
+      saveState({ playing: true });
     } catch (e) {
-      // iOS/Safari may block autoplay until user gesture
+      // iOS blocks autoplay until user gesture; ignore quietly
     }
   }
 
-  function pause() {
-    localStorage.setItem(KEY_PLAY, "false");
-    try { bgm.pause(); } catch(e) {}
+  function setLoop(loop) {
+    audio.loop = !!loop;
   }
 
-  // Save time periodically so next page resumes
-  setInterval(() => {
-    if (!bgm.paused) {
-      localStorage.setItem(KEY_TIME, String(bgm.currentTime || 0));
-    }
-  }, 500);
+  function switchTo(src, loop = true, restart = false) {
+    const wasPlaying = !audio.paused;
+    ensureSrc(src);
+    setLoop(loop);
+    if (restart) audio.currentTime = 0;
+    saveState({ src, loop, playing: wasPlaying });
+    if (wasPlaying) safePlay();
+  }
 
-  // Init on page load
-  setTrack(getTrack(), { resetTime: false, loop: true });
-  restoreTime();
+  // ---------- Restore on page load ----------
+  const st = loadState();
+  ensureSrc(st.src || DEFAULT_SRC);
+  setLoop(st.loop ?? true);
 
-  // If user previously had music on, try resume on pageshow (bfcache)
-  window.addEventListener("pageshow", () => {
-    setTrack(getTrack(), { resetTime: false, loop: bgm.loop });
-    restoreTime();
-    if (localStorage.getItem(KEY_PLAY) === "true") play();
+  // Try resume time if same src
+  if (typeof st.t === "number" && !Number.isNaN(st.t)) {
+    audio.currentTime = Math.max(0, st.t);
+  }
+
+  // If previously playing, attempt to play (will only succeed after gesture on iOS)
+  if (st.playing) safePlay();
+
+  // ---------- Keep time across pages ----------
+  function persistTime() {
+    saveState({ t: audio.currentTime, src: audio.getAttribute("src"), loop: audio.loop, playing: !audio.paused });
+  }
+  window.addEventListener("pagehide", persistTime);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) persistTime();
   });
 
-  // First user gesture on each page => guaranteed start
+  // ---------- Provide global functions (so your existing calls work) ----------
+  window.tryPlayBgm = () => safePlay();
+
+  // For your special pages:
+  window.BGM = {
+    play: () => safePlay(),
+    pause: () => { audio.pause(); saveState({ playing: false }); },
+    stop: () => { audio.pause(); audio.currentTime = 0; saveState({ playing: false, t: 0 }); },
+    switchTo: (src, loop = true, restart = true) => switchTo(src, loop, restart),
+    setVolume: (v) => { audio.volume = Math.max(0, Math.min(1, v)); saveState({ vol: audio.volume }); },
+    getAudio: () => audio
+  };
+
+  // Start playing on first user interaction (iOS autoplay rule)
   document.addEventListener("pointerdown", function firstTap() {
-    if (localStorage.getItem(KEY_PLAY) === "true") play();
+    safePlay();
     document.removeEventListener("pointerdown", firstTap);
   }, { once: true });
-
-  // Expose a tiny API for special scenes (final rooftop)
-  window.BGM = { play, pause, setTrack };
 })();
