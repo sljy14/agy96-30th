@@ -77,6 +77,10 @@ document.addEventListener("pointerdown", function firstTap(){
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
   }
+
+  // Switch to birthday music when page loads
+switchBgmTo("./bday.mp3", true);
+
 </script>
 </body>
 </html>
