@@ -197,12 +197,7 @@
 
 <script>
 /* ===== BGM ===== */
-const bgm = document.getElementById("bgm");
-bgm.volume = 0.5;
-function tryPlayBgm(){
-  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
-}
-if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
+
 
 /* ===== Game ===== */
 const cv = document.getElementById("cv");
@@ -393,5 +388,8 @@ document.getElementById("nextBtn").addEventListener("click", ()=>{
 });
 
 </script>
+
+  <script src="./js/bgm.js"></script>
+
 </body>
 </html>
