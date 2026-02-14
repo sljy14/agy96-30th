@@ -152,6 +152,19 @@
       font-weight: 1000;
       letter-spacing: -0.01em;
     }
+
+    .modal h2{
+  color: #111;   /* black */
+}
+
+.modal p{
+  color: #222;   /* dark grey */
+}
+
+.modal button{
+  color: #111;   /* black text */
+}
+
     .modal p{
       margin: 0 0 14px;
       color: rgba(255,255,255,0.82);
@@ -442,29 +455,28 @@
 }
 
 function drawLegsBetter(c){
-  // Hip anchor (under tutu)
+  // Start slightly lower so it clearly sits under tutu
   const hipX = 0;
-  const hipY = 44;
+  const hipY = 48;   // was 44 → move down 4px
 
   c.fillStyle = "#f1c7a6";
 
-  // two straight legs
   const legW = 8;
-  const legH = 60;
-  const gap  = 3; // space between legs
+  const legH = 54;   // was 60 → slightly shorter
+  const gap  = 3;
 
   // left leg
   c.fillRect(hipX - gap - legW, hipY, legW, legH);
+
   // right leg
   c.fillRect(hipX + gap, hipY, legW, legH);
 
-  // shoes (pointe-ish)
+  // shoes
   c.fillStyle = "#fff";
   const shoeH = 8;
   c.fillRect(hipX - gap - legW - 2, hipY + legH - 4, legW + 4, shoeH);
-  c.fillRect(hipX + gap - 2,       hipY + legH - 4, legW + 4, shoeH);
+  c.fillRect(hipX + gap - 2,        hipY + legH - 4, legW + 4, shoeH);
 }
-
 
   function drawArmsUpArc(c){
     // Arms UP (fifth position vibe) — two smooth arcs above shoulders
