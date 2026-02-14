@@ -473,13 +473,26 @@
 
 
   function bindTapInput(){
-    if (window.PointerEvent){
-      canvas.addEventListener("pointerdown", (e)=>{
-        e.preventDefault();
-        onTap();
-      }, { passive:false });
-      return;
-    }
+  // Use pointer events when available (best for iOS + desktop)
+  if (window.PointerEvent){
+    canvas.addEventListener("pointerdown", (e)=>{
+      e.preventDefault();
+      onTap();
+    }, { passive:false });
+    return;
+  }
+
+  // Fallbacks (older Safari)
+  canvas.addEventListener("touchstart", (e)=>{
+    e.preventDefault();
+    onTap();
+  }, { passive:false });
+
+  canvas.addEventListener("click", (e)=>{
+    e.preventDefault();
+    onTap();
+  });
+}
 
   
   // ===== GAME UPDATE =====
@@ -798,6 +811,7 @@
 
 
   // ===== INIT =====
+  bindTapInput();
   resetGame();
   requestAnimationFrame(loop);
   requestAnimationFrame(viewLoop);
