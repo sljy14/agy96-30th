@@ -325,6 +325,11 @@
     game.fallT = 0;
   }
 
+function ensureBgm(){
+    if (window.tryPlayBgm) window.tryPlayBgm();
+  }
+
+  
   function handlePick(pick){
     ensureBgm();
     if (game.state !== "playing" || !game.cue) return;
