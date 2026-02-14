@@ -197,7 +197,7 @@
 </div>
 
 <!-- BGM (will start on first user tap; then loops forever across pages) -->
-<audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
+<audio id="bgm" src="./arcade.mp3" preload="auto" loop></audio>
 
 <script>
 (() => {
@@ -451,6 +451,13 @@
     e.preventDefault();
     onTap();
   }, {passive:false});
+
+  canvas.addEventListener("touchstart", (e)=>{
+    e.preventDefault();
+    onTap();
+  }, {passive:false});
+
+  canvas.addEventListener("click", onTap);
 
   // ===== GAME UPDATE =====
   function update(dt){
