@@ -581,8 +581,6 @@
       ctx.fillStyle = "rgba(0,0,0,0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Finish line pole only (no tape)
-      drawFinishLine();
 
       // hop 5x
       if (winAnim.active){
@@ -623,7 +621,7 @@
         winAnim.clapBursts.push({
           x: player.x + rand(-80, 80),
           y: player.y - 180 + rand(-20, 60),
-          life: 700
+          life: 1800
         });
       }
     }
