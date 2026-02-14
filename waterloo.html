@@ -248,18 +248,7 @@
   const rightBtn = document.getElementById("rightBtn");
   const upBtn    = document.getElementById("upBtn");
 
-  const bgm = document.getElementById("bgm");
-  let bgmStarted = false;
-  async function ensureBgm(){
-    if (bgmStarted) return;
-    bgmStarted = true;
-    try{
-      bgm.volume = 0.7;
-      await bgm.play();
-      localStorage.setItem("bgmPlaying","true");
-    }catch(e){ bgmStarted = false; }
-  }
-  if (localStorage.getItem("bgmPlaying")==="true") ensureBgm();
+
 
   const GOAL = 10;
   const WINDOW_MS = 1600;
@@ -833,5 +822,8 @@ c.fillRect(-28, 38, 56, 3);
 
 })();
 </script>
+
+  <script src="./js/bgm.js"></script>
+
 </body>
 </html>
