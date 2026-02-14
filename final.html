@@ -29,9 +29,34 @@
   </div>
 </div>
 
+  <!-- BGM -->
+<audio id="bgm" src="./loop.mp3" preload="auto" loop></audio>
+
 <script type="module">
   import { loadState } from "./js/app.js";
   const s = loadState();
+  // ===== BGM CONTROL =====
+const bgm = document.getElementById("bgm");
+
+function safePlay(){
+  bgm.play().catch(()=>{});
+}
+
+function switchBgmTo(src, shouldLoop=true){
+  bgm.pause();
+  bgm.currentTime = 0;
+  bgm.src = src;
+  bgm.loop = shouldLoop;
+  bgm.load();
+  safePlay();
+}
+
+// Start loop.mp3 after first user interaction (iOS autoplay rule)
+document.addEventListener("pointerdown", function firstTap(){
+  safePlay();
+  document.removeEventListener("pointerdown", firstTap);
+}, { once:true });
+
   const a1 = s.answers?.a1 || "";
   const a2 = s.answers?.a2 || "";
 
