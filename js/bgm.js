@@ -21,6 +21,8 @@
     audio.preload = "auto";
     document.body.appendChild(audio);
   }
+  audio.setAttribute("playsinline", "");
+  audio.setAttribute("webkit-playsinline", "");
 
   audio.volume = 0.5;
   let wantedPlaying = false;
@@ -73,6 +75,9 @@
   // ---------- Restore on page load ----------
   const st = loadState();
   wantedPlaying = !!st.playing;
+  if (typeof st.vol === "number" && !Number.isNaN(st.vol)) {
+    audio.volume = Math.max(0, Math.min(1, st.vol));
+  }
   const pageSrc = audio.getAttribute("src") || audio.src;
   const targetSrc = pageSrc || st.src || DEFAULT_SRC;
   const sameAsSaved = !!st.src && normalizeSrc(st.src) === normalizeSrc(targetSrc);
@@ -106,7 +111,17 @@
       playing: wantedPlaying || !audio.paused
     });
   }
+  let lastPersistAt = 0;
+  audio.addEventListener("timeupdate", () => {
+    const now = Date.now();
+    if (now - lastPersistAt > 500) {
+      lastPersistAt = now;
+      persistTime();
+    }
+  });
   window.addEventListener("pagehide", persistTime);
+  window.addEventListener("beforeunload", persistTime);
+  window.addEventListener("freeze", persistTime);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) persistTime();
   });
@@ -124,9 +139,9 @@
     getAudio: () => audio
   };
 
-  // Start playing on first user interaction (iOS autoplay rule)
-  document.addEventListener("pointerdown", function firstTap() {
-    safePlay();
-    document.removeEventListener("pointerdown", firstTap);
-  }, { once: true });
+  // Start playing on first user interaction (iOS/Android autoplay rule)
+  const unlock = () => safePlay();
+  ["pointerdown", "touchstart", "click", "keydown"].forEach((evt) => {
+    document.addEventListener(evt, unlock, { once: true, passive: true });
+  });
 })();
