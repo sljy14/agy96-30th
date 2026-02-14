@@ -340,6 +340,8 @@ function buildCrowd(n){
       
 drawCrowd(performance.now());
 
+      
+
       // Field green bands
       ctx.fillStyle = "#2fdc2a";
       ctx.fillRect(0, 124, canvas.width, 54);
@@ -361,6 +363,53 @@ drawCrowd(performance.now());
         ctx.stroke();
       }
       ctx.setLineDash([]);
+
+      function drawWinBackground(){
+  // Same sky
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, "#0b1c2d");
+  g.addColorStop(1, "#162a3d");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Crowd band
+  ctx.fillStyle = "#caa76c";
+  ctx.fillRect(0, 60, canvas.width, 34);
+
+  ctx.fillStyle = "#2b3f63";
+  ctx.fillRect(0, 94, canvas.width, 30);
+
+  drawCrowd(performance.now());
+
+  // Field
+  ctx.fillStyle = "#2fdc2a";
+  ctx.fillRect(0, 124, canvas.width, 54);
+
+  ctx.fillStyle = "#26c624";
+  ctx.fillRect(0, 178, canvas.width, 26);
+
+  // Track
+  ctx.fillStyle = "#5b2e2e";
+  ctx.fillRect(0, 204, canvas.width, 356);
+
+  // Track dashed lanes only (no diagonal stripe)
+  ctx.strokeStyle = "rgba(255,255,255,0.42)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([12, 12]);
+  for(let y=250; y<=520; y+=40){
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Lights (keep glow)
+  drawLightPole(90, 45);
+  drawLightPole(canvas.width/2, 40);
+  drawLightPole(canvas.width-90, 45);
+}
+
 
       // Big diagonal stripe like ref
       ctx.fillStyle = "rgba(255,255,255,0.58)";
@@ -615,7 +664,8 @@ setTimeout(() => {
 
     function drawWinScene(dt){
       // same stadium background but darker, and a finish line + claps
-      drawStadiumBackground();
+      drawWinBackground();
+
 
       // Darken a touch
       ctx.fillStyle = "rgba(0,0,0,0.08)";
@@ -669,12 +719,6 @@ setTimeout(() => {
       ctx.fillStyle = "rgba(255,255,255,0.70)";
       ctx.fillRect(finishLine.x, 220, finishLine.w, finishLine.h);
 
-      // checkered tape
-      const tapeY = world.groundY - 10;
-      for (let i=0;i<12;i++){
-        ctx.fillStyle = (i%2===0) ? "rgba(255,255,255,0.90)" : "rgba(0,0,0,0.50)";
-        ctx.fillRect(finishLine.x - 90 + i*15, tapeY, 15, 10);
-      }
     }
 
     function spawnClaps(){
