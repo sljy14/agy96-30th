@@ -6,19 +6,20 @@
   <title>Waterloo Ballet Studio</title>
   <style>
     :root{
-      --cardBg1: rgba(24, 10, 40, 0.82);
-      --cardBg2: rgba(12, 6, 22, 0.74);
+      --cardBg1: rgba(34, 8, 60, 0.78);
+      --cardBg2: rgba(10, 7, 22, 0.72);
       --border: rgba(255,255,255,0.12);
-      --text: #f4f1ff;
-      --muted: rgba(244,241,255,0.72);
+      --text: #f3f0ff;
+      --muted: rgba(243,240,255,0.78);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: radial-gradient(1100px 620px at 50% 12%, rgba(255,170,220,0.10), transparent 62%),
-                  radial-gradient(900px 560px at 50% 82%, rgba(140,255,220,0.08), transparent 62%),
-                  linear-gradient(160deg,#061523,#070714);
+      background:
+        radial-gradient(1100px 620px at 50% 10%, rgba(210,170,255,0.18), transparent 55%),
+        radial-gradient(900px 520px at 50% 80%, rgba(140,255,220,0.10), transparent 62%),
+        linear-gradient(160deg,#0a1632,#090615);
       color: var(--text);
     }
     .wrap{
@@ -34,7 +35,6 @@
       border: 1px solid var(--border);
       box-shadow: 0 30px 80px rgba(0,0,0,0.55);
       overflow:hidden;
-      position:relative;
     }
     .header{
       padding: 16px 16px 10px;
@@ -42,9 +42,9 @@
     }
     h1{
       margin: 0 0 6px;
-      font-size: 32px;
-      line-height: 1.08;
-      font-weight: 900;
+      font-size: 34px;
+      line-height: 1.05;
+      font-weight: 1000;
       letter-spacing: -0.02em;
       text-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
@@ -60,9 +60,11 @@
       gap: 10px;
       justify-content: space-between;
       padding: 0 14px 10px;
+      flex-wrap: wrap;
     }
     .pill{
       flex:1;
+      min-width: 160px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -71,118 +73,121 @@
       padding: 10px 10px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.2px;
-      min-width: 0;
     }
     .pill small{
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .stage{ padding: 8px 12px 12px; }
+    .stage{
+      padding: 8px 12px 12px;
+    }
     .frame{
+      position: relative;
       border-radius: 20px;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.10);
       padding: 10px;
-      position:relative;
+      overflow: hidden;
     }
     canvas{
       width:100%;
       height:auto;
       display:block;
       border-radius: 16px;
-      background: #f6eefe;
+      background: #f3eaff;
       touch-action: manipulation;
     }
 
-    /* Controls BELOW her (on the studio floor) */
+    /* control center */
     .controls{
       position:absolute;
-      left:50%;
-      bottom: 18px;
+      left: 50%;
+      bottom: 16px;
       transform: translateX(-50%);
       display:flex;
       gap: 14px;
       z-index: 5;
-      pointer-events:auto;
+      pointer-events: auto;
     }
     .btn{
-      width: 78px;
-      height: 78px;
+      width: 76px;
+      height: 76px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.30);
-      background: rgba(255,255,255,0.28);
-      box-shadow: 0 14px 30px rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.50);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.16);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size: 34px;
+      font-size: 38px;
       font-weight: 900;
-      color: rgba(25,20,40,0.70);
+      color: rgba(0,0,0,0.72);
       user-select:none;
       cursor:pointer;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(6px);
     }
-    .btn:active{ transform: translateY(1px); }
+    .btn:active{ transform: translateY(1px) scale(0.98); }
+    .btnRowHint{
+      padding: 0 16px 14px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
 
-    /* Win overlay */
+    /* win overlay */
     .overlay{
       position:absolute;
-      inset:0;
+      inset: 0;
       display:none;
       align-items:center;
       justify-content:center;
       z-index: 10;
-      background: rgba(0,0,0,0.30);
-      backdrop-filter: blur(3px);
+      pointer-events:auto;
     }
     .overlay.show{ display:flex; }
-
     .modal{
-      width: min(420px, 86%);
+      width: min(420px, 92%);
       border-radius: 22px;
-      padding: 18px 18px 16px;
-      border: 1px solid rgba(255,255,255,0.24);
       background: rgba(255,255,255,0.18);
-      box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      padding: 18px 16px 16px;
       text-align:center;
+      backdrop-filter: blur(8px);
     }
     .modal h2{
       margin: 0 0 8px;
-      font-size: 18px;
-      line-height: 1.25;
-      font-weight: 900;
+      font-size: 20px;
+      font-weight: 1000;
+      letter-spacing: -0.01em;
     }
     .modal p{
       margin: 0 0 14px;
-      color: rgba(255,255,255,0.78);
+      color: rgba(255,255,255,0.82);
       font-size: 13px;
+      line-height: 1.35;
     }
     .modal button{
-      appearance:none;
-      border:0;
       width: 100%;
+      border: 0;
       border-radius: 999px;
       padding: 14px 16px;
-      font-weight: 900;
+      font-weight: 1000;
       letter-spacing: 0.2px;
-      background: rgba(255,255,255,0.24);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.26);
+      background: linear-gradient(180deg, rgba(255,190,230,0.30), rgba(255,190,230,0.14));
+      color: var(--text);
+      border: 1px solid rgba(255,190,230,0.34);
       cursor:pointer;
     }
     .modal button:active{ transform: translateY(1px); }
 
-    /* Cue pulse so repeated same-direction cues feel “new” */
-    .cuePulse{
-      animation: cuePulse 140ms ease-out 1;
-    }
-    @keyframes cuePulse{
-      0%{ transform: scale(1); }
-      60%{ transform: scale(1.08); }
-      100%{ transform: scale(1); }
+    @media (max-width: 360px){
+      h1{ font-size: 30px; }
+      .btn{ width: 70px; height: 70px; font-size: 34px; }
     }
   </style>
 </head>
@@ -190,19 +195,21 @@
 <body>
 <div class="wrap">
   <div class="card">
+
     <div class="header">
       <h1>Welcome to the Waterloo ballet studio! 🩰</h1>
-      <p class="sub">Tap left, right, or up to balance your piqué pose.</p>
+      <p class="sub">Tap ←, ↑, or → to balance your piqué pose.</p>
     </div>
 
     <div class="hud">
-      <div class="pill"><span>🎯</span><span>Clicks:&nbsp;<strong id="hitCount">0</strong>&nbsp;<small>/ 10</small></span></div>
-      <div class="pill"><span>⏳</span><span>Timer:&nbsp;<strong id="timeLeft">1.6</strong><small>s</small></span></div>
+      <div class="pill"><span>🎯</span><span>Hits:&nbsp;<strong id="hits">0</strong>&nbsp;<small>/ 10</small></span></div>
+      <div class="pill"><span>⏳</span><span>Time:&nbsp;<strong id="timer">1.6</strong><small>s</small></span></div>
+      <div class="pill"><span>🙈</span><span>Falls:&nbsp;<strong id="falls">0</strong></span></div>
     </div>
 
     <div class="stage">
       <div class="frame">
-        <canvas id="game" width="390" height="520" aria-label="Waterloo ballet game"></canvas>
+        <canvas id="c" width="390" height="520" aria-label="Waterloo ballet game"></canvas>
 
         <div class="controls" aria-label="controls">
           <div class="btn" id="leftBtn" role="button" aria-label="left">‹</div>
@@ -214,36 +221,40 @@
           <div class="modal">
             <h2>Congratulations! You balanced with grace under pressure. 🙆‍♀️</h2>
             <p>Ready for the next mission?</p>
-            <button id="nextBtn">On to my next mission!</button>
+            <button id="nextBtn">On to my next adventure!</button>
           </div>
         </div>
+
       </div>
     </div>
+
+    <div class="btnRowHint">10 correct cues. Each cue must be tapped within 1.6 seconds. Wrong or late = drop + instant restart.</div>
   </div>
 </div>
 
-<audio id="bgm" src="arcade.mp3" preload="auto" loop></audio>
+<!-- BGM -->
+<audio id="bgm" src="./arcade.mp3" preload="auto" loop></audio>
 
 <script>
 (() => {
   // ===== DOM =====
-  const canvas = document.getElementById("game");
+  const canvas = document.getElementById("c");
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = true;
 
-  const hitCountEl = document.getElementById("hitCount");
-  const timeLeftEl = document.getElementById("timeLeft");
-
-  const leftBtn  = document.getElementById("leftBtn");
-  const upBtn    = document.getElementById("upBtn");
-  const rightBtn = document.getElementById("rightBtn");
-
+  const hitsEl = document.getElementById("hits");
+  const timerEl = document.getElementById("timer");
+  const fallsEl = document.getElementById("falls");
   const overlay = document.getElementById("overlay");
   const nextBtn = document.getElementById("nextBtn");
 
+  const leftBtn = document.getElementById("leftBtn");
+  const rightBtn = document.getElementById("rightBtn");
+  const upBtn = document.getElementById("upBtn");
+
   const bgm = document.getElementById("bgm");
 
-  // ===== BGM (starts on first user action; remembers across pages) =====
+  // ===== BGM (iOS friendly + persists across pages) =====
   let bgmStarted = false;
   async function ensureBgm(){
     if (bgmStarted) return;
@@ -257,566 +268,612 @@
     }
   }
   if (localStorage.getItem("bgmPlaying")==="true"){
-    // try (may still be blocked until tap)
+    // try autoplay (may fail, will succeed on first tap)
     ensureBgm();
   }
 
-  // ===== GAME CONFIG =====
-  const TARGET_HITS = 10;
-  const WINDOW_MS = 1600; // 1.6s per cue (per your latest)
-  const COLORS = ["#7ad6ff","#ff7ad6","#7affb0","#ffd37a","#b07aff","#7affff","#ff7a7a","#9cff7a"];
+  // ===== GAME SETTINGS =====
+  const GOAL = 10;
+  const WINDOW_MS = 1600;      // your chosen 1.6s
+  const BETWEEN_MS = 140;      // tiny pause between cues so it never flickers
+  const rand = (a,b)=>a + Math.random()*(b-a);
 
   // ===== STATE =====
-  const state = {
-    mode: "play", // play | fall | winAnim | winHold
+  const game = {
+    state: "playing", // playing | falling | winAnim | winModal
     hits: 0,
-    cue: "👉",       // emoji cue above head
-    expected: "R",    // L | R | U
-    cueStart: 0,
-    now: 0,
-
-    // dancer motion
-    tilt: 0,          // current tilt (radians)
-    tiltTarget: 0,    // target tilt
-    jumpY: 0,
-    jumpV: 0,
-
-    // fall motion
-    fallY: 0,
-    fallV: 0,
-    fallTilt: 0,
-
-    // confetti
+    falls: 0,
+    cue: null,         // {dir:'left'|'right'|'up', shownAt, deadline, id}
+    lastCueAt: 0,
+    tilt: 0,           // current tilt radians
+    tiltTarget: 0,
+    wobbleT: 0,
+    jumpT: -1,         // -1 none, else 0..1
+    fallT: -1,
     confetti: [],
-    confettiOn: false,
-    winT0: 0,
-    hopT0: 0,
-
-    // cue pop
-    cuePulseT: 0
+    confettiT: 0,
+    winT: 0,
+    winJumps: 0
   };
 
+  // dancer anchor (we keep her ABOVE the buttons)
+  const dancer = {
+    x: canvas.width/2,
+    y: canvas.height - 140, // just above button row
+    scale: 1.0
+  };
+
+  // ===== HUD =====
   function setHUD(){
-    hitCountEl.textContent = String(state.hits);
+    hitsEl.textContent = String(game.hits);
+    fallsEl.textContent = String(game.falls);
+    if (game.cue && game.state === "playing"){
+      const remain = Math.max(0, (game.cue.deadline - performance.now())/1000);
+      timerEl.textContent = remain.toFixed(1);
+    } else {
+      timerEl.textContent = (WINDOW_MS/1000).toFixed(1);
+    }
   }
 
-  function setCue(expected){
-    // expected: "L" | "R" | "U"
-    state.expected = expected;
-    state.cue = expected === "L" ? "👈" : expected === "R" ? "👉" : "👆";
-    state.cueStart = performance.now();
+  // ===== CUE SYSTEM =====
+  function newCue(){
+    const now = performance.now();
+    const dirs = ["left","right","up"];
+    const dir = dirs[Math.floor(Math.random()*dirs.length)];
+    game.cue = {
+      dir,
+      shownAt: now,
+      deadline: now + WINDOW_MS,
+      id: (game.cue ? game.cue.id + 1 : 1)
+    };
+    game.lastCueAt = now;
 
-    // She tilts OPPOSITE the cue direction (as requested)
-    // cue 👉 means user must press right, so she tilts LEFT (negative)
-    if (expected === "R") state.tiltTarget = -0.38;
-    if (expected === "L") state.tiltTarget =  0.38;
-    if (expected === "U") state.tiltTarget =  0.00;
-
-    // cue pulse (so repeated same direction feels “new”)
-    state.cuePulseT = performance.now();
+    // tilt is OPPOSITE cue (your rule)
+    if (dir === "left")  game.tiltTarget = +0.42;   // cue left -> she tips RIGHT
+    if (dir === "right") game.tiltTarget = -0.42;   // cue right -> she tips LEFT
+    if (dir === "up")    game.tiltTarget = (Math.random()>0.5 ? 0.14 : -0.14); // a tiny lean, but jump is the effect
   }
 
-  function randNextExpected(){
-    // only L/R/U now (fair distribution)
-    const r = Math.random();
-    return r < 0.40 ? "L" : r < 0.80 ? "R" : "U";
-  }
-
-  function resetRun(){
-    state.mode = "play";
-    state.hits = 0;
-    state.tilt = 0;
-    state.tiltTarget = 0;
-    state.jumpY = 0;
-    state.jumpV = 0;
-    state.fallY = 0;
-    state.fallV = 0;
-    state.fallTilt = 0;
-
-    state.confetti = [];
-    state.confettiOn = false;
+  function resetRound(){
     overlay.classList.remove("show");
-
+    game.state = "playing";
+    game.hits = 0;
+    game.tilt = 0;
+    game.tiltTarget = 0;
+    game.wobbleT = 0;
+    game.jumpT = -1;
+    game.fallT = -1;
+    game.confetti = [];
+    game.confettiT = 0;
+    game.winT = 0;
+    game.winJumps = 0;
     setHUD();
-    setCue(randNextExpected());
-  }
-
-  function fail(){
-    state.mode = "fall";
-    state.fallY = 0;
-    state.fallV = 3.6;
-    state.fallTilt = state.tilt; // start from current tilt
-  }
-
-  function win(){
-    state.mode = "winAnim";
-    state.winT0 = performance.now();
-    state.hopT0 = performance.now();
-    state.tiltTarget = 0;
-    state.confettiOn = true;
-    state.confetti = spawnConfetti(220);
-
-    // lock cue so it doesn’t distract
-    state.cue = "";
+    newCue();
   }
 
   // ===== INPUT =====
-  function handleInput(input){ // "L" | "R" | "U"
+  function handlePick(pick){
     ensureBgm();
 
-    if (state.mode !== "play") return;
+    if (game.state !== "playing") return;
+    if (!game.cue) return;
 
-    const t = performance.now();
-    const elapsed = t - state.cueStart;
+    const now = performance.now();
+    const correct = (pick === game.cue.dir);
+    const late = (now > game.cue.deadline);
 
-    if (elapsed > WINDOW_MS){
-      fail();
+    if (!correct || late){
+      failDrop();
       return;
     }
 
-    if (input !== state.expected){
-      fail();
-      return;
+    // success
+    game.hits++;
+
+    // straighten immediately
+    game.tiltTarget = 0;
+
+    // quick jump on UP
+    if (pick === "up"){
+      game.jumpT = 0;
     }
 
-    // correct
-    state.hits++;
     setHUD();
 
-    // snap back upright quickly
-    state.tiltTarget = 0;
-
-    // jump if UP correct
-    if (input === "U"){
-      state.jumpV = -6.8; // quick hop
-    }
-
-    if (state.hits >= TARGET_HITS){
-      win();
+    if (game.hits >= GOAL){
+      winSequence();
       return;
     }
 
-    // next cue
-    setCue(randNextExpected());
+    // delay then next cue (prevents flicker + ensures repeat cues feel like "new")
+    const cueIdAtTap = game.cue.id;
+    game.cue = null;
+    setTimeout(() => {
+      // if still same run
+      if (game.state === "playing" && game.hits < GOAL){
+        // cue id increments even if same direction repeats
+        const prev = { id: cueIdAtTap };
+        game.cue = prev; // temporary so newCue increments consistently
+        newCue();
+      }
+    }, BETWEEN_MS);
   }
 
-  leftBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); handleInput("L"); }, {passive:false});
-  rightBtn.addEventListener("pointerdown",(e)=>{ e.preventDefault(); handleInput("R"); }, {passive:false});
-  upBtn.addEventListener("pointerdown",   (e)=>{ e.preventDefault(); handleInput("U"); }, {passive:false});
+  function failDrop(){
+    game.falls++;
+    setHUD();
+    game.state = "falling";
+    game.fallT = 0;
+  }
+
+  // ===== WIN =====
+  function spawnConfetti(){
+    const colors = ["#ff6bb5","#7cf5d2","#ffd35a","#9d7bff","#4fd2ff","#ff8a5a","#7ef07a"];
+    game.confetti = Array.from({length: 140}, () => ({
+      x: rand(0, canvas.width),
+      y: rand(-canvas.height, 0),
+      w: rand(6, 14),
+      h: rand(6, 14),
+      vy: rand(180, 420),
+      vx: rand(-90, 90),
+      rot: rand(0, Math.PI*2),
+      vr: rand(-6, 6),
+      a: rand(0.72, 1),
+      c: colors[Math.floor(Math.random()*colors.length)]
+    }));
+  }
+
+  function winSequence(){
+    game.state = "winAnim";
+    game.cue = null;
+    game.tiltTarget = 0;
+    game.tilt = 0;
+    game.winT = 0;
+    game.winJumps = 0;
+    game.confettiT = 0;
+    spawnConfetti();
+  }
 
   // ===== DRAW HELPERS =====
-  function roundedRect(c,x,y,w,h,r){
-    const rr = Math.min(r, w/2, h/2);
+  function roundRect(c,x,y,w,h,r){
     c.beginPath();
-    c.moveTo(x+rr, y);
-    c.arcTo(x+w, y, x+w, y+h, rr);
-    c.arcTo(x+w, y+h, x, y+h, rr);
-    c.arcTo(x, y+h, x, y, rr);
-    c.arcTo(x, y, x+w, y, rr);
+    c.moveTo(x+r,y);
+    c.arcTo(x+w,y,x+w,y+h,r);
+    c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r);
+    c.arcTo(x,y,x+w,y,r);
     c.closePath();
+  }
+
+  // Glasses (exact MacRitchie proportions)
+  function drawGlasses(c, leftX, gy, lensW, lensH, thick, gap, armLen){
+    c.fillStyle = "#000";
+    // left
+    c.fillRect(leftX, gy, lensW, thick);
+    c.fillRect(leftX, gy + lensH - thick, lensW, thick);
+    c.fillRect(leftX, gy, thick, lensH);
+    c.fillRect(leftX + lensW - thick, gy, thick, lensH);
+
+    const rightX = leftX + lensW + gap;
+    // right
+    c.fillRect(rightX, gy, lensW, thick);
+    c.fillRect(rightX, gy + lensH - thick, lensW, thick);
+    c.fillRect(rightX, gy, thick, lensH);
+    c.fillRect(rightX + lensW - thick, gy, thick, lensH);
+
+    // bridge
+    c.fillRect(leftX + lensW, gy + Math.floor(lensH/2) - 1, gap, 2);
+
+    // arms
+    c.fillRect(leftX - armLen, gy + 2, armLen, 2);
+    c.fillRect(rightX + lensW, gy + 2, armLen, 2);
+  }
+
+  function drawHeadFace(c){
+    // local space: hair box centered at 0,0 (top-left at -18,-60)
+    const x = -18, y = -60;
+
+    // hair
+    c.fillStyle = "#000";
+    c.fillRect(x, y, 36, 60);
+
+    // face
+    c.fillStyle = "#f1c7a6";
+    c.fillRect(x + 6, y + 16, 24, 28);
+
+    // glasses
+    const gy = y + 22;
+    const lensW = 11, lensH = 9;
+    const thick = 2, gap = 5, armLen = 4;
+    const leftX = x + 4;
+    drawGlasses(c, leftX, gy, lensW, lensH, thick, gap, armLen);
+  }
+
+  function drawArmsArc(c){
+    // arms as two smooth arcs (like your reference)
+    c.strokeStyle = "#f1c7a6";
+    c.lineWidth = 8;
+    c.lineCap = "round";
+
+    // left arc
+    c.beginPath();
+    c.arc(-14, -2, 20, Math.PI*1.05, Math.PI*1.75, false);
+    c.stroke();
+
+    // right arc
+    c.beginPath();
+    c.arc(14, -2, 20, Math.PI*1.25, Math.PI*1.95, false);
+    c.stroke();
+  }
+
+  function drawDancer(c, tiltRad, jumpOffset){
+    c.save();
+    c.translate(dancer.x, dancer.y + jumpOffset);
+    c.scale(dancer.scale, dancer.scale);
+    c.rotate(tiltRad);
+
+    // shirt (sleeveless light blue)
+    c.fillStyle = "#9fd0ff";
+    c.fillRect(-16, -10, 32, 42);
+
+    // neckline hint
+    c.fillStyle = "rgba(255,255,255,0.18)";
+    c.fillRect(-14, -8, 28, 3);
+
+    // tutu (pink) - keeps your clean blocky style
+    c.fillStyle = "#ff7dbf";
+    c.fillRect(-24, 26, 48, 16);
+    c.fillStyle = "rgba(255,255,255,0.18)";
+    c.fillRect(-22, 28, 44, 3);
+
+    // arms (arc)
+    drawArmsArc(c);
+
+    // head (exact proportions)
+    drawHeadFace(c);
+
+    // legs (improved: thigh starts under tutu, not from standing knee)
+    // standing leg (left)
+    c.fillStyle = "#f1c7a6";
+    c.fillRect(-6, 42, 12, 54);
+
+    // pointe shoe
+    c.fillStyle = "#fff";
+    c.fillRect(-8, 92, 16, 8);
+
+    // bent leg: horizontal thigh near tutu, shin angled back towards standing leg
+    // thigh
+    c.fillStyle = "#f1c7a6";
+    c.fillRect(6, 50, 26, 10); // starts near tutu
+    // shin (diagonal-ish using 2 rectangles)
+    c.fillRect(26, 58, 10, 22);
+    c.fillRect(20, 74, 14, 10);
+
+    // shoe on bent leg
+    c.fillStyle = "#fff";
+    c.fillRect(20, 84, 18, 8);
+
+    c.restore();
+  }
+
+  function drawNameTag(c, text, x, y){
+    c.save();
+    c.textAlign = "center";
+    c.font = "12px Arial";
+    c.fillStyle = "rgba(255,255,255,0.92)";
+    c.shadowColor = "rgba(0,0,0,0.35)";
+    c.shadowBlur = 6;
+    c.fillText(text, x, y);
+    c.restore();
   }
 
   function drawStudioBackground(){
     const W = canvas.width, H = canvas.height;
 
-    // soft lilac gradient
+    // soft purple gradient
     const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "#f7eefe");
-    g.addColorStop(0.55, "#f4dff0");
-    g.addColorStop(1, "#f7d8c6");
+    g.addColorStop(0, "#f7efff");
+    g.addColorStop(0.55, "#f3e6ff");
+    g.addColorStop(1, "#f8d7e7");
     ctx.fillStyle = g;
     ctx.fillRect(0,0,W,H);
 
-    // mirror wall panels
+    // mirror wall panel
     ctx.save();
-    ctx.globalAlpha = 0.55;
+    ctx.globalAlpha = 0.92;
     ctx.fillStyle = "rgba(255,255,255,0.55)";
-    roundedRect(ctx, 28, 40, W-56, 240, 18);
+    roundRect(ctx, 16, 40, W-32, 250, 18);
     ctx.fill();
-    ctx.globalAlpha = 0.20;
-    ctx.strokeStyle = "rgba(180,120,160,0.35)";
-    ctx.lineWidth = 2;
-    roundedRect(ctx, 28, 40, W-56, 240, 18);
-    ctx.stroke();
+    ctx.restore();
 
-    // mirror vertical seams
-    ctx.globalAlpha = 0.18;
-    ctx.strokeStyle = "rgba(120,90,120,0.35)";
+    // mirror lines
+    ctx.strokeStyle = "rgba(155,120,170,0.24)";
     ctx.lineWidth = 2;
-    for (let i=1;i<=4;i++){
-      const x = 28 + (W-56) * (i/5);
+    for (let x=50; x<W; x+=70){
       ctx.beginPath();
-      ctx.moveTo(x, 56);
-      ctx.lineTo(x, 268);
+      ctx.moveTo(x, 54);
+      ctx.lineTo(x, 276);
       ctx.stroke();
     }
 
-    // ceiling lights
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = "rgba(210,240,255,0.9)";
+    // light panels at top
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
     for (let i=0;i<4;i++){
-      roundedRect(ctx, 58 + i*(W-116)/3, 62, 64, 16, 9);
+      roundRect(ctx, 34 + i*90, 58, 56, 14, 7);
       ctx.fill();
     }
-    ctx.restore();
 
-    // barre
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = "rgba(135,110,120,0.65)";
-    ctx.fillRect(36, 320, W-72, 10);
-    ctx.globalAlpha = 0.45;
-    ctx.fillStyle = "rgba(90,80,95,0.55)";
+    // ballet barre
+    ctx.fillStyle = "rgba(140,120,120,0.65)";
+    ctx.fillRect(32, 320, W-64, 10);
+    ctx.fillStyle = "rgba(120,110,110,0.55)";
     for (let i=0;i<6;i++){
-      ctx.fillRect(46 + i*(W-92)/5, 330, 8, 52);
+      ctx.fillRect(54 + i*60, 330, 8, 70);
     }
-    ctx.restore();
 
-    // floor boards
-    const floorY = 360;
-    const fg = ctx.createLinearGradient(0,floorY,0,H);
-    fg.addColorStop(0, "#f2cfae");
-    fg.addColorStop(1, "#e8b184");
+    // floor
+    const fg = ctx.createLinearGradient(0, 360, 0, H);
+    fg.addColorStop(0, "#f0cfa8");
+    fg.addColorStop(1, "#e7b47e");
     ctx.fillStyle = fg;
-    ctx.fillRect(0,floorY,W,H-floorY);
+    ctx.fillRect(0, 360, W, H-360);
 
-    ctx.save();
-    ctx.globalAlpha = 0.22;
-    ctx.strokeStyle = "rgba(120,80,60,0.55)";
-    ctx.lineWidth = 1;
-    for (let x=22; x<W; x+=28){
+    // floor planks
+    ctx.strokeStyle = "rgba(140,90,70,0.18)";
+    ctx.lineWidth = 2;
+    for (let x=20; x<W; x+=28){
       ctx.beginPath();
-      ctx.moveTo(x, floorY);
+      ctx.moveTo(x, 365);
       ctx.lineTo(x, H);
       ctx.stroke();
     }
+
+    // spotlight on dancer area
+    ctx.save();
+    ctx.globalAlpha = 0.26;
+    const spot = ctx.createRadialGradient(W/2, 380, 20, W/2, 380, 240);
+    spot.addColorStop(0, "rgba(255,255,255,0.95)");
+    spot.addColorStop(1, "rgba(255,255,255,0.00)");
+    ctx.fillStyle = spot;
+    ctx.fillRect(0,0,W,H);
     ctx.restore();
 
-    // spotlight ellipse (soft)
+    // soft diagonal beam
     ctx.save();
-    ctx.globalAlpha = 0.22;
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.beginPath();
-    ctx.ellipse(W/2, 290, 210, 260, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawNameTag(x, y){
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.shadowColor = "rgba(0,0,0,0.55)";
-    ctx.shadowBlur = 4;
-    ctx.fillText("agy96", x, y);
-    ctx.restore();
-  }
-
-  function drawCueBubble(x, y){
-    if (!state.cue) return;
-
-    const pulse = (performance.now() - state.cuePulseT) < 170;
-    ctx.save();
-    if (pulse) ctx.scale(1.0, 1.0);
-
-    const w = 160, h = 62;
-    const bx = x - w/2;
-    const by = y - h/2;
-
-    ctx.globalAlpha = 0.92;
-    ctx.fillStyle = "rgba(255,255,255,0.78)";
-    ctx.strokeStyle = "rgba(255,120,190,0.60)";
-    ctx.lineWidth = 3;
-    roundedRect(ctx, bx, by, w, h, 18);
-    ctx.fill();
-    roundedRect(ctx, bx, by, w, h, 18);
-    ctx.stroke();
-
-    // emoji cue
-    ctx.globalAlpha = 1;
-    ctx.textAlign = "center";
-    ctx.font = "28px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif";
-    // tiny “pulse” feel
-    if (pulse){
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(1.06, 1.06);
-      ctx.translate(-x, -y);
-      ctx.fillText(state.cue, x, y+10);
-      ctx.restore();
-    }else{
-      ctx.fillText(state.cue, x, y+10);
-    }
-
-    ctx.restore();
-  }
-
-  // Ballet avatar (canvas) — keep your clean “image 2” proportions,
-  // with better arms (rounded above) + legs anchored from tutu area.
-  function drawBallerina(cx, cy, tiltRad, extraY){
-    // cy = feet baseline on floor
-    const y = cy + extraY;
-
-    ctx.save();
-    ctx.translate(cx, y);
-    ctx.rotate(tiltRad);
-
-    // shadow
-    ctx.save();
-    ctx.rotate(-tiltRad);
-    ctx.globalAlpha = 0.22;
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.beginPath();
-    ctx.ellipse(0, 18, 72, 18, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-
-    // torso anchor
-    const headTop = -150;
-    const hairW = 44, hairH = 88;
-    const faceW = 28, faceH = 34;
-
-    // hair
-    ctx.fillStyle = "#000";
-    roundedRect(ctx, -hairW/2, headTop, hairW, hairH, 10);
-    ctx.fill();
-
-    // face (same face block)
-    ctx.fillStyle = "#f1c7a6";
-    ctx.fillRect(-faceW/2, headTop+26, faceW, faceH);
-
-    // glasses (same vibe)
-    ctx.fillStyle = "#000";
-    // left lens
-    ctx.fillRect(-16, headTop+38, 14, 10);
-    ctx.fillRect(-18, headTop+36, 18, 2);
-    ctx.fillRect(-18, headTop+46, 18, 2);
-    ctx.fillRect(-18, headTop+36, 2, 12);
-    ctx.fillRect(-2,  headTop+36, 2, 12);
-    // right lens
-    ctx.fillRect(2, headTop+38, 14, 10);
-    ctx.fillRect(0, headTop+36, 18, 2);
-    ctx.fillRect(0, headTop+46, 18, 2);
-    ctx.fillRect(0, headTop+36, 2, 12);
-    ctx.fillRect(16, headTop+36, 2, 12);
-    // bridge
-    ctx.fillRect(-2, headTop+41, 4, 2);
-
-    // top (sleeveless light blue)
-    ctx.fillStyle = "#97c9ff";
-    ctx.fillRect(-22, headTop+78, 44, 46);
-
-    // arms — rounded ABOVE (canvas arcs), not “wrong curls”
-    ctx.save();
-    ctx.lineWidth = 9;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#f1c7a6";
-    // left arm arc
-    ctx.beginPath();
-    ctx.arc(-16, headTop+92, 28, Math.PI*1.05, Math.PI*1.70);
-    ctx.stroke();
-    // right arm arc
-    ctx.beginPath();
-    ctx.arc(16, headTop+92, 28, Math.PI*1.30, Math.PI*1.95);
-    ctx.stroke();
-    ctx.restore();
-
-    // tutu skirt (pink)
-    ctx.fillStyle = "#ff7ab8";
-    ctx.fillRect(-28, headTop+120, 56, 18);
     ctx.globalAlpha = 0.18;
     ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.fillRect(-24, headTop+124, 48, 2);
-    ctx.globalAlpha = 1;
-
-    // LEGS:
-    // Standing left leg straight down (pointe)
-    // Bent leg: horizontal thigh from tutu area, then shin angled back toward standing leg.
-    const hipY = headTop + 138;
-    ctx.strokeStyle = "#f1c7a6";
-    ctx.lineWidth = 12;
-    ctx.lineCap = "round";
-
-    // standing leg (left-ish)
     ctx.beginPath();
-    ctx.moveTo(-6, hipY);
-    ctx.lineTo(-10, hipY + 64);
+    ctx.moveTo(W*0.64, 60);
+    ctx.lineTo(W*0.92, 60);
+    ctx.lineTo(W*0.74, H);
+    ctx.lineTo(W*0.46, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCueBubble(){
+    if (!game.cue) return;
+
+    const W = canvas.width;
+    const now = performance.now();
+    const t = Math.min(1, (now - game.cue.shownAt)/140); // pop-in
+    const pop = 0.92 + 0.08*Math.sin(Math.PI*t);
+
+    // bubble position ABOVE head
+    const bx = dancer.x;
+    const by = dancer.y - 175;
+
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.scale(pop, pop);
+
+    // bubble
+    ctx.fillStyle = "rgba(255,255,255,0.86)";
+    ctx.strokeStyle = "rgba(255,120,190,0.55)";
+    ctx.lineWidth = 3;
+    roundRect(ctx, -48, -34, 96, 68, 18);
+    ctx.fill();
     ctx.stroke();
 
-    // standing shoe
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(-20, hipY + 64, 20, 8);
+    // emoji
+    ctx.font = "34px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-    // bent leg: thigh starts near tutu (NOT from standing knee)
-    // thigh horizontal out to right
-    const thighStartX = 6, thighStartY = hipY + 12;
-    const kneeX = 34, kneeY = hipY + 18;
+    let emoji = "👉";
+    if (game.cue.dir === "left") emoji = "👈";
+    if (game.cue.dir === "right") emoji = "👉";
+    if (game.cue.dir === "up") emoji = "👆";
 
-    ctx.beginPath();
-    ctx.moveTo(thighStartX, thighStartY);
-    ctx.lineTo(kneeX, kneeY);
-    ctx.stroke();
-
-    // shin leans back toward standing leg (diagonal /)
-    const ankleX = 16, ankleY = hipY + 56;
-    ctx.beginPath();
-    ctx.moveTo(kneeX, kneeY);
-    ctx.lineTo(ankleX, ankleY);
-    ctx.stroke();
-
-    // bent shoe
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(8, ankleY, 20, 8);
+    ctx.fillText(emoji, 0, 3);
 
     ctx.restore();
   }
 
-  function spawnConfetti(n){
-    const W = canvas.width, H = canvas.height;
-    const arr = [];
-    for (let i=0;i<n;i++){
-      arr.push({
-        x: Math.random()*W,
-        y: -Math.random()*H*0.9,
-        w: 6 + Math.random()*10,
-        h: 6 + Math.random()*12,
-        vx: -0.5 + Math.random()*1.0,
-        vy: 1.8 + Math.random()*4.2,
-        rot: Math.random()*Math.PI,
-        vr: (-0.14 + Math.random()*0.28),
-        col: COLORS[(Math.random()*COLORS.length)|0],
-        a: 0.85
-      });
-    }
-    return arr;
+  function drawShadow(){
+    ctx.save();
+    ctx.globalAlpha = 0.20;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(dancer.x, dancer.y + 110, 70, 18, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawConfetti(dt){
-    if (!state.confettiOn) return;
-    const W = canvas.width, H = canvas.height;
+    if (!game.confetti.length) return;
+    const H = canvas.height;
 
-    for (const p of state.confetti){
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.rot += p.vr * dt;
+    for (const p of game.confetti){
+      p.x += p.vx * (dt/1000);
+      p.y += p.vy * (dt/1000);
+      p.rot += p.vr * (dt/1000);
 
-      if (p.y > H + 30){
-        // loop down a bit to keep it chaotic for the 2s
-        p.y = -20 - Math.random()*60;
-        p.x = Math.random()*W;
-      }
+      // wrap a bit
+      if (p.y > H + 30) p.y = -30;
+      if (p.x < -30) p.x = canvas.width + 30;
+      if (p.x > canvas.width + 30) p.x = -30;
+    }
 
-      ctx.save();
+    ctx.save();
+    for (const p of game.confetti){
       ctx.globalAlpha = p.a;
+      ctx.fillStyle = p.c;
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
-      ctx.fillStyle = p.col;
       ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-      ctx.restore();
+      ctx.setTransform(1,0,0,1,0,0);
     }
+    ctx.restore();
   }
 
-  // ===== LOOP =====
+  // ===== UPDATE LOOP =====
   let last = 0;
-  function loop(ts){
-    if (!last) last = ts;
-    const dt = Math.min(33, ts - last);
-    last = ts;
-    state.now = ts;
 
-    // timer display
-    if (state.mode === "play"){
-      const left = Math.max(0, (WINDOW_MS - (ts - state.cueStart)) / 1000);
-      timeLeftEl.textContent = left.toFixed(1);
-      if (ts - state.cueStart > WINDOW_MS){
-        fail();
-      }
-    } else {
-      timeLeftEl.textContent = "—";
+  function update(dt){
+    const now = performance.now();
+
+    // smooth tilt towards target
+    game.tilt += (game.tiltTarget - game.tilt) * 0.12;
+
+    // jump anim
+    if (game.jumpT >= 0){
+      game.jumpT += dt/260;
+      if (game.jumpT >= 1) game.jumpT = -1;
     }
 
-    // update dancer motion
-    // ease tilt
-    state.tilt += (state.tiltTarget - state.tilt) * 0.16;
-
-    // jump physics (for UP correct)
-    state.jumpY += state.jumpV;
-    state.jumpV += 0.6;
-    if (state.jumpY > 0){ state.jumpY = 0; state.jumpV = 0; }
-
-    // falling
-    if (state.mode === "fall"){
-      state.fallY += state.fallV;
-      state.fallV += 0.9;
-      // tilt more dramatically while falling
-      state.fallTilt += (state.tiltTarget >= 0 ? 0.06 : -0.06);
-
-      if (state.fallY > 220){
-        resetRun(); // immediate restart
+    // timeout fail
+    if (game.state === "playing" && game.cue){
+      if (now > game.cue.deadline){
+        failDrop();
       }
     }
 
-    // win animation timing
-    if (state.mode === "winAnim"){
-      const t = ts - state.winT0;
+    // falling anim
+    if (game.state === "falling"){
+      game.fallT += dt;
+      // after short drop, instant restart
+      if (game.fallT > 520){
+        game.state = "playing";
+        game.tilt = 0;
+        game.tiltTarget = 0;
+        game.jumpT = -1;
+        game.fallT = -1;
+        game.hits = 0;
+        setHUD();
+        newCue();
+      }
+    }
 
-      // hop 3 times (keep scene visible)
-      // 3 hops over ~900ms
-      const hopT = Math.min(900, ts - state.hopT0);
-      const phase = hopT / 900;
-      const hops = 3;
-      const hopY = -18 * Math.max(0, Math.sin(Math.PI * hops * phase));
+    // win anim: keep scene, jump 3x, confetti for >=2s, then show modal
+    if (game.state === "winAnim"){
+      game.winT += dt;
 
-      // store as jumpY override
-      state.jumpY = hopY;
+      // 3 jumps across ~900ms
+      const jumpPeriod = 300;
+      const totalJumpTime = 900;
+      if (game.winT <= totalJumpTime){
+        // nothing to set; jump offset computed in draw
+      }
 
-      // after 2s, show button
-      if (t > 2000){
-        state.mode = "winHold";
+      game.confettiT += dt;
+      if (game.confettiT >= 2000){
+        game.state = "winModal";
         overlay.classList.add("show");
       }
     }
 
-    // ===== DRAW =====
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    setHUD();
+  }
+
+  // ===== DRAW LOOP =====
+  function draw(dt){
     drawStudioBackground();
 
-    // cue bubble near top
-    drawCueBubble(canvas.width/2, 108);
+    // shadow
+    drawShadow();
 
-    // place agy on FLOOR (right above the bottom buttons)
-    // floor baseline is around y=468-ish inside canvas due to boards
-    const dancerCX = canvas.width/2;
-    const dancerFeetY = 438; // puts her on floor, above controls
+    // dancer state
+    let tilt = game.tilt;
 
-    // name tag above head
-    drawNameTag(dancerCX, 188);
-
-    if (state.mode === "fall"){
-      // obvious fall: drop straight down with extra tilt
-      drawBallerina(dancerCX, dancerFeetY + state.fallY, state.fallTilt, 0);
-    } else {
-      drawBallerina(dancerCX, dancerFeetY, state.tilt, state.jumpY);
+    // falling: dramatic drop straight down (no weird spin)
+    let extraY = 0;
+    if (game.state === "falling"){
+      const t = Math.min(1, game.fallT / 520);
+      extraY = 220 * t * t;
+      tilt = tilt * (1 - t);
     }
 
-    // confetti on top, but DO NOT hide the scene
-    if (state.confettiOn){
+    // win: upright
+    if (game.state === "winAnim" || game.state === "winModal"){
+      tilt = 0;
+    }
+
+    // jump offset
+    let jumpOffset = 0;
+    if (game.jumpT >= 0){
+      // quick hop
+      const s = Math.sin(Math.PI * game.jumpT);
+      jumpOffset = -18 * s;
+    }
+    if (game.state === "winAnim"){
+      const t = Math.min(900, game.winT);
+      // 3 hops
+      const s = Math.abs(Math.sin((Math.PI * 3) * (t/900)));
+      jumpOffset = -22 * s;
+    }
+
+    // draw dancer
+    ctx.save();
+    ctx.translate(0, extraY);
+    drawDancer(ctx, tilt, jumpOffset);
+    ctx.restore();
+
+    // name tag above head (always)
+    drawNameTag(ctx, "agy96", dancer.x, dancer.y - 120);
+
+    // cue bubble (only while playing)
+    if (game.state === "playing") drawCueBubble();
+
+    // confetti
+    if (game.state === "winAnim" || game.state === "winModal"){
       drawConfetti(dt);
     }
+  }
+
+  function loop(ts){
+    if (!last) last = ts;
+    const dt = Math.min(33, ts - last);
+    last = ts;
+
+    update(dt);
+    draw(dt);
 
     requestAnimationFrame(loop);
   }
 
-  // ===== WIN BUTTON: go back to map with stadium prompt =====
+  // ===== BUTTON HANDLERS =====
+  function bindBtn(el, dir){
+    el.addEventListener("pointerdown", (e)=>{
+      e.preventDefault();
+      handlePick(dir);
+    }, {passive:false});
+  }
+  bindBtn(leftBtn, "left");
+  bindBtn(rightBtn, "right");
+  bindBtn(upBtn, "up");
+
+  // ===== NEXT =====
   nextBtn.addEventListener("click", ()=>{
-    // stadium prompt index in your map prompt list is 3 (0-based)
+    ensureBgm();
+    // after waterloo -> map with stadium prompt
     localStorage.setItem("mapPromptIndex", "3");
     location.href = "./map.html";
   });
 
   // ===== INIT =====
-  resetRun();
+  resetRound();
   requestAnimationFrame(loop);
 
 })();
