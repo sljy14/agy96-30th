@@ -235,7 +235,7 @@
       <div class="modalBack" id="shareModalBack">
         <div class="modal">
           <h3>Did you manage to send it on Telegram?</h3>
-          <p>If Telegram didn’t attach it, tap “No” and I’ll help you download + retry.</p>
+          <p>If Telegram didn’t attach it, click “No” and I’ll help you download + retry.</p>
           <div class="modalRow" style="margin-bottom:10px;">
             <div class="modalBtn" id="modalYes">✅ Yes → mini surprise</div>
             <div class="modalBtn secondary" id="modalNo">❌ No → download & retry</div>
@@ -256,7 +256,7 @@
         </div>
 
         <div class="smallHint" id="hint">
-          Tip: after you tap “Send to Sandra”, choose Telegram and send it to Sandra.
+          Tip: after you click “Send to Sandra”, choose Telegram and send it to Sandra.
         </div>
       </div>
     </div>
@@ -429,14 +429,14 @@ Sandra`;
       isRecording = true;
       setBtn(recordBtn, "⏹ Stop", true);
       setBtn(sendBtn, "📤 Send to Sandra", false);
-      hintEl.textContent = "Recording… Answer A then B in one take. Tap Stop when done.";
+      hintEl.textContent = "Recording… Answer A then B in one take. Click Stop when done.";
     }
 
     function stopRecording(){
       if (recorder && isRecording) recorder.stop();
       isRecording = false;
       setBtn(recordBtn, "🎙️ Record again", true);
-      hintEl.textContent = "Nice. Now tap “Send to Sandra”.";
+      hintEl.textContent = "Nice. Now click “Send to Sandra”.";
     }
 
     recordBtn.addEventListener("click", async () => {
