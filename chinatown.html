@@ -222,8 +222,7 @@
 /* =========================
    SETTINGS YOU CAN EDIT
 ========================= */
-const MAP_FILE = "./map.html";
-const NEXT_PROMPT_INDEX = 1; // 1 = MacRitchie
+
 const WIN_TARGET = 10;
 
 /* =========================
@@ -675,9 +674,13 @@ function startEatingScene(){
    BUTTON: back to map
 ========================= */
 fullBtn.addEventListener("click", ()=>{
-  localStorage.setItem("mapPromptIndex", String(NEXT_PROMPT_INDEX));
-  location.href = MAP_FILE;
+  // Mark Chinatown as completed for the new map flow
+  localStorage.setItem("done_chinatown", "1");
+
+  // Go back to map (map.html will now prompt MacRitchie)
+  location.href = "./map.html";
 });
+
 </script>
 </body>
 </html>
