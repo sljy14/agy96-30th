@@ -330,233 +330,218 @@
 <audio id="bgm" src="./arcade.mp3" loop></audio>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+/* ===== BGM (plays after first tap) ===== */
+const bgm = document.getElementById("bgm");
+bgm.volume = 0.5;
 
-  /* =========================
-     BGM (plays after first tap)
-     ========================= */
-  const bgm = document.getElementById("bgm");
-  if (bgm){
-    bgm.volume = 0.5;
-    function tryPlayBgm(){
-      bgm.play()
-        .then(()=>localStorage.setItem("bgmPlaying","true"))
-        .catch(()=>{});
-    }
-    window.tryPlayBgm = tryPlayBgm; // expose for reuse
+function tryPlayBgm(){
+  bgm.play().then(()=>localStorage.setItem("bgmPlaying","true")).catch(()=>{});
+}
+if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
 
-    if (localStorage.getItem("bgmPlaying")==="true") tryPlayBgm();
-  } else {
-    window.tryPlayBgm = ()=>{};
+/* ===== LINEAR PROMPT FLOW (INDEX-BASED) =====
+0 Chinatown → 1 MacRitchie → 2 Waterloo → 3 Stadium → 4 Rooftop
+*/
+const prompts = [
+  {
+    place: "chinatown",
+    q: "Where will you catch the mala ingredients? 🌶️",
+    next: "./chinatown.html"
+  },
+  {
+    place: "macritchie",
+    q: "Where will you hop across logs? 🪵",
+    next: "./macritchie.html"
+  },
+  {
+    place: "waterloo",
+    q: "Where will you do ballet / toes hurt the most? 🩰",
+    next: "./waterloo.html"
+  },
+  {
+    place: "stadium",
+    q: "Where will you run and jump barricades? 🏟️",
+    next: "./stadium.html"
+  }
+];
+
+const questionText = document.getElementById("questionText");
+const tryAgain = document.getElementById("tryAgain");
+const agyCenter = document.getElementById("agyCenter");
+const cta = document.getElementById("cta");
+const goRooftop = document.getElementById("goRooftop");
+
+// Optional: reset with ?reset=1
+(function maybeReset(){
+  const u = new URL(location.href);
+  if (u.searchParams.get("reset") === "1"){
+    localStorage.removeItem("mapPromptIndex");
+    localStorage.removeItem("bgmPlaying");
+    u.searchParams.delete("reset");
+    history.replaceState(null, "", u.toString());
+  }
+})();
+
+function getIndex(){
+  let i = Number(localStorage.getItem("mapPromptIndex") ?? 0);
+  if (!Number.isFinite(i) || i < 0) i = 0;
+  return i;
+}
+
+function setIndex(i){
+  localStorage.setItem("mapPromptIndex", String(i));
+}
+
+function setPrompt(i){
+  tryAgain.classList.remove("show");
+
+  // Finished all prompts -> go rooftop
+  if (i >= prompts.length){
+    questionText.textContent = "Final stop unlocked: Rooftop Quiet Time 🌙";
+    cta.classList.add("show");
+    document.querySelectorAll(".spot").forEach(s => s.style.opacity = "0.35");
+    return;
   }
 
-  /* =========================
-     PROMPT FLOW (INDEX-BASED)
-     0 = Chinatown
-     1 = MacRitchie
-     2 = Waterloo
-     3 = Stadium
-     4 = Rooftop (end)
-     ========================= */
-  const STAGES = [
-    { place: "chinatown",  q: "Where will you get some shiok and numbing food?",                  next: "./chinatown.html"  },
-    { place: "macritchie", q: "Where will you get your food stolen from you?",                   next: "./macritchie.html" },
-    { place: "waterloo",   q: "Where would your toes hurt the most?",                            next: "./waterloo.html"   },
-    { place: "stadium",    q: "Where would you be more than happy for your ear drums to hurt?",  next: "./stadium.html"    }
-  ];
+  cta.classList.remove("show");
+  document.querySelectorAll(".spot").forEach(s => s.style.opacity = "1");
+  questionText.textContent = prompts[i].q;
+}
 
-  const questionText = document.getElementById("questionText");
-  const tryAgain = document.getElementById("tryAgain");
-  const agyCenter = document.getElementById("agyCenter");
-  const cta = document.getElementById("cta");
-  const goRooftop = document.getElementById("goRooftop");
+let currentIndex = getIndex();
+setPrompt(currentIndex);
 
-  function clampIndex(i){
-    const end = STAGES.length; // 4
-    if (!Number.isFinite(i) || i < 0) return 0;
-    if (i > end) return 0; // safety wrap
-    return i;
-  }
+function jumpTwice(){
+  agyCenter.classList.remove("jumpTwice");
+  void agyCenter.offsetWidth;
+  agyCenter.classList.add("jumpTwice");
+  tryAgain.classList.add("show");
+}
 
-  function getIndex(){
-    return clampIndex(Number(localStorage.getItem("mapPromptIndex") || 0));
-  }
+// IMPORTANT: refresh when returning from games (Safari bfcache)
+function refresh(){
+  currentIndex = getIndex();
+  setPrompt(currentIndex);
+}
+window.addEventListener("pageshow", refresh);
+document.addEventListener("visibilitychange", ()=>{
+  if (!document.hidden) refresh();
+});
 
-  function setIndex(i){
-    localStorage.setItem("mapPromptIndex", String(clampIndex(i)));
-  }
+/* ===== Click handling ===== */
+document.querySelectorAll(".spot").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    tryPlayBgm();
 
-  /* Optional reset: map.html?reset=1 */
-  (function maybeReset(){
-    const u = new URL(location.href);
-    if (u.searchParams.get("reset") === "1"){
-      localStorage.removeItem("mapPromptIndex");
-      localStorage.removeItem("bgmPlaying");
-      u.searchParams.delete("reset");
-      history.replaceState(null, "", u.toString());
-    }
-  })();
-
-  function setSpotsDim(dim){
-    document.querySelectorAll(".spot").forEach(s => {
-      s.style.opacity = dim ? "0.35" : "1";
-    });
-  }
-
-  function render(){
-    if (tryAgain) tryAgain.classList.remove("show");
-
-    const i = getIndex();
-    const END_INDEX = STAGES.length;
-
-    if (i === END_INDEX){
-      if (questionText) questionText.textContent = "Final stop unlocked: Rooftop Quiet Time 🌙";
-      if (cta) cta.classList.add("show");
-      setSpotsDim(true);
+    // If already finished, don't allow map spots
+    if (currentIndex >= prompts.length){
+      jumpTwice();
       return;
     }
 
-    if (cta) cta.classList.remove("show");
-    setSpotsDim(false);
+    const pick = el.dataset.place;
+    const correct = prompts[currentIndex].place;
 
-    if (questionText) questionText.textContent = STAGES[i].q;
-  }
-
-  function jumpTwice(){
-    if (!agyCenter || !tryAgain) return;
-    agyCenter.classList.remove("jumpTwice");
-    void agyCenter.offsetWidth;
-    agyCenter.classList.add("jumpTwice");
-    tryAgain.classList.add("show");
-  }
-
-  /* iOS back/forward cache restore safety */
-  function refreshPromptFromStorage(){ render(); }
-  window.addEventListener("pageshow", refreshPromptFromStorage);
-  document.addEventListener("visibilitychange", ()=>{
-    if (!document.hidden) refreshPromptFromStorage();
+    if (pick === correct){
+      location.href = prompts[currentIndex].next;
+    } else {
+      jumpTwice();
+    }
   });
-
-  /* Spot clicks */
-  document.querySelectorAll(".spot").forEach(el=>{
-    el.addEventListener("click", ()=>{
-      window.tryPlayBgm();
-
-      const i = getIndex();
-      const END_INDEX = STAGES.length;
-
-      if (i === END_INDEX){
-        jumpTwice();
-        return;
-      }
-
-      const pick = el.dataset.place;
-      const stage = STAGES[i];
-
-      if (pick === stage.place){
-        location.href = stage.next;
-      } else {
-        jumpTwice();
-      }
-    });
-  });
-
-  /* Rooftop CTA */
-  if (goRooftop){
-    goRooftop.addEventListener("click", ()=>{
-      window.tryPlayBgm();
-      setIndex(STAGES.length); // 4
-      location.href = "./rooftop.html";
-    });
-  }
-
-  /* Initial render */
-  render();
-
-  /* =========================
-     Pixel art (your existing icons)
-     ========================= */
-  function px(ctx, x,y,w,h,color){ ctx.fillStyle = color; ctx.fillRect(x,y,w,h); }
-  function clear(ctx){ ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height); }
-
-  function drawLanterns(id){
-    const c = document.getElementById(id);
-    if (!c) return;
-    const ctx = c.getContext("2d");
-    clear(ctx);
-    px(ctx, 10, 16, 76, 6, "#d1b15a");
-    const lantern = (cx)=>{
-      px(ctx, cx-10, 24, 20, 24, "#d22b2b");
-      px(ctx, cx-12, 28, 4, 16, "#b01f1f");
-      px(ctx, cx+8, 28, 4, 16, "#b01f1f");
-      px(ctx, cx-8, 28, 16, 2, "#f2c94c");
-      px(ctx, cx-8, 34, 16, 2, "#f2c94c");
-      px(ctx, cx-2, 48, 4, 18, "#d1b15a");
-      px(ctx, cx-6, 66, 12, 4, "#d22b2b");
-    };
-    lantern(26); lantern(48); lantern(70);
-    px(ctx, 24, 32, 4, 6, "#ffe08a");
-    px(ctx, 46, 30, 4, 8, "#ffe08a");
-    px(ctx, 68, 34, 4, 6, "#ffe08a");
-  }
-
-  function drawTrees(id){
-    const c = document.getElementById(id);
-    if (!c) return;
-    const ctx = c.getContext("2d");
-    clear(ctx);
-    px(ctx, 10, 70, 76, 14, "#2b8c3a");
-    const tree = (x, y, s)=>{
-      px(ctx, x+s*2, y+s*4, s, s*4, "#6b3f2a");
-      px(ctx, x, y, s*5, s*4, "#3a8f44");
-      px(ctx, x+s, y-s, s*3, s, "#58b15f");
-      px(ctx, x+s, y+s, s*3, s, "#58b15f");
-    };
-    tree(16, 26, 4);
-    tree(46, 20, 5);
-    tree(62, 34, 3);
-  }
-
-  function drawPagoda(id){
-    const c = document.getElementById(id);
-    if (!c) return;
-    const ctx = c.getContext("2d");
-    clear(ctx);
-    px(ctx, 18, 72, 60, 10, "rgba(0,0,0,0.18)");
-    px(ctx, 18, 56, 60, 12, "#d9b27c");
-    px(ctx, 10, 52, 76, 6, "#e06a2c");
-    px(ctx, 18, 48, 60, 6, "#c75422");
-    px(ctx, 26, 36, 44, 10, "#d9b27c");
-    px(ctx, 20, 32, 56, 6, "#e06a2c");
-    px(ctx, 26, 28, 44, 6, "#c75422");
-    px(ctx, 34, 18, 28, 8, "#d9b27c");
-    px(ctx, 30, 14, 36, 6, "#e06a2c");
-    px(ctx, 34, 10, 28, 6, "#c75422");
-    px(ctx, 46, 6, 4, 8, "#2b2b3a");
-    px(ctx, 44, 4, 8, 3, "#7a7a8a");
-  }
-
-  function drawStadium(id){
-    const c = document.getElementById(id);
-    if (!c) return;
-    const ctx = c.getContext("2d");
-    clear(ctx);
-    px(ctx, 10, 12, 76, 72, "#d7dbe5");
-    px(ctx, 14, 16, 68, 64, "#eef1f6");
-    px(ctx, 22, 30, 52, 38, "#57b15f");
-    px(ctx, 24, 32, 48, 2, "#ffffff");
-    px(ctx, 24, 64, 48, 2, "#ffffff");
-    px(ctx, 46, 32, 2, 34, "#ffffff");
-    px(ctx, 44, 46, 6, 6, "#ffffff");
-    px(ctx, 46, 48, 2, 2, "#57b15f");
-    px(ctx, 22, 22, 52, 6, "#4aa3d6");
-  }
-
-  drawLanterns("chinatownIcon");
-  drawTrees("macritchieIcon");
-  drawPagoda("waterlooIcon");
-  drawStadium("stadiumIcon");
 });
+
+// Rooftop CTA
+goRooftop.addEventListener("click", ()=>{
+  tryPlayBgm();
+  location.href = "./rooftop.html";
+});
+
+/* ===== Pixel art drawing (UNCHANGED) ===== */
+function px(ctx, x,y,w,h,color){
+  ctx.fillStyle = color; ctx.fillRect(x,y,w,h);
+}
+function clear(ctx){ ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height); }
+
+function drawLanterns(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+  px(ctx, 10, 16, 76, 6, "#d1b15a");
+  const lantern = (cx)=>{
+    px(ctx, cx-10, 24, 20, 24, "#d22b2b");
+    px(ctx, cx-12, 28, 4, 16, "#b01f1f");
+    px(ctx, cx+8, 28, 4, 16, "#b01f1f");
+    px(ctx, cx-8, 28, 16, 2, "#f2c94c");
+    px(ctx, cx-8, 34, 16, 2, "#f2c94c");
+    px(ctx, cx-2, 48, 4, 18, "#d1b15a");
+    px(ctx, cx-6, 66, 12, 4, "#d22b2b");
+  };
+  lantern(26); lantern(48); lantern(70);
+  px(ctx, 24, 32, 4, 6, "#ffe08a");
+  px(ctx, 46, 30, 4, 8, "#ffe08a");
+  px(ctx, 68, 34, 4, 6, "#ffe08a");
+}
+
+function drawTrees(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+  px(ctx, 10, 70, 76, 14, "#2b8c3a");
+
+  const tree = (x, y, s)=>{
+    px(ctx, x+s*2, y+s*4, s, s*4, "#6b3f2a");
+    px(ctx, x, y, s*5, s*4, "#3a8f44");
+    px(ctx, x+s, y-s, s*3, s, "#58b15f");
+    px(ctx, x+s, y+s, s*3, s, "#58b15f");
+  };
+  tree(16, 26, 4);
+  tree(46, 20, 5);
+  tree(62, 34, 3);
+}
+
+function drawPagoda(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+
+  px(ctx, 18, 72, 60, 10, "rgba(0,0,0,0.18)");
+  px(ctx, 18, 56, 60, 12, "#d9b27c");
+  px(ctx, 10, 52, 76, 6, "#e06a2c");
+  px(ctx, 18, 48, 60, 6, "#c75422");
+
+  px(ctx, 26, 36, 44, 10, "#d9b27c");
+  px(ctx, 20, 32, 56, 6, "#e06a2c");
+  px(ctx, 26, 28, 44, 6, "#c75422");
+
+  px(ctx, 34, 18, 28, 8, "#d9b27c");
+  px(ctx, 30, 14, 36, 6, "#e06a2c");
+  px(ctx, 34, 10, 28, 6, "#c75422");
+
+  px(ctx, 46, 6, 4, 8, "#2b2b3a");
+  px(ctx, 44, 4, 8, 3, "#7a7a8a");
+}
+
+function drawStadium(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext("2d");
+  clear(ctx);
+
+  px(ctx, 10, 12, 76, 72, "#d7dbe5");
+  px(ctx, 14, 16, 68, 64, "#eef1f6");
+  px(ctx, 22, 30, 52, 38, "#57b15f");
+  px(ctx, 24, 32, 48, 2, "#ffffff");
+  px(ctx, 24, 64, 48, 2, "#ffffff");
+  px(ctx, 46, 32, 2, 34, "#ffffff");
+  px(ctx, 44, 46, 6, 6, "#ffffff");
+  px(ctx, 46, 48, 2, 2, "#57b15f");
+  px(ctx, 22, 22, 52, 6, "#4aa3d6");
+}
+
+drawLanterns("chinatownIcon");
+drawTrees("macritchieIcon");
+drawPagoda("waterlooIcon");
+drawStadium("stadiumIcon");
 </script>
+
 </body>
 </html>
