@@ -481,26 +481,7 @@
       return;
     }
 
-    canvas.addEventListener("touchstart", (e)=>{
-      e.preventDefault();
-      onTap();
-    }, { passive:false });
-
-    canvas.addEventListener("click", (e)=>{
-      e.preventDefault();
-      onTap();
-    });
-  }
-
-  bindTapInput();
-
-  canvas.addEventListener("touchstart", (e)=>{
-    e.preventDefault();
-    onTap();
-  }, {passive:false});
-
-  canvas.addEventListener("click", onTap);
-
+  
   // ===== GAME UPDATE =====
   function update(dt){
     // logs move
