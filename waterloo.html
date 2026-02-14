@@ -444,34 +444,25 @@
 function drawLegsBetter(c){
   // Hip anchor (under tutu)
   const hipX = 0;
-  const hipY = 44; // slightly higher so legs originate under tutu better
+  const hipY = 44;
 
-  // ===== standing leg (left) =====
   c.fillStyle = "#f1c7a6";
-  // long straight leg
-  c.fillRect(hipX - 7, hipY, 14, 62);
 
-  // pointe shoe
+  // two straight legs
+  const legW = 8;
+  const legH = 60;
+  const gap  = 3; // space between legs
+
+  // left leg
+  c.fillRect(hipX - gap - legW, hipY, legW, legH);
+  // right leg
+  c.fillRect(hipX + gap, hipY, legW, legH);
+
+  // shoes (pointe-ish)
   c.fillStyle = "#fff";
-  c.fillRect(hipX - 10, hipY + 58, 20, 9);
-
-  // ===== bent leg (right) : thigh OUT then shin BACK IN =====
-  // thigh should start near tutu (not from standing knee)
-  c.fillStyle = "#f1c7a6";
-  // horizontal thigh coming out from hip
-  c.fillRect(hipX + 2, hipY + 10, 30, 10);
-
-  // shin: angle back toward standing leg
-  c.save();
-  // knee point at end of thigh
-  c.translate(hipX + 30, hipY + 18);
-  c.rotate(-1.05); // stronger angle inward
-  c.fillRect(0, 0, 10, 34);
-  c.restore();
-
-  // foot (white shoe) closer to standing leg
-  c.fillStyle = "#fff";
-  c.fillRect(hipX + 1, hipY + 46, 18, 9);
+  const shoeH = 8;
+  c.fillRect(hipX - gap - legW - 2, hipY + legH - 4, legW + 4, shoeH);
+  c.fillRect(hipX + gap - 2,       hipY + legH - 4, legW + 4, shoeH);
 }
 
 
@@ -504,11 +495,19 @@ function drawLegsBetter(c){
     c.fillStyle = "#9fd0ff";
     c.fillRect(-16, -10, 32, 42);
 
-    // tutu
-    c.fillStyle = "#ff7dbf";
-    c.fillRect(-24, 26, 48, 16);
-    c.fillStyle = "rgba(255,255,255,0.18)";
-    c.fillRect(-22, 28, 44, 3);
+    // tutu (layered)
+c.fillStyle = "#ff7dbf";
+// top layer
+c.fillRect(-24, 26, 48, 14);
+
+// bottom layer (wider + slightly lower)
+c.fillRect(-30, 36, 60, 12);
+
+// little highlight lines (optional but helps “tutu” read)
+c.fillStyle = "rgba(255,255,255,0.18)";
+c.fillRect(-22, 28, 44, 3);
+c.fillRect(-28, 38, 56, 3);
+
 
     // ARMS UP (fix)
     drawArmsUpArc(c);
