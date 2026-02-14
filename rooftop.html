@@ -6,17 +6,18 @@
   <title>Rooftop Quiet Time</title>
   <style>
     :root{
-      --bg1:#0b1c2d;
-      --bg2:#162a3d;
+      --bg1:#081525;
+      --bg2:#0f2742;
+      --card: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.12);
       --text: rgba(255,255,255,0.92);
       --muted: rgba(255,255,255,0.70);
       --muted2: rgba(255,255,255,0.55);
-      --stroke: rgba(255,255,255,0.12);
     }
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Arial, sans-serif;
       background: radial-gradient(1200px 800px at 50% -10%, rgba(255,255,255,0.08), transparent 55%),
                   linear-gradient(180deg,var(--bg1),var(--bg2));
       color: var(--text);
@@ -25,24 +26,24 @@
       justify-content:center;
       padding: 18px 14px 28px;
     }
-    .wrap{ width:min(820px, 100%); }
+    .wrap{ width:min(760px, 100%); }
     h1{
-      margin: 6px 0 6px;
+      margin: 6px 0 8px;
       text-align:center;
-      font-size: 40px;
+      font-size: 34px;
       letter-spacing:-0.5px;
       line-height:1.05;
-      font-weight: 900;
+      font-weight: 800;
       text-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
     .sub{
       text-align:center;
       color: var(--muted);
-      font-size: 15px;
-      margin-bottom: 14px;
+      font-size: 14px;
+      margin-bottom: 12px;
     }
 
-    .gameCard{
+    .card{
       width:100%;
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.16);
@@ -57,134 +58,99 @@
       height:auto;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.08);
+      background: rgba(0,0,0,0.10);
       display:block;
-      touch-action: manipulation;
     }
 
     .panel{
-      margin-top: 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      padding: 14px;
-      box-shadow: 0 18px 44px rgba(0,0,0,0.25);
-    }
-    .typeBox{
-      white-space: pre-wrap;
-      font-size: 14px;
-      line-height: 1.45;
-      color: rgba(255,255,255,0.90);
-      min-height: 150px;
+      margin-top: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      padding: 12px;
     }
 
-    .controls{
-      margin-top: 12px;
+    .typed{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color: rgba(255,255,255,0.92);
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      min-height: 160px;
+    }
+
+    .row{
       display:flex;
       gap:10px;
-      flex-wrap: wrap;
-      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 12px;
     }
+
     .btn{
-      padding: 12px 14px;
+      flex: 1 1 180px;
+      padding: 14px 14px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.18);
       background: rgba(255,255,255,0.10);
       color: rgba(255,255,255,0.95);
       font-weight: 800;
       font-size: 15px;
+      text-align:center;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      min-width: 150px;
-      text-align:center;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.25);
     }
     .btn:active{ transform: translateY(1px); }
-    .btn[disabled]{
+    .btn.disabled{
       opacity: 0.45;
-      cursor: not-allowed;
+      pointer-events:none;
     }
-    .hint{
-      margin-top: 10px;
-      text-align:center;
+
+    .smallHint{
+      margin-top: 8px;
       color: var(--muted2);
-      font-size: 13px;
-    }
-
-    /* Modal */
-    .overlay{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.30), rgba(0,0,0,0.72));
-    }
-    .overlay.show{ display:flex; }
-    .modal{
-      width: min(520px, 96%);
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(20,30,45,0.88);
-      box-shadow: 0 22px 70px rgba(0,0,0,0.5);
-      padding: 16px;
-    }
-    .modal h2{
-      margin: 0 0 8px;
-      font-size: 18px;
-      font-weight: 900;
-      text-align:center;
-    }
-    .modal p{
-      margin: 0 0 12px;
-      color: rgba(255,255,255,0.78);
-      font-size: 13px;
-      line-height:1.35;
-      text-align:center;
-    }
-    .modal .row{
-      display:flex;
-      gap:10px;
-      flex-wrap: wrap;
-      justify-content:center;
-      margin-top: 10px;
-    }
-    .small{
       font-size: 12px;
-      color: rgba(255,255,255,0.65);
       text-align:center;
-      margin-top: 10px;
-    }
-    a.dl{
-      color: rgba(255,255,255,0.92);
-      font-weight: 800;
-      text-decoration: underline;
     }
 
-    /* Surprise button */
-    .surpriseBtn{
-      display:none;
-      margin: 14px auto 0;
-      width: min(520px, 96%);
-      padding: 16px 18px;
+    /* Mini-surprise popup */
+    .popup{
+      position:absolute;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      width: min(560px, 92%);
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      padding: 12px 14px;
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+    }
+    .popup.show{ display:flex; }
+    .popup .text{
+      font-weight: 800;
       color: rgba(255,255,255,0.95);
+      font-size: 14px;
+    }
+    .popup .go{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
       font-weight: 900;
-      font-size: 17px;
-      text-align:center;
-      box-shadow: 0 18px 48px rgba(0,0,0,0.35);
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
+      white-space:nowrap;
     }
 
     @media (max-width: 420px){
-      h1{ font-size: 34px; }
-      .btn{ min-width: 140px; }
-      .typeBox{ min-height: 165px; }
+      h1{ font-size: 30px; }
+      .typed{ font-size: 12px; }
     }
   </style>
 </head>
@@ -193,655 +159,767 @@
     <h1>Rooftop Quiet Time 🌙</h1>
     <div class="sub">A calm moment — record your reflection, then come back for a mini surprise.</div>
 
-    <div class="gameCard">
-      <canvas id="scene" width="800" height="520"></canvas>
+    <div class="card" id="card">
+      <canvas id="scene" width="720" height="560"></canvas>
 
-      <div id="shareOverlay" class="overlay">
-        <div class="modal">
-          <h2>Send your audio to Sandra</h2>
-          <p>Tap <b>Share</b> to open your share sheet and choose Telegram.<br/>Message is prefilled + audio attached.</p>
-          <div class="row">
-            <div class="btn" id="shareBtn">Share</div>
-            <div class="btn" id="closeShare">Close</div>
-          </div>
-          <div class="small">
-            If Telegram doesn’t attach the file on your device, use:
-            <br/>
-            <a id="downloadLink" class="dl" href="#" download>Download audio</a>
-            <br/>then send it in Telegram manually.
-          </div>
+      <div class="popup" id="miniPopup">
+        <div class="text">Click for a mini surprise! 🌸</div>
+        <div class="go" id="miniGo">Open</div>
+      </div>
+
+      <div class="panel">
+        <div class="typed" id="typed"></div>
+
+        <div class="row">
+          <div class="btn" id="recordBtn">🎙️ Record</div>
+          <div class="btn disabled" id="sendBtn">📤 Send to Sandra</div>
+        </div>
+
+        <div class="smallHint" id="hint">
+          Tip: after you tap “Send to Sandra”, choose Telegram and send it to Sandra. Then come back here.
         </div>
       </div>
-    </div>
-
-    <div class="panel">
-      <div id="typeBox" class="typeBox"></div>
-
-      <div class="controls">
-        <button class="btn" id="recordBtn">Record</button>
-        <button class="btn" id="stopBtn" disabled>Stop</button>
-        <button class="btn" id="sendBtn" disabled>Send to Sandra</button>
-      </div>
-
-      <div class="hint" id="statusHint">Tip: record in one go (one recording only).</div>
-
-      <div id="surpriseBtn" class="surpriseBtn">Click for a mini surprise!</div>
     </div>
   </div>
 
   <script>
-    // =========================
-    // Rooftop Quiet Time (single-file)
-    // - Static skyline (no movement)
-    // - One recording only
-    // - Share audio file + prefilled text
-    // - Return -> 2.5s -> surprise button
-    // - Surprise: sljy14 walks in, gives flowers (ends next to agy96), fireworks loop, plays bday.mp3
-    // =========================
+    // -----------------------------
+    // Rooftop Scene + Recording + Share + Surprise
+    // -----------------------------
 
     const canvas = document.getElementById("scene");
     const ctx = canvas.getContext("2d");
 
-    const typeBox = document.getElementById("typeBox");
+    const typedEl  = document.getElementById("typed");
     const recordBtn = document.getElementById("recordBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const sendBtn = document.getElementById("sendBtn");
-    const statusHint = document.getElementById("statusHint");
+    const sendBtn   = document.getElementById("sendBtn");
+    const hintEl    = document.getElementById("hint");
 
-    const shareOverlay = document.getElementById("shareOverlay");
-    const shareBtn = document.getElementById("shareBtn");
-    const closeShare = document.getElementById("closeShare");
-    const downloadLink = document.getElementById("downloadLink");
+    const miniPopup = document.getElementById("miniPopup");
+    const miniGo = document.getElementById("miniGo");
 
-    const surpriseBtn = document.getElementById("surpriseBtn");
+    // Audio to play on surprise (place bday.mp3 next to this file)
+    const bdayAudio = new Audio("bday.mp3");
+    bdayAudio.preload = "auto";
 
-    // ---------- Typewriter instructions ----------
-    const fullText =
+    // Prefilled share message
+    const SHARE_TEXT = "here’s my 30th rooftop reflection 🥹";
+
+    // Typewriter (word-by-word)
+    const instructions =
 `Follow these instructions carefully.
 
 1. Think about these two questions:
-A. Now that you’ve turned 30, what would you tell your 21-year-old self?
-B. What is your 30-year-old birthday wish for yourself?
-
-2. Click on Record to start recording your answers
+A. Now that you’ve turned 30, What would you tell your 21 year old self?
+B. What is your 30 year old birthday wish for yourself?
+2. Click on record to start recording your answers
 3. Click on “Send to Sandra”
-4. A pop up will appear — send it to Sandra through Telegram
+4. A pop up will appear, send it to Sandra through telegram
 5. !Important! Come back to this screen for a mini surprise`;
 
-    function typeWriter(text, el, speed=14){
-      el.textContent = "";
-      let i = 0;
-      const timer = setInterval(() => {
-        el.textContent += text[i] ?? "";
-        i++;
-        if (i >= text.length) clearInterval(timer);
-      }, speed);
+    function tokenizeWords(text){
+      const tokens = [];
+      const lines = text.split("\n");
+      for (let li=0; li<lines.length; li++){
+        const line = lines[li];
+        if (line.trim().length === 0){
+          tokens.push({t:"\n"});
+          continue;
+        }
+        const parts = line.split(" ");
+        for (let i=0;i<parts.length;i++){
+          const w = parts[i];
+          tokens.push({t: (i===0 ? w : " " + w)});
+        }
+        if (li !== lines.length-1) tokens.push({t:"\n"});
+      }
+      return tokens;
     }
-    typeWriter(fullText, typeBox);
 
-    // ---------- Recording (robust mobile) ----------
+    const wordTokens = tokenizeWords(instructions);
+    let typeIdx = 0;
+
+    function startTypewriter(){
+      typedEl.textContent = "";
+      typeIdx = 0;
+
+      const tick = () => {
+        if (typeIdx >= wordTokens.length) return;
+        typedEl.textContent += wordTokens[typeIdx].t;
+        typeIdx++;
+
+        const last = wordTokens[typeIdx-1]?.t || "";
+        let delay = 70;
+        if (last.includes("\n")) delay = 220;
+        if (/[.!?]$/.test(last.trim())) delay = 220;
+
+        setTimeout(tick, delay);
+      };
+      tick();
+    }
+    startTypewriter();
+
+    // -----------------------------
+    // Recording (one take)
+    // -----------------------------
     let mediaStream = null;
     let recorder = null;
     let chunks = [];
-    let audioBlob = null;
-    let audioFile = null;
-    let didSendFlow = false; // set true when user taps "Send to Sandra"
-    let hasRecordedOnce = false; // one recording only
+    let recordedBlob = null;
+    let recordedFile = null;
+    let isRecording = false;
+
+    function setBtn(el, text, enabled){
+      el.textContent = text;
+      el.classList.toggle("disabled", !enabled);
+    }
 
     function pickMimeType(){
-      // Prefer iOS-friendly first if supported
+      // Prefer formats Telegram is happiest with. iOS Safari sometimes supports audio/mp4.
       const candidates = [
         "audio/mp4;codecs=mp4a.40.2",
         "audio/mp4",
         "audio/webm;codecs=opus",
         "audio/webm"
       ];
-      for (const t of candidates){
-        if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+      if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return "";
+      for (const c of candidates){
+        if (MediaRecorder.isTypeSupported(c)) return c;
       }
-      return ""; // let browser decide
+      return "";
+    }
+
+    function extFromType(t){
+      if (!t) return "webm";
+      if (t.includes("mp4")) return "m4a";
+      if (t.includes("webm")) return "webm";
+      return "webm";
     }
 
     async function startRecording(){
-      if (hasRecordedOnce) return;
-
-      statusHint.textContent = "Requesting microphone…";
-      chunks = [];
-      audioBlob = null;
-      audioFile = null;
-
-      try{
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-        const mimeType = pickMimeType();
-        recorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
-
-        recorder.ondataavailable = (e) => {
-          if (e.data && e.data.size > 0) chunks.push(e.data);
-        };
-
-        recorder.onstop = () => {
-          const finalType = recorder.mimeType || (chunks[0] && chunks[0].type) || "audio/webm";
-          audioBlob = new Blob(chunks, { type: finalType });
-
-          // Choose extension based on type
-          const ext = finalType.includes("mp4") ? "m4a" : "webm";
-          audioFile = new File([audioBlob], `agy96_rooftop_reflection.${ext}`, { type: finalType });
-
-          // Enable send
-          sendBtn.disabled = false;
-
-          // One recording only (lock Record)
-          hasRecordedOnce = true;
-          recordBtn.disabled = true;
-
-          // Provide download fallback
-          const url = URL.createObjectURL(audioBlob);
-          downloadLink.href = url;
-
-          statusHint.textContent = "Recording saved. Tap “Send to Sandra”.";
-        };
-
-        recorder.start();
-        recordBtn.disabled = true;
-        stopBtn.disabled = false;
-        sendBtn.disabled = true;
-        statusHint.textContent = "Recording… speak your answers (one take).";
-
-      } catch(err){
-        console.error(err);
-        statusHint.textContent = "Mic blocked. Please allow microphone access and try again.";
+      if (!navigator.mediaDevices?.getUserMedia){
+        throw new Error("getUserMedia not supported");
       }
+
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      recordedBlob = null;
+      recordedFile = null;
+
+      const mimeType = pickMimeType();
+      recorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const type = recorder.mimeType || mimeType || "audio/webm";
+        recordedBlob = new Blob(chunks, { type });
+
+        const ext = extFromType(type);
+        const filename = `rooftop_reflection.${ext}`;
+        recordedFile = new File([recordedBlob], filename, { type });
+
+        setBtn(sendBtn, "📤 Send to Sandra", true);
+
+        if (mediaStream){
+          mediaStream.getTracks().forEach(t => t.stop());
+          mediaStream = null;
+        }
+      };
+
+      recorder.start();
+      isRecording = true;
+      setBtn(recordBtn, "⏹ Stop", true);
+      setBtn(sendBtn, "📤 Send to Sandra", false);
+      hintEl.textContent = "Recording… Answer A then B in one take. Tap Stop when done.";
     }
 
     function stopRecording(){
-      if (!recorder) return;
-      stopBtn.disabled = true;
-      statusHint.textContent = "Finalizing audio…";
-      recorder.stop();
-
-      // stop tracks
-      if (mediaStream){
-        mediaStream.getTracks().forEach(t => t.stop());
-        mediaStream = null;
+      if (recorder && isRecording){
+        recorder.stop();
       }
+      isRecording = false;
+      setBtn(recordBtn, "🎙️ Record again", true);
+      hintEl.textContent = "Nice. Now tap “Send to Sandra”.";
     }
 
-    recordBtn.addEventListener("click", startRecording);
-    stopBtn.addEventListener("click", stopRecording);
-
-    // ---------- Share flow ----------
-    const PREFILLED_TEXT = "here’s my 30th rooftop reflection 🥹";
-
-    function openShareModal(){
-      if (!audioFile){
-        statusHint.textContent = "Please record first.";
-        return;
+    recordBtn.addEventListener("click", async () => {
+      try{
+        if (!isRecording){
+          await startRecording();
+        } else {
+          stopRecording();
+        }
+      } catch (err){
+        console.error(err);
+        hintEl.textContent = "Mic permission blocked (or not supported). Please allow microphone access and try again.";
       }
-      didSendFlow = true;
-      shareOverlay.classList.add("show");
-    }
-
-    closeShare.addEventListener("click", () => {
-      shareOverlay.classList.remove("show");
-      statusHint.textContent = "After you share in Telegram, come back to this tab for a mini surprise 🙂";
     });
 
-    async function doShare(){
-      if (!audioFile) return;
+    // -----------------------------
+    // Share flow + return detection + popup
+    // -----------------------------
+    let shareInitiated = false;
+    let surpriseReady = false;
 
-      // navigator.share with files works on most modern iOS/Android browsers, but Telegram behavior can vary.
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [audioFile] })){
-        try{
-          await navigator.share({
-            files: [audioFile],
-            text: PREFILLED_TEXT,
-            title: "Rooftop Reflection"
-          });
-          shareOverlay.classList.remove("show");
-          statusHint.textContent = "Sent? Come back to this screen for your mini surprise 🙂";
-        } catch(e){
-          // user cancelled is normal
-          console.log("Share cancelled or failed:", e);
-          statusHint.textContent = "If share didn’t work, download the audio and send manually in Telegram.";
-        }
-      } else {
-        // Fallback: download link + copy text
-        statusHint.textContent = "Your browser can’t attach files via share sheet. Download the audio, then send it on Telegram.";
+    function forceDownload(){
+      if (!recordedBlob || !recordedFile) return;
+      const url = URL.createObjectURL(recordedBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = recordedFile.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    async function shareToSandra(){
+      if (!recordedFile) return;
+
+      shareInitiated = true;
+
+      // If share sheet not available, fallback download
+      if (!navigator.share){
+        forceDownload();
+        hintEl.textContent = "Downloaded. Please send the audio to Sandra on Telegram, then come back here for a mini surprise.";
+        return;
+      }
+
+      try{
+        await navigator.share({
+          files: [recordedFile],
+          text: SHARE_TEXT,
+          title: "Rooftop Reflection"
+        });
+      } catch (err){
+        // Common: Telegram rejects some file types, or user cancels.
+        console.log("Share failed/cancelled:", err);
+        // Provide a reliable fallback
+        forceDownload();
+        hintEl.textContent = "If Telegram didn’t attach it, use the downloaded file and send it in Telegram. Then come back here.";
       }
     }
 
-    shareBtn.addEventListener("click", doShare);
-    sendBtn.addEventListener("click", openShareModal);
+    sendBtn.addEventListener("click", async () => {
+      try{
+        hintEl.textContent = "Choose Telegram and send it to Sandra. Then come back here.";
+        await shareToSandra();
+      } catch (err){
+        console.error(err);
+        forceDownload();
+        hintEl.textContent = "Sharing failed. A download should start — send that file to Sandra on Telegram, then come back.";
+      }
+    });
 
-    // ---------- Surprise trigger after returning ----------
-    let pendingSurpriseTimer = null;
+    function onReturnToPage(){
+      if (!shareInitiated || surpriseReady) return;
+      surpriseReady = true;
 
-    function scheduleSurpriseButton(){
-      if (!didSendFlow) return;
-      if (pendingSurpriseTimer) clearTimeout(pendingSurpriseTimer);
-
-      pendingSurpriseTimer = setTimeout(() => {
-        surpriseBtn.style.display = "block";
+      setTimeout(() => {
+        miniPopup.classList.add("show");
       }, 2500);
     }
 
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) scheduleSurpriseButton();
+      if (document.visibilityState === "visible") onReturnToPage();
     });
-    window.addEventListener("focus", scheduleSurpriseButton);
+    window.addEventListener("focus", () => onReturnToPage());
 
-    // ---------- Scene: static rooftop + characters ----------
-    const agy = {
-      x: 250, y: 410,
-      label: "agy96"
-    };
+    // -----------------------------
+    // STATIC skyline (prebuilt once)
+    // -----------------------------
+    function mulberry32(seed){
+      let a = seed >>> 0;
+      return function(){
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
 
-    const sljy = {
-      x: 880, y: 410,
-      targetX: 360,
-      label: "sljy14",
-      walking: false
-    };
+    function buildSkyLayer(seed, yMin, yMax, wMin, wMax){
+      const rnd = mulberry32(seed);
+      const rects = [];
+      let x = 0;
 
-    const bouquet = {
-      x: 0, y: 0,
-      state: "hidden", // hidden | carried | placed
-      placedX: 290,
-      placedY: 386
-    };
+      while (x < canvas.width + 30){
+        const w = wMin + rnd() * (wMax - wMin);
+        const h = (yMax - yMin) * (0.4 + rnd() * 0.9);
+        const y = yMax - h;
 
-    let fireworksOn = false;
-    let surpriseStarted = false;
+        // windows prebuilt too
+        const windows = [];
+        const winCount = 5;
+        for (let i=0;i<winCount;i++){
+          windows.push({
+            wx: x + 2 + rnd()*(w-6),
+            wy: y + 4 + rnd()*(h-10)
+          });
+        }
 
-    // Audio (plays on user gesture => reliable on iOS/Android)
-    const bdayAudio = new Audio("bday.mp3");
-    bdayAudio.preload = "auto";
+        rects.push({ x, y, w, h, windows });
+        x += w + 6;
+      }
+      return rects;
+    }
 
-    // Stars
-    const stars = Array.from({length: 150}).map(() => ({
-      x: Math.random()*canvas.width,
-      y: Math.random()*250,
-      a: 0.35 + Math.random()*0.65,
-      r: 0.6 + Math.random()*1.6
-    }));
+    const skylineLayers = [
+      { color:"#1b3f73", alpha:0.45, rects: buildSkyLayer(101, 40, 210, 10, 18) },
+      { color:"#25518f", alpha:0.55, rects: buildSkyLayer(202, 80, 260, 14, 22) },
+      { color:"#2f68b8", alpha:0.70, rects: buildSkyLayer(303, 130, 320, 18, 28) }
+    ];
+
+    // Stars / moon
+    const stars = makeStars(90);
+    function makeStars(n){
+      const arr = [];
+      for (let i=0;i<n;i++){
+        arr.push({
+          x: Math.random()*canvas.width,
+          y: Math.random()*170,
+          r: 0.6 + Math.random()*1.4,
+          tw: Math.random()*Math.PI*2
+        });
+      }
+      return arr;
+    }
 
     // Fireworks particles
-    let sparks = [];
+    let fireworksOn = false;
+    let particles = [];
+    let lastFireworkAt = 0;
+
     function spawnFirework(){
       const cx = 120 + Math.random()*(canvas.width-240);
-      const cy = 90 + Math.random()*140;
-      const n = 28;
-      for (let i=0;i<n;i++){
-        const ang = (Math.PI*2)*(i/n) + Math.random()*0.2;
-        const spd = 1.6 + Math.random()*2.4;
-        sparks.push({
+      const cy = 60 + Math.random()*150;
+      const count = 36;
+
+      for (let i=0;i<count;i++){
+        const a = (i/count) * Math.PI*2;
+        const sp = 1.2 + Math.random()*2.0;
+        particles.push({
           x: cx, y: cy,
-          vx: Math.cos(ang)*spd,
-          vy: Math.sin(ang)*spd,
-          life: 1400 + Math.random()*600
+          vx: Math.cos(a)*sp,
+          vy: Math.sin(a)*sp,
+          life: 110 + Math.random()*40
         });
       }
     }
 
-    function updateFireworks(dt){
-      // spawn periodically
-      if (fireworksOn){
-        if (Math.random() < 0.03) spawnFirework();
+    function updateFireworks(){
+      const now = performance.now();
+      if (fireworksOn && now - lastFireworkAt > 650){
+        lastFireworkAt = now;
+        spawnFirework();
       }
-
-      for (const p of sparks){
-        p.life -= dt;
+      for (const p of particles){
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.0025 * dt; // gentle gravity
-        p.vx *= 0.995;
-        p.vy *= 0.995;
+        p.vy += 0.01;
+        p.life -= 1;
       }
-      sparks = sparks.filter(p => p.life > 0);
+      particles = particles.filter(p => p.life > 0);
     }
 
     function drawFireworks(){
+      if (particles.length === 0) return;
       ctx.save();
-      for (const p of sparks){
-        const a = Math.max(0, Math.min(1, p.life/1800));
-        ctx.fillStyle = `rgba(255,255,255,${0.15 + 0.65*a})`;
+      for (const p of particles){
+        const a = Math.max(0, Math.min(1, p.life/160));
+        ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.65*a})`;
         ctx.fillRect(p.x, p.y, 2, 2);
       }
       ctx.restore();
     }
 
-    // ---------- Draw helpers ----------
-    function drawBackground(){
-      // Sky
-      const g = ctx.createLinearGradient(0,0,0,canvas.height);
-      g.addColorStop(0,"#061425");
-      g.addColorStop(1,"#0c2540");
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Surprise actor (you)
+    const you = {
+      x: -80,
+      y: 420,
+      targetX: 250,
+      walking: false,
+      arrived: false,
+      bouquetGiven: false
+    };
 
-      // Stars (static positions, subtle twinkle)
-      const t = performance.now();
+    // Bouquet animation (moves to agy and ends next to her)
+    const bouquet = {
+      active:false,
+      t:0,
+      x:0, y:0,
+      fromX:0, fromY:0,
+      toX:0, toY:0,
+      done:false
+    };
+
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+
+    function startSurprise(){
+      miniPopup.classList.remove("show");
+
+      you.x = -80;
+      you.walking = true;
+      you.arrived = false;
+      you.bouquetGiven = false;
+
+      fireworksOn = false;
+
+      bouquet.active = false;
+      bouquet.t = 0;
+      bouquet.done = false;
+    }
+
+    miniGo.addEventListener("click", startSurprise);
+    miniPopup.addEventListener("click", startSurprise);
+
+    function drawScene(t){
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, "#04101f");
+      g.addColorStop(1, "#0f2742");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Stars
+      ctx.save();
       for (const s of stars){
-        const tw = 0.85 + 0.15*Math.sin(t/1400 + s.x*0.02);
-        ctx.fillStyle = `rgba(255,255,255,${s.a*tw})`;
+        const tw = 0.35 + 0.65*(0.5 + 0.5*Math.sin(t/900 + s.tw));
+        ctx.fillStyle = `rgba(255,255,255,${0.15 + 0.55*tw})`;
         ctx.fillRect(s.x, s.y, s.r, s.r);
       }
+      ctx.restore();
 
-      // Moon (crescent)
+      drawCrescentMoon(610, 80, 22);
+
+      drawSkylineStatic();
+
+      drawRooftopDeck();
+
+      // Fireworks behind foreground
+      drawFireworks();
+
+      // agy96 sitting
+      drawAgySitting(160, 444);
+
+      // you + bouquet
+      drawYouAndBouquet();
+
+      // vignette
+      ctx.fillStyle = "rgba(0,0,0,0.20)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawCrescentMoon(x,y,r){
       ctx.save();
-      ctx.translate(690, 110);
-      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.fillStyle = "rgba(255,255,255,0.75)";
       ctx.beginPath();
-      ctx.arc(0,0,26,0,Math.PI*2);
+      ctx.arc(x,y,r,0,Math.PI*2);
       ctx.fill();
+
       ctx.globalCompositeOperation = "destination-out";
       ctx.beginPath();
-      ctx.arc(8,0,24,0,Math.PI*2);
+      ctx.arc(x+8,y-2,r,0,Math.PI*2);
       ctx.fill();
-      ctx.restore();
       ctx.globalCompositeOperation = "source-over";
 
-      // Skyline (STATIC)
-      drawSkyline();
-
-      // Rooftop floor
-      ctx.fillStyle = "#0b0b0b";
-      ctx.fillRect(0, 345, canvas.width, 175);
-
-      // Rail
-      ctx.fillStyle = "rgba(255,255,255,0.14)";
-      ctx.fillRect(80, 332, 640, 8);
-      ctx.strokeStyle = "rgba(255,255,255,0.16)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(80, 332, 640, 70);
-
-      // small floor speckles
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      for (let i=0;i<40;i++){
-        const x = (i*19) % canvas.width;
-        const y = 360 + ((i*37) % 150);
-        ctx.fillRect(x, y, 2, 1);
-      }
-    }
-
-    function drawSkyline(){
-      // layered buildings (static bars)
-      const layers = [
-        {y:110, h:220, c:"rgba(40,90,160,0.55)"},
-        {y:120, h:230, c:"rgba(32,74,138,0.65)"},
-        {y:135, h:250, c:"rgba(26,60,120,0.75)"}
-      ];
-      for (const L of layers){
-        ctx.fillStyle = L.c;
-        let x = 0;
-        while (x < canvas.width){
-          const w = 18 + Math.random()*44;
-          const hh = 60 + Math.random()*L.h;
-          ctx.fillRect(x, L.y + (240 - hh), w, hh);
-          x += w + 6 + Math.random()*10;
-        }
-      }
-      // horizon band
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      ctx.fillRect(0, 285, canvas.width, 4);
-    }
-
-    function drawFurniture(){
-      // Couch / bed platform (left)
-      ctx.fillStyle = "#6b5f1a";
-      ctx.fillRect(150, 390, 250, 90);
-
-      // Coffee table (center)
-      ctx.fillStyle = "#b6ad9f";
-      ctx.fillRect(430, 440, 120, 55);
-
-      // Plant (right)
-      ctx.fillStyle = "#c7b07a";
-      ctx.fillRect(640, 430, 70, 80);
-      ctx.fillStyle = "#1da24f";
-      ctx.fillRect(655, 400, 40, 40);
-    }
-
-    function drawLabel(text, x, y){
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 14px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(text, x, y);
-    }
-
-    // agy96 sprite sitting (even legs)
-    function drawAgySitting(px, py){
-      ctx.save();
-      ctx.translate(px, py);
-
-      // shadow
-      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      const rg = ctx.createRadialGradient(x,y,2,x,y,80);
+      rg.addColorStop(0,"rgba(255,255,255,0.10)");
+      rg.addColorStop(1,"rgba(255,255,255,0.0)");
+      ctx.fillStyle = rg;
       ctx.beginPath();
-      ctx.ellipse(0, 46, 36, 10, 0, 0, Math.PI*2);
+      ctx.arc(x,y,80,0,Math.PI*2);
       ctx.fill();
+      ctx.restore();
+    }
 
-      drawLabel("agy96", 0, -10);
+    function drawSkylineStatic(){
+      // layered buildings (STATIC)
+      for (const L of skylineLayers){
+        ctx.save();
+        ctx.globalAlpha = L.alpha;
+        ctx.fillStyle = L.color;
 
-      // hair block (thicker sides)
+        for (const r of L.rects){
+          ctx.fillRect(r.x, r.y, r.w, r.h);
+
+          // windows
+          ctx.fillStyle = "rgba(255,255,255,0.18)";
+          for (const w of r.windows){
+            ctx.fillRect(w.wx, w.wy, 2, 2);
+          }
+          ctx.fillStyle = L.color;
+        }
+        ctx.restore();
+      }
+
+      // Water band
+      ctx.fillStyle = "#062242";
+      ctx.fillRect(0, 330, canvas.width, 70);
+
+      // Water sparkles (static-ish pattern)
+      ctx.fillStyle = "rgba(255,255,255,0.25)";
+      for (let i=0;i<40;i++){
+        const x = (i/40) * canvas.width + (Math.sin(i*9)*4);
+        const y = 350 + (i%6)*6;
+        ctx.fillRect(x, y, 3, 1);
+      }
+    }
+
+    function drawRooftopDeck(){
+      ctx.fillStyle = "#101010";
+      ctx.fillRect(0, 400, canvas.width, 160);
+
+      // Glass railing
+      ctx.fillStyle = "rgba(255,255,255,0.10)";
+      ctx.fillRect(80, 370, 560, 38);
+      ctx.strokeStyle = "rgba(255,255,255,0.20)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(80, 370, 560, 38);
+
+      // Posts
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      for (let x=90;x<=630;x+=70){
+        ctx.fillRect(x, 370, 4, 38);
+      }
+
+      // Couch
+      ctx.fillStyle = "#6a5a1a";
+      ctx.fillRect(110, 430, 210, 70);
+      ctx.fillStyle = "#7a6820";
+      ctx.fillRect(110, 420, 210, 16);
+
+      // Table
+      ctx.fillStyle = "#c8b79a";
+      ctx.fillRect(350, 452, 90, 38);
+      ctx.fillStyle = "#b8a788";
+      ctx.fillRect(360, 444, 70, 10);
+
+      // Plant pot
+      ctx.fillStyle = "#d1b06a";
+      ctx.fillRect(510, 450, 44, 50);
+      ctx.fillStyle = "#c09a58";
+      ctx.fillRect(516, 440, 32, 10);
+      // Plant
+      ctx.fillStyle = "#30c15b";
+      ctx.fillRect(520, 418, 24, 24);
+      ctx.fillStyle = "#27a94c";
+      ctx.fillRect(526, 410, 12, 12);
+    }
+
+    // Draw agy96 sitting on couch
+    function drawAgySitting(x, y){
+      ctx.save();
+      ctx.translate(x, y);
+
+      // Name label
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("agy96", 0, -70);
+
+      // Hair
       ctx.fillStyle = "#0a0a0a";
       ctx.fillRect(-20, -62, 40, 34);
       ctx.fillRect(-22, -58, 4, 30);
       ctx.fillRect(18,  -58, 4, 30);
-      ctx.fillRect(-20, -28, 40, 8);
+      ctx.fillRect(-20, -28, 40, 7);
 
-      // face
+      // Face
       ctx.fillStyle = "#f1c9a8";
       ctx.fillRect(-14, -50, 28, 22);
 
-      // glasses
+      // Glasses
       ctx.strokeStyle = "#000";
       ctx.lineWidth = 2;
       ctx.strokeRect(-12, -46, 10, 8);
       ctx.strokeRect(2, -46, 10, 8);
-      ctx.beginPath();
-      ctx.moveTo(-2, -42);
-      ctx.lineTo(2, -42);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-2, -42); ctx.lineTo(2, -42); ctx.stroke();
 
-      // torso
+      // Torso
       ctx.fillStyle = "#c43737";
-      ctx.fillRect(-16, -28, 32, 22);
+      ctx.fillRect(-16, -28, 32, 20);
 
-      // legs (even, sitting forward)
+      // Seated legs (FIXED: even)
       ctx.fillStyle = "#1f2530";
-      ctx.fillRect(-16, -6, 32, 14);
-
+      // thighs
+      ctx.fillRect(-16, -8, 16, 12);
+      ctx.fillRect(0,   -8, 16, 12);
       // shoes (even)
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(-18, 8, 16, 8);
-      ctx.fillRect(2,  8, 16, 8);
+      ctx.fillRect(-16, 4, 16, 6);
+      ctx.fillRect(0,   4, 16, 6);
 
-      // arms
+      // Arms
       ctx.fillStyle = "#f1c9a8";
-      ctx.fillRect(-20, -24, 4, 16);
-      ctx.fillRect(16, -24, 4, 16);
+      ctx.fillRect(-20, -26, 4, 16);
+      ctx.fillRect(16, -26, 4, 16);
 
       ctx.restore();
     }
 
-    // sljy14 sprite (black tee + black mini skirt)
-    function drawSljy(px, py){
-      ctx.save();
-      ctx.translate(px, py);
-
-      // shadow
-      ctx.fillStyle = "rgba(0,0,0,0.28)";
+    function drawBouquetAt(bx, by){
+      // Soft glow
+      const rg = ctx.createRadialGradient(bx, by, 4, bx, by, 80);
+      rg.addColorStop(0, "rgba(255,230,200,0.20)");
+      rg.addColorStop(1, "rgba(255,230,200,0.00)");
+      ctx.fillStyle = rg;
       ctx.beginPath();
-      ctx.ellipse(0, 46, 34, 10, 0, 0, Math.PI*2);
+      ctx.arc(bx, by, 80, 0, Math.PI*2);
       ctx.fill();
 
-      drawLabel("sljy14", 0, -10);
+      // Flowers
+      ctx.fillStyle = "#ff7ab6";
+      ctx.fillRect(bx-8, by-12, 6, 6);
+      ctx.fillRect(bx,   by-14, 6, 6);
+      ctx.fillRect(bx+8, by-10, 6, 6);
+      ctx.fillStyle = "#ffd1e5";
+      ctx.fillRect(bx-2, by-6, 6, 6);
 
-      // hair
-      ctx.fillStyle = "#2b1d12";
-      ctx.fillRect(-18, -62, 36, 24);
+      // Leaves
+      ctx.fillStyle = "#30c15b";
+      ctx.fillRect(bx-6, by, 6, 6);
+      ctx.fillRect(bx+6, by, 6, 6);
 
-      // face
-      ctx.fillStyle = "#eab48f";
-      ctx.fillRect(-12, -50, 24, 20);
+      // Wrap
+      ctx.fillStyle = "#f2e6d6";
+      ctx.fillRect(bx-6, by+6, 16, 10);
 
-      // shirt (black tee)
-      ctx.fillStyle = "#0b0b0b";
-      ctx.fillRect(-16, -30, 32, 22);
-
-      // mini skirt (black)
-      ctx.fillStyle = "#0f0f0f";
-      ctx.fillRect(-14, -8, 28, 14);
-
-      // legs
-      ctx.fillStyle = "#eab48f";
-      ctx.fillRect(-10, 6, 8, 16);
-      ctx.fillRect(2,  6, 8, 16);
-
-      // shoes
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(-12, 22, 10, 8);
-      ctx.fillRect(2,  22, 10, 8);
-
-      // arms
-      ctx.fillStyle = "#eab48f";
-      ctx.fillRect(-20, -26, 4, 18);
-      ctx.fillRect(16,  -26, 4, 18);
-
-      ctx.restore();
+      // tiny sparkle
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      if ((Math.floor(performance.now()/120) % 2) === 0){
+        ctx.fillRect(bx+22, by-18, 2, 2);
+      }
     }
 
-    function drawBouquet(x, y){
+    // "You" avatar walking in + bouquet handoff
+    function drawYouAndBouquet(){
+      // Update your position
+      if (you.walking){
+        you.x += 3.2;
+        if (you.x >= you.targetX){
+          you.x = you.targetX;
+          you.walking = false;
+          you.arrived = true;
+
+          // after arrive, give bouquet after a short beat
+          setTimeout(() => {
+            you.bouquetGiven = true;
+
+            // bouquet moves from your hand to agy side
+            bouquet.active = true;
+            bouquet.done = false;
+            bouquet.t = 0;
+
+            // start position = your hand
+            bouquet.fromX = you.x + 44;
+            bouquet.fromY = you.y - 20;
+
+            // end position = next to agy96 (right side of her)
+            bouquet.toX = 235;   // tuned to sit beside agy on couch
+            bouquet.toY = 410;
+
+            // Start audio now (allowed because this chain began from a click)
+            bdayAudio.currentTime = 0;
+            bdayAudio.play().catch(()=>{});
+
+            // Start fireworks after bouquet is given
+            fireworksOn = true;
+            lastFireworkAt = performance.now();
+          }, 500);
+        }
+      }
+
+      // Draw you
       ctx.save();
-      ctx.translate(x, y);
+      ctx.translate(you.x, you.y);
 
-      // pot wrap
-      ctx.fillStyle = "#d9d0c0";
-      ctx.fillRect(-10, 10, 20, 14);
+      // label sljy14
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("sljy14", 0, -70);
 
-      // stems
-      ctx.fillStyle = "#1da24f";
-      ctx.fillRect(-2, 0, 4, 12);
+      // shadow
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.beginPath();
+      ctx.ellipse(0, 26, 26, 8, 0, 0, Math.PI*2);
+      ctx.fill();
 
-      // flowers
-      ctx.fillStyle = "#ff8fb3";
-      ctx.fillRect(-10, -2, 6, 6);
-      ctx.fillRect(-2, -6, 6, 6);
-      ctx.fillRect(6, -2, 6, 6);
+      // Hair
+      ctx.fillStyle = "#111";
+      ctx.fillRect(-18, -52, 36, 30);
+
+      // Face
+      ctx.fillStyle = "#eab48f";
+      ctx.fillRect(-12, -40, 24, 18);
+
+      // Black tee
+      ctx.fillStyle = "#0b0b0b";
+      ctx.fillRect(-14, -22, 28, 18);
+
+      // Black mini skirt
+      ctx.fillStyle = "#101010";
+      ctx.fillRect(-14, -4, 28, 12);
+
+      // Legs
+      ctx.fillStyle = "#eab48f";
+      ctx.fillRect(-12, 8, 10, 12);
+      ctx.fillRect(2, 8, 10, 12);
+
+      // Shoes
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-12, 20, 10, 6);
+      ctx.fillRect(2, 20, 10, 6);
+
+      // Arms
+      ctx.fillStyle = "#eab48f";
+      if (you.bouquetGiven){
+        ctx.fillRect(14, -16, 12, 4); // extended arm
+      } else {
+        ctx.fillRect(14, -18, 4, 16);
+      }
+      ctx.fillRect(-18, -18, 4, 16);
 
       ctx.restore();
+
+      // Bouquet animation
+      if (bouquet.active && !bouquet.done){
+        bouquet.t += 1/40; // ~40 frames for smooth move
+        const tt = Math.min(1, bouquet.t);
+        const e = easeOutCubic(tt);
+
+        bouquet.x = lerp(bouquet.fromX, bouquet.toX, e);
+        bouquet.y = lerp(bouquet.fromY, bouquet.toY, e);
+
+        drawBouquetAt(bouquet.x, bouquet.y);
+
+        if (tt >= 1){
+          bouquet.done = true;
+        }
+      } else if (bouquet.done){
+        // bouquet stays next to agy
+        drawBouquetAt(bouquet.toX, bouquet.toY);
+      }
     }
 
-    // ---------- Surprise sequence ----------
-    function startSurprise(){
-      if (surpriseStarted) return;
-      surpriseStarted = true;
-      surpriseBtn.style.display = "none";
-      statusHint.textContent = "🙂";
-
-      // Start walking in
-      sljy.walking = true;
-      bouquet.state = "carried";
-
-      // Start fireworks loop
-      fireworksOn = true;
-
-      // Play audio (user gesture -> should work on iPhone + Android)
-      bdayAudio.currentTime = 0;
-      bdayAudio.play().catch(() => {
-        // if it fails, it will still be okay visually
-      });
-    }
-
-    surpriseBtn.addEventListener("click", startSurprise);
-
-    // ---------- Animation loop ----------
+    // -----------------------------
+    // Animation loop
+    // -----------------------------
     let last = performance.now();
-
-    function update(dt){
-      // Walk in
-      if (sljy.walking){
-        const step = 0.18 * dt; // speed
-        sljy.x = Math.max(sljy.targetX, sljy.x - step);
-
-        // Bouquet follows sljy hand area while walking
-        if (bouquet.state === "carried"){
-          bouquet.x = sljy.x + 22;
-          bouquet.y = sljy.y + 12;
-        }
-
-        // When reached, place bouquet next to agy96
-        if (sljy.x <= sljy.targetX + 0.5){
-          sljy.walking = false;
-
-          // "handoff" bouquet ends next to agy96 (NOT in the air)
-          bouquet.state = "placed";
-          bouquet.x = bouquet.placedX;
-          bouquet.y = bouquet.placedY;
-        }
-      }
-
-      updateFireworks(dt);
-    }
-
-    function render(){
-      drawBackground();
-      drawFireworks();
-
-      drawFurniture();
-
-      // Characters
-      drawAgySitting(agy.x, agy.y);
-
-      if (surpriseStarted){
-        drawSljy(sljy.x, sljy.y);
-      }
-
-      // Bouquet draw
-      if (bouquet.state === "carried" || bouquet.state === "placed"){
-        drawBouquet(bouquet.x, bouquet.y);
-      }
-
-      // Soft vignette
-      ctx.fillStyle = "rgba(0,0,0,0.12)";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-    }
-
     function loop(now){
       const dt = now - last;
       last = now;
-      update(dt);
-      render();
+
+      updateFireworks();
+      drawScene(now);
+
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
-
-    // ---------- UX glue ----------
-    // Lock “one recording only”
-    // - Record starts once, Stop ends it, then Send is available.
-    // - Send opens modal with Share sheet + Download fallback.
-
-    // Show surprise button only after "Send to Sandra" flow + returning
-    // (handled earlier via visibilitychange/focus)
-
-    // Buttons
-    sendBtn.addEventListener("click", () => {
-      if (!audioFile){
-        statusHint.textContent = "Please record first.";
-        return;
-      }
-      // Open share modal
-      shareOverlay.classList.add("show");
-      didSendFlow = true;
-      statusHint.textContent = "Choose Telegram in the share sheet. Then come back here 🙂";
-    });
-
-    closeShare.addEventListener("click", () => {
-      shareOverlay.classList.remove("show");
-    });
-
-    // (Record/Stop already wired above)
   </script>
 </body>
 </html>
