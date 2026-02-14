@@ -21,9 +21,8 @@
     audio.preload = "auto";
     document.body.appendChild(audio);
   }
-  audio.setAttribute("playsinline", "true");
-  audio.setAttribute("webkit-playsinline", "true");
-  audio.playsInline = true;
+  audio.setAttribute("playsinline", "");
+  audio.setAttribute("webkit-playsinline", "");
 
   audio.volume = 0.5;
   let wantedPlaying = false;
