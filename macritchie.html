@@ -399,66 +399,46 @@
 
   if (!world.running) return;
   if (world.state !== "playing") return;
+  if (world.currentIndex >= GOAL) return;
 
-  // 1) Compute the player's FOOT position in WORLD space
-  // player.y is feet-baseline in world space already
-  const footY = player.y + SHOE_BOTTOM_OFFSET;
+  // Always jump to the NEXT required log
+  const targetIdx = world.currentIndex;
+  const target = logs[targetIdx];
 
-  // 2) Find the log that is ACTUALLY under her feet (same-ish Y band)
-  //    and also horizontally overlapping.
-  //    This prevents "landing on 2nd branch" or "fall even though it looks aligned".
-  const FOOT_BAND = 10; // tolerance pixels; tweak 8-14
-
+  // Player footprint (approx width of hair/body)
   const pxL = player.x - 18;
   const pxR = player.x + 18;
 
-  let bestIdx = -1;
-  let bestDy = 1e9;
+  // Target log bounds
+  const lxL = target.x;
+  const lxR = target.x + target.w;
 
-  for (let i = 0; i < logs.length; i++){
-    const log = logs[i];
+  const overlapX = (pxR > lxL) && (pxL < lxR);
 
-    // Must overlap in X
-    const lxL = log.x;
-    const lxR = log.x + log.w;
-    const overlapX = (pxR > lxL) && (pxL < lxR);
-    if (!overlapX) continue;
-
-    // Must be close in Y (player feet close to log top)
-    const dy = Math.abs(footY - log.y);
-    if (dy <= FOOT_BAND && dy < bestDy){
-      bestDy = dy;
-      bestIdx = i;
-    }
-  }
-
-  if (bestIdx !== -1){
-    // LAND on the actual log found
-    const target = logs[bestIdx];
-
+  if (overlapX){
+    // LAND: snap feet baseline so shoe bottom sits on log top
     player.y = target.y - SHOE_BOTTOM_OFFSET;
-    player.ridingLogIndex = bestIdx;
 
-    // Count ONLY if this is the next required log (prevents double count / skipping)
-    if (bestIdx === world.currentIndex){
-      world.landed++;
-      world.currentIndex++;
-      setHUD();
+    // Stick to this log
+    player.ridingLogIndex = targetIdx;
 
-      // camera follows upward
-      const approxTop = player.y - 80;
-      world.camTargetY = (canvas.height * 0.58) - approxTop;
+    // Progress
+    world.landed++;
+    world.currentIndex++;
+    setHUD();
 
-      if (world.landed >= GOAL){
-        world.state = "win";
-        world.running = false;
-        setTimeout(() => {
-          gamePage.classList.remove("active");
-          viewPage.classList.add("active");
-        }, 220);
-      }
+    // Camera follows upward
+    const approxTop = player.y - 80;
+    world.camTargetY = (canvas.height * 0.58) - approxTop;
+
+    if (world.landed >= GOAL){
+      world.state = "win";
+      world.running = false;
+      setTimeout(() => {
+        gamePage.classList.remove("active");
+        viewPage.classList.add("active");
+      }, 220);
     }
-
     return;
   }
 
